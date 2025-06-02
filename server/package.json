@@ -8,6 +8,10 @@
     "start": "node -e \"try { require('./dist/index.js') } catch(e) { console.log('Compiled code not found, using ts-node instead'); require('ts-node/register'); require('./src/index.ts'); }\"",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "seed": "ts-node src/scripts/seedAdmin.ts",
+    "seed:locations": "ts-node src/scripts/seedDistributionLocations.ts",
+    "seed:locations:debug": "cross-env DEBUG=* ts-node src/scripts/seedDistributionLocations.ts",
+    "seed:locations:js": "node src/scripts/insertLocations.js",
+    "test:db": "ts-node src/scripts/testDbConnection.ts",
     "postinstall": "npm run build"
   },
   "keywords": [
