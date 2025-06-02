@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import { IUser } from './User';
 import { ICause } from './Cause';
+import { IPhysicalDistribution } from './PhysicalDistribution';
 
 export enum SponsorshipStatus {
   PENDING = 'pending',
@@ -45,7 +46,7 @@ export interface ISponsorship extends Document {
   distributionStartDate: Date;
   distributionEndDate: Date;
   distributionDate?: Date; // Keeping for backward compatibility
-  // Removed physicalDistributionDetails field
+  physicalDistribution?: mongoose.Types.ObjectId | IPhysicalDistribution; // Reference to PhysicalDistribution
   demographics: IDemographics;
   status: SponsorshipStatus;
   approvedBy?: mongoose.Types.ObjectId | IUser;
@@ -114,7 +115,10 @@ const sponsorshipSchema = new Schema<ISponsorship>(
       default: DistributionType.ONLINE
     },
     // Removed distributionPoints field
-    // Removed physicalDistributionDetails field
+    physicalDistribution: {
+      type: Schema.Types.ObjectId,
+      ref: 'PhysicalDistribution'
+    },
     distributionStartDate: {
       type: Date,
       required: true
