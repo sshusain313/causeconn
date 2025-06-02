@@ -18,58 +18,73 @@ const app: Application = express();
 
 // Middleware
 // Using type assertions to fix TypeScript errors
-app.use((express as any).json());
-app.use((express as any).urlencoded({ extended: true }));
+app.use((express as any).json({ limit: '10mb' }));
+app.use((express as any).urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
 // Configure CORS to allow requests from the frontend domain
+// This is the primary CORS configuration
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+  'https://changebag.org',
+  'https://www.changebag.org',
+  'http://localhost:8083',
+  'http://localhost:8085',
+  'http://localhost:3000',
+  'http://localhost:5173'
+];
+
+// Debug CORS configuration
+console.log('CORS configuration:', {
+  allowedOrigins,
+  nodeEnv: process.env.NODE_ENV
+});
+
+// Apply CORS middleware with comprehensive configuration
 app.use(cors({
   origin: (origin, callback) => {
-    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
-      'https://changebag.org', 
-      'https://www.changebag.org',
-      'http://localhost:8083',
-      'http://localhost:8085',
-      'http://localhost:3000',
-      'http://localhost:5173'
-    ];
-    
-    if (!origin || allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) {
+      console.log('Allowing request with no origin');
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      console.log(`Allowing request from origin: ${origin}`);
       callback(null, true);
     } else {
-      console.log('CORS blocked origin:', origin);
+      console.log(`CORS blocked origin: ${origin}`);
       callback(new Error(`Origin ${origin} not allowed by CORS`));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Length', 'Content-Type'],
   preflightContinue: false,
   optionsSuccessStatus: 204,
   maxAge: 86400 // Cache preflight response for 24 hours
 }));
 
-// Add CORS headers to all responses with improved preflight handling
+// Additional CORS headers for all responses with improved preflight handling
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+
+  // Log all incoming requests for debugging
+  console.log(`${req.method} request to ${req.url} from origin: ${origin || 'unknown'}`);
+
   if (origin) {
-    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
-      'https://changebag.org', 
-      'https://www.changebag.org',
-      'http://localhost:8083',
-      'http://localhost:8085',
-      'http://localhost:3000',
-      'http://localhost:5173'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      // Set CORS headers
       res.header('Access-Control-Allow-Origin', origin);
       res.header('Access-Control-Allow-Credentials', 'true');
       res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-      
-      // Handle preflight requests
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+      res.header('Access-Control-Expose-Headers', 'Content-Length, Content-Type');
+      res.header('Access-Control-Max-Age', '86400'); // 24 hours
+
+      // Handle preflight requests explicitly
       if (req.method === 'OPTIONS') {
-        console.log('Received OPTIONS request from origin:', origin);
+        console.log(`Handling OPTIONS preflight request from ${origin} for path: ${req.url}`);
         res.status(204).end();
         return;
       }
@@ -111,16 +126,22 @@ app.use('/api/claims', claimRoutes as any);
 app.use('/api/upload', uploadRoutes as any);
 app.use('/api/otp', otpRoutes as any);
 
+// Direct routes for non-API endpoints (no /api prefix)
+app.use('/causes', causeRoutes as any);
+app.use('/sponsorships', sponsorshipRoutes as any);
+app.use('/auth', authRoutes as any);
+app.use('/upload', uploadRoutes as any);
+
 // Protected route example
 app.get('/api/profile', authGuard as any, (req: Request, res: Response) => {
-  res.json({ 
-    message: 'Profile data', 
+  res.json({
+    message: 'Profile data',
     user: {
       id: req.user?._id,
       email: req.user?.email,
       role: req.user?.role,
       name: req.user?.name
-    } 
+    }
   });
 });
 
