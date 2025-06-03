@@ -1,7 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import { IUser } from './User';
 import { ICause } from './Cause';
-import { IPhysicalDistribution } from './PhysicalDistribution';
 
 export enum SponsorshipStatus {
   PENDING = 'pending',
@@ -16,7 +15,22 @@ export enum DistributionType {
   PHYSICAL = 'physical'
 }
 
-// Distribution point interface removed
+export interface IDistributionPoint {
+  name: string;
+  address: string;
+  contactPerson: string;
+  phone: string;
+  location?: string;
+  totesCount?: number;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
+  openingHours?: string;
+  distributionInstructions?: string;
+  accessibilityInfo?: string;
+  photoUrl?: string;
+}
 
 export interface IDemographics {
   ageGroups: string[];
@@ -25,9 +39,38 @@ export interface IDemographics {
   other: string;
 }
 
-// Distribution location types and interface removed
+export enum DistributionLocationType {
+  MALL = 'mall',
+  METRO_STATION = 'metro_station',
+  AIRPORT = 'airport',
+  SCHOOL = 'school',
+  OTHER = 'other'
+}
 
-// Physical distribution details interface removed
+export interface IDistributionLocation {
+  name: string;
+  type: string; // Use string instead of enum for better compatibility
+  address?: string;
+  totesCount?: number;
+  contactPerson?: string;
+  phone?: string;
+  openingHours?: string;
+  distributionInstructions?: string;
+}
+
+export interface IPhysicalDistributionDetails {
+  shippingAddress?: string;
+  shippingContactName?: string;
+  shippingPhone?: string;
+  shippingInstructions?: string;
+  trackingNumber?: string;
+  shippingProvider?: string;
+  estimatedDeliveryDate?: Date;
+  deliveryConfirmation?: boolean;
+  deliverySignature?: string;
+  deliveryDate?: Date;
+  distributionLocations?: IDistributionLocation[];
+}
 
 export interface ISponsorship extends Document {
   cause: mongoose.Types.ObjectId | ICause;
@@ -42,11 +85,11 @@ export interface ISponsorship extends Document {
   mockupUrl?: string;
   message: string;
   distributionType: DistributionType;
-  // Removed distributionPoints field
+  distributionPoints: IDistributionPoint[];
   distributionStartDate: Date;
   distributionEndDate: Date;
   distributionDate?: Date; // Keeping for backward compatibility
-  physicalDistribution?: mongoose.Types.ObjectId | IPhysicalDistribution; // Reference to PhysicalDistribution
+  physicalDistributionDetails?: IPhysicalDistributionDetails;
   demographics: IDemographics;
   status: SponsorshipStatus;
   approvedBy?: mongoose.Types.ObjectId | IUser;
@@ -114,10 +157,43 @@ const sponsorshipSchema = new Schema<ISponsorship>(
       enum: Object.values(DistributionType),
       default: DistributionType.ONLINE
     },
-    // Removed distributionPoints field
-    physicalDistribution: {
-      type: Schema.Types.ObjectId,
-      ref: 'PhysicalDistribution'
+    distributionPoints: [{
+      name: String,
+      address: String,
+      contactPerson: String,
+      phone: String,
+      location: String,
+      totesCount: Number,
+      coordinates: {
+        latitude: Number,
+        longitude: Number
+      },
+      openingHours: String,
+      distributionInstructions: String,
+      accessibilityInfo: String,
+      photoUrl: String
+    }],
+    physicalDistributionDetails: {
+      shippingAddress: String,
+      shippingContactName: String,
+      shippingPhone: String,
+      shippingInstructions: String,
+      trackingNumber: String,
+      shippingProvider: String,
+      estimatedDeliveryDate: Date,
+      deliveryConfirmation: Boolean,
+      deliverySignature: String,
+      deliveryDate: Date,
+      distributionLocations: [{
+        name: String,
+        type: String, // Simplified to just String type
+        address: String,
+        totesCount: Number,
+        contactPerson: String,
+        phone: String,
+        openingHours: String,
+        distributionInstructions: String
+      }]
     },
     distributionStartDate: {
       type: Date,

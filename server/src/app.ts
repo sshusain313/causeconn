@@ -9,8 +9,6 @@ import sponsorshipRoutes from './routes/sponsorshipRoutes';
 import claimRoutes from './routes/claims';
 import uploadRoutes from './routes/uploadRoutes';
 import otpRoutes from './routes/otpRoutes';
-import distributionLocationRoutes from './routes/distributionLocationRoutes';
-import physicalDistributionRoutes from './routes/physicalDistributionRoutes';
 import { authGuard, adminGuard } from './middleware/authGuard';
 import configureStaticFiles from './middleware/staticFiles';
 import copyUploadsToPublic from './utils/copyUploadsToPublic';
@@ -127,8 +125,6 @@ app.use('/api/sponsorships', sponsorshipRoutes as any);
 app.use('/api/claims', claimRoutes as any);
 app.use('/api/upload', uploadRoutes as any);
 app.use('/api/otp', otpRoutes as any);
-app.use('/api/distribution-locations', distributionLocationRoutes as any);
-app.use('/api/physical-distributions', physicalDistributionRoutes as any);
 
 // Direct routes for non-API endpoints (no /api prefix)
 app.use('/causes', causeRoutes as any);
@@ -172,8 +168,6 @@ app.get('/', (req: Request, res: Response) => {
       '/api/claims',
       '/api/upload',
       '/api/otp',
-      '/api/distribution-locations',
-      '/api/physical-distributions',
       '/api/profile',
       '/api/admin',
       '/api/health'

@@ -8,6 +8,7 @@ import { Upload, ZoomIn, ZoomOut, RotateCw, RotateCcw } from 'lucide-react';
 import config from '@/config';
 import axios from 'axios';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Slider } from '@/components/ui/slider';
 
 interface LogoUploadStepProps {
   formData: {
@@ -19,6 +20,12 @@ interface LogoUploadStepProps {
       scale: number;
       angle: number;
     };
+    causePlaceholder?: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
   };
   updateFormData: (data: Partial<{
     logoUrl: string;
@@ -29,21 +36,30 @@ interface LogoUploadStepProps {
       scale: number;
       angle: number;
     };
+    causePlaceholder?: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
   }>) => void;
 }
 
 const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
   const [previewUrl, setPreviewUrl] = useState<string>(formData.logoUrl);
   const [uploading, setUploading] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const logoCanvasRef = useRef<HTMLCanvasElement>(null);
+  const causeCanvasRef = useRef<HTMLCanvasElement>(null);
   const logoRef = useRef<HTMLImageElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isPlaceholderDragging, setIsPlaceholderDragging] = useState(false);
   const [position, setPosition] = useState(formData.logoPosition || { x: 200, y: 200, scale: 0.25, angle: 0 });
+  const [causePlaceholder, setCausePlaceholder] = useState(formData.causePlaceholder || { x: 200, y: 200, width: 150, height: 100 });
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize canvas and draw tote bag with logo
+  // Initialize logo canvas and draw tote bag with logo
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = logoCanvasRef.current;
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
@@ -59,10 +75,10 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
     // Draw tote bag image
     const toteBag = new Image();
     toteBag.src = '/totebag.png';
-    console.log('Loading totebag image from:', toteBag.src);
+    console.log('Loading totebag image for logo canvas from:', toteBag.src);
     
     toteBag.onload = () => {
-      console.log('Totebag image loaded successfully');
+      console.log('Totebag image loaded successfully for logo canvas');
       
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -83,10 +99,52 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
     };
     
     toteBag.onerror = (error) => {
-      console.error('Error loading totebag image:', error);
+      console.error('Error loading totebag image for logo canvas:', error);
       console.error('Failed URL:', toteBag.src);
     };
   }, [previewUrl, position]);
+  
+  // Initialize cause placeholder canvas and draw tote bag with placeholder
+  useEffect(() => {
+    const canvas = causeCanvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Set canvas size
+    canvas.width = 400;
+    canvas.height = 400;
+    
+    // Clear canvas first
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw tote bag image
+    const toteBag = new Image();
+    toteBag.src = '/totebag.png';
+    console.log('Loading totebag image for cause canvas from:', toteBag.src);
+    
+    toteBag.onload = () => {
+      console.log('Totebag image loaded successfully for cause canvas');
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw tote bag centered
+      const scale = Math.min(canvas.width / toteBag.width, canvas.height / toteBag.height) * 0.9;
+      const x = (canvas.width - toteBag.width * scale) / 2;
+      const y = (canvas.height - toteBag.height * scale) / 2;
+      ctx.drawImage(toteBag, x, y, toteBag.width * scale, toteBag.height * scale);
+      
+      // Draw cause placeholder
+      drawCausePlaceholder(ctx, causePlaceholder);
+    };
+    
+    toteBag.onerror = (error) => {
+      console.error('Error loading totebag image for cause canvas:', error);
+      console.error('Failed URL:', toteBag.src);
+    };
+  }, [causePlaceholder]);
   
   // Load logo image when URL changes
   useEffect(() => {
@@ -133,11 +191,41 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
     ctx.restore();
   };
   
-  // Mouse event handlers for dragging
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Function to draw cause placeholder on canvas
+  const drawCausePlaceholder = (ctx: CanvasRenderingContext2D, placeholder: { x: number, y: number, width: number, height: number }) => {
+    ctx.save();
+    
+    // Set dashed line style
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = '#0070f3';
+    ctx.lineWidth = 2;
+    
+    // Draw rectangle centered at x,y
+    ctx.strokeRect(
+      placeholder.x - placeholder.width / 2,
+      placeholder.y - placeholder.height / 2,
+      placeholder.width,
+      placeholder.height
+    );
+    
+    // Add label
+    ctx.font = '12px Arial';
+    ctx.fillStyle = '#0070f3';
+    ctx.textAlign = 'center';
+    ctx.fillText(
+      'Cause Image Area',
+      placeholder.x,
+      placeholder.y
+    );
+    
+    ctx.restore();
+  };
+  
+  // Mouse event handlers for logo dragging
+  const handleLogoMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!previewUrl) return;
     
-    const canvas = canvasRef.current;
+    const canvas = logoCanvasRef.current;
     if (!canvas) return;
     
     const rect = canvas.getBoundingClientRect();
@@ -160,10 +248,10 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
     }
   };
   
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDragging || !canvasRef.current) return;
+  const handleLogoMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDragging || !logoCanvasRef.current) return;
     
-    const canvas = canvasRef.current;
+    const canvas = logoCanvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -175,11 +263,59 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
     }));
   };
   
-  const handleMouseUp = () => {
+  const handleLogoMouseUp = () => {
     if (isDragging) {
       setIsDragging(false);
       // Save position to form data
       updateFormData({ logoPosition: position });
+    }
+  };
+  
+  // Mouse event handlers for cause placeholder dragging
+  const handlePlaceholderMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = causeCanvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Check if click is within placeholder bounds
+    const placeholderX = causePlaceholder.x;
+    const placeholderY = causePlaceholder.y;
+    const placeholderWidth = causePlaceholder.width;
+    const placeholderHeight = causePlaceholder.height;
+    
+    if (
+      x >= placeholderX - placeholderWidth / 2 &&
+      x <= placeholderX + placeholderWidth / 2 &&
+      y >= placeholderY - placeholderHeight / 2 &&
+      y <= placeholderY + placeholderHeight / 2
+    ) {
+      setIsPlaceholderDragging(true);
+    }
+  };
+  
+  const handlePlaceholderMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isPlaceholderDragging || !causeCanvasRef.current) return;
+    
+    const canvas = causeCanvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    setCausePlaceholder(prev => ({
+      ...prev,
+      x,
+      y
+    }));
+  };
+  
+  const handlePlaceholderMouseUp = () => {
+    if (isPlaceholderDragging) {
+      setIsPlaceholderDragging(false);
+      // Save placeholder to form data
+      updateFormData({ causePlaceholder });
     }
   };
   
@@ -334,6 +470,32 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
     updateFormData({ message: e.target.value });
   };
   
+  // Handle cause placeholder dimension changes
+  const handlePlaceholderWidthChange = (value: number[]) => {
+    setCausePlaceholder(prev => {
+      const newPlaceholder = { ...prev, width: value[0] };
+      updateFormData({ causePlaceholder: newPlaceholder });
+      return newPlaceholder;
+    });
+  };
+  
+  const handlePlaceholderHeightChange = (value: number[]) => {
+    setCausePlaceholder(prev => {
+      const newPlaceholder = { ...prev, height: value[0] };
+      updateFormData({ causePlaceholder: newPlaceholder });
+      return newPlaceholder;
+    });
+  };
+  
+  const handlePlaceholderInputChange = (dimension: 'width' | 'height', value: number) => {
+    const clampedValue = Math.min(300, Math.max(50, value));
+    setCausePlaceholder(prev => {
+      const newPlaceholder = { ...prev, [dimension]: clampedValue };
+      updateFormData({ causePlaceholder: newPlaceholder });
+      return newPlaceholder;
+    });
+  };
+  
   // Logo manipulation functions
   const handleZoomIn = () => {
     setPosition(prev => {
@@ -380,12 +542,13 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <h2 className="text-xl font-bold mb-4">Logo Upload</h2>
+      <h2 className="text-xl font-bold mb-4">Tote Bag Design</h2>
       <p className="text-gray-600 mb-6">
-        Upload your organization's logo to be displayed on the cause page and tote bags.
+        Upload your organization's logo and define the area where cause images will appear on the tote bags.
       </p>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Logo Upload and Message */}
         <div>
           <div className="space-y-4">
             <Label htmlFor="logoUpload">Upload Logo</Label>
@@ -412,106 +575,189 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
             </div>
           </div>
           
-          <div className="space-y-4 mt-6">
-            <Label htmlFor="message">Message (Optional)</Label>
-            <Textarea
-              id="message"
-              placeholder="Any special requests or details about your sponsorship?"
-              value={formData.message}
-              onChange={handleMessageChange}
-              rows={4}
-            />
+          {/* Logo Preview */}
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-4">Your Logo</h3>
+            <Card className="border-2 border-gray-200">
+              <CardContent className="p-4">
+                {previewUrl ? (
+                  <div className="space-y-4">
+                    <div className="relative bg-gray-50 rounded-lg flex flex-col items-center">
+                      {/* HTML5 Canvas for Logo */}
+                      <canvas 
+                        ref={logoCanvasRef} 
+                        className="border rounded-lg cursor-move" 
+                        onMouseDown={handleLogoMouseDown}
+                        onMouseMove={handleLogoMouseMove}
+                        onMouseUp={handleLogoMouseUp}
+                        onMouseLeave={handleLogoMouseUp}
+                      />
+                      
+                      {/* Logo Controls */}
+                      <div className="mt-4 flex items-center justify-center gap-2">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleZoomIn}
+                          title="Zoom In"
+                        >
+                          <ZoomIn className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleZoomOut}
+                          title="Zoom Out"
+                        >
+                          <ZoomOut className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleRotateClockwise}
+                          title="Rotate Clockwise"
+                        >
+                          <RotateCw className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleRotateCounterClockwise}
+                          title="Rotate Counter-Clockwise"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleResetLogo}
+                          title="Reset Position"
+                        >
+                          Reset
+                        </Button>
+                      </div>
+                      
+                      <p className="mt-2 text-xs text-muted-foreground text-center">
+                        Drag to position, use controls to resize or rotate your logo.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center min-h-[400px]">
+                    <p className="text-gray-400 text-center">
+                      Your logo preview will appear here after upload
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
         
+        {/* Right Column - Cause Image Placeholder */}
         <div>
-          <Label className="block mb-4">Logo Preview</Label>
+          <h3 className="text-lg font-semibold mb-4">Cause Image Area</h3>
           <Card className="border-2 border-gray-200">
             <CardContent className="p-4">
-              {previewUrl ? (
-                <div className="space-y-4">
-                  <p className="font-medium">Your logo on a tote:</p>
-                  <div className="relative bg-gray-50 rounded-lg flex flex-col items-center">
-                    {/* HTML5 Canvas */}
-                    <canvas 
-                      ref={canvasRef} 
-                      className="border rounded-lg cursor-move" 
-                      onMouseDown={handleMouseDown}
-                      onMouseMove={handleMouseMove}
-                      onMouseUp={handleMouseUp}
-                      onMouseLeave={handleMouseUp}
-                    />
-                    
-                    {/* Logo Controls */}
-                    <div className="mt-4 flex items-center justify-center gap-2">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleZoomIn}
-                        title="Zoom In"
-                      >
-                        <ZoomIn className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleZoomOut}
-                        title="Zoom Out"
-                      >
-                        <ZoomOut className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleRotateClockwise}
-                        title="Rotate Clockwise"
-                      >
-                        <RotateCw className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleRotateCounterClockwise}
-                        title="Rotate Counter-Clockwise"
-                      >
-                        <RotateCcw className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleResetLogo}
-                        title="Reset Position"
-                      >
-                        Reset
-                      </Button>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  Define the area where cause images will appear on the tote bags. Drag the placeholder or adjust dimensions below.
+                </p>
+                <div className="relative bg-gray-50 rounded-lg flex flex-col items-center">
+                  {/* HTML5 Canvas for Cause Placeholder */}
+                  <canvas 
+                    ref={causeCanvasRef} 
+                    className="border rounded-lg cursor-move" 
+                    onMouseDown={handlePlaceholderMouseDown}
+                    onMouseMove={handlePlaceholderMouseMove}
+                    onMouseUp={handlePlaceholderMouseUp}
+                    onMouseLeave={handlePlaceholderMouseUp}
+                  />
+                </div>
+                
+                {/* Placeholder Dimension Controls */}
+                <div className="space-y-4 mt-4">
+                  <div>
+                    {/* <div className="flex justify-between mb-1">
+                      <Label htmlFor="placeholderWidth">Width</Label>
+                      <span>{causePlaceholder.width}px</span>
+                    </div> */}
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <Slider
+                          id="placeholderWidth"
+                          value={[causePlaceholder.width]}
+                          min={50}
+                          max={300}
+                          step={5}
+                          onValueChange={handlePlaceholderWidthChange}
+                        />
+                      </div>
+                      <div className="w-16">
+                        <Input
+                          type="number"
+                          min={50}
+                          max={300}
+                          value={causePlaceholder.width}
+                          onChange={(e) => handlePlaceholderInputChange('width', parseInt(e.target.value) || 50)}
+                        />
+                      </div>
                     </div>
-                    
-                    <p className="mt-2 text-xs text-muted-foreground text-center">
-                      Drag to position, use corner handles to resize, or use the controls above.
-                    </p>
+                  </div>
+                  
+                  <div>
+                    {/* <div className="flex justify-between mb-1">
+                      <Label htmlFor="placeholderHeight">Height</Label>
+                      <span>{causePlaceholder.height}px</span>
+                    </div> */}
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <Slider
+                          id="placeholderHeight"
+                          value={[causePlaceholder.height]}
+                          min={50}
+                          max={300}
+                          step={5}
+                          onValueChange={handlePlaceholderHeightChange}
+                        />
+                      </div>
+                      <div className="w-16">
+                        <Input
+                          type="number"
+                          min={50}
+                          max={300}
+                          value={causePlaceholder.height}
+                          onChange={(e) => handlePlaceholderInputChange('height', parseInt(e.target.value) || 50)}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              ) : (
-                <div className="flex items-center justify-center min-h-[400px]">
-                  <p className="text-gray-400 text-center">
-                    Your logo preview will appear here after upload
-                  </p>
+                
+                <div className="text-sm text-gray-500 mt-2">
+                  <p>This area will be used by admins to place cause-related images on the tote bags.</p>
                 </div>
-              )}
+              </div>
             </CardContent>
           </Card>
-
-          {previewUrl && (
-            <div className="mt-4 text-sm text-gray-500">
-              <p>This is how your logo will appear on sponsored totes. Position and size it as desired.</p>
-            </div>
-          )}
         </div>
+      </div>
+      
+      {/* Message Textarea - Below Both Previews */}
+      <div className="space-y-4 mt-6">
+        <Label htmlFor="message">Message (Optional)</Label>
+        <Textarea
+          id="message"
+          placeholder="Any special requests or details about your sponsorship?"
+          value={formData.message}
+          onChange={handleMessageChange}
+          rows={4}
+        />
       </div>
     </div>
   );

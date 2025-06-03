@@ -48,7 +48,7 @@ import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
 import QrScanner from "./pages/admin/QrScanner";
 import ClaimDetails from '@/pages/admin/claims/ClaimDetails';
-import CauseEdit from "./pages/admin/CauseEdit";
+import DistributionSettings from './pages/admin/DistributionSettings';
 
 // Create QueryClient once, outside of component
 const queryClient = new QueryClient();
@@ -117,11 +117,6 @@ const App: React.FC = () => {
                     <CausesManagement />
                   </ProtectedRoute>
                 } />
-                <Route path="/admin/causes/:id" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <CauseEdit />
-                  </ProtectedRoute>
-                } />
                 <Route path="/admin/approvals" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <CampaignApprovals />
@@ -160,6 +155,11 @@ const App: React.FC = () => {
                 <Route path="/admin/claims/:id" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <ClaimDetails />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/distribution-settings" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <DistributionSettings />
                   </ProtectedRoute>
                 } />
                 

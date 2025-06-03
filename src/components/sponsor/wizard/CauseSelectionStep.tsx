@@ -26,9 +26,10 @@ interface CauseSelectionStepProps {
     phone: string;
     selectedCause: string;
   }>) => void;
+  causeData?: any; // Make causeData optional
 }
 
-const CauseSelectionStep = ({ formData, updateFormData }: CauseSelectionStepProps) => {
+const CauseSelectionStep = ({ formData, updateFormData, causeData }: CauseSelectionStepProps) => {
   // Mock causes data (would fetch from API)
   const causes = [
     { id: '1', title: 'Clean Water Initiative' },

@@ -19,8 +19,11 @@ interface ConfirmationStepProps {
     totalAmount: number;
     logoUrl: string;
     message: string;
+    distributionType?: 'online' | 'physical';
     distributionPoints?: string[];
     distributionDate?: Date;
+    distributionStartDate?: Date;
+    distributionEndDate?: Date;
     demographics?: {
       ageGroups: string[];
       income: string;
@@ -48,7 +51,7 @@ const ConfirmationStep = ({ formData }: ConfirmationStepProps) => {
   const totalCost = formData.totalAmount || (formData.toteQuantity * unitPrice);
   
   // Mock QR code value
-  const qrValue = `https://causeconnect.org/claim/${formData.selectedCause}?sponsor=${encodeURIComponent(formData.organizationName)}`;
+  const qrValue = `https://changebag.org/claim/${formData.selectedCause}?sponsor=${encodeURIComponent(formData.organizationName)}`;
 
   // Format demographic information
   const formatDemographics = () => {
@@ -141,14 +144,36 @@ const ConfirmationStep = ({ formData }: ConfirmationStepProps) => {
               <h3 className="font-semibold mb-3">Distribution Information</h3>
               <ul className="space-y-3">
                 {/* Distribution Date */}
-                <li>
-                  <span className="text-gray-600 block">Distribution Date:</span>
-                  <span className="font-medium">
-                    {formData.distributionDate 
-                      ? format(formData.distributionDate, "MMMM d, yyyy") 
-                      : "Not specified"}
-                  </span>
-                </li>
+                {/* Show different date fields based on distribution type */}
+                {formData.distributionType === 'physical' ? (
+                  <>
+                    <li className="flex justify-between">
+                      <span className="text-gray-600">Start Date:</span>
+                      <span className="font-medium">
+                        {formData.distributionStartDate 
+                          ? format(new Date(formData.distributionStartDate), "MMMM d, yyyy") 
+                          : "Not specified"}
+                      </span>
+                    </li>
+                    <li className="flex justify-between">
+                      <span className="text-gray-600">End Date:</span>
+                      <span className="font-medium">
+                        {formData.distributionEndDate 
+                          ? format(new Date(formData.distributionEndDate), "MMMM d, yyyy") 
+                          : "Not specified"}
+                      </span>
+                    </li>
+                  </>
+                ) : (
+                  <li className="flex justify-between">
+                    <span className="text-gray-600">Distribution Date:</span>
+                    <span className="font-medium">
+                      {formData.distributionDate 
+                        ? format(new Date(formData.distributionDate), "MMMM d, yyyy") 
+                        : "Not specified"}
+                    </span>
+                  </li>
+                )}
                 
                 {/* Distribution Points */}
                 <li>

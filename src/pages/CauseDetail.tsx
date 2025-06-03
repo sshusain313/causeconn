@@ -46,7 +46,7 @@ const CauseDetail = () => {
   
   const handleSponsor = () => {
     // Navigate to sponsor form
-    navigate(`/sponsor/cause_id=${id}`);
+    navigate(`/sponsor/new?causeId=${id}`);
   };
 
   const handleShare = async () => {
