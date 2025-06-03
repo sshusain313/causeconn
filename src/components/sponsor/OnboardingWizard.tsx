@@ -297,16 +297,7 @@ const OnboardingWizard = ({
         <Progress value={progressPercentage} className="h-2" />
       </div>
 
-
       {currentStep === 1 && (
-        <CauseSelectionStep 
-          formData={formData} 
-          updateFormData={updateFormData} 
-          causeData={causeData}
-        />
-      )}
-      
-      {currentStep === 2 && (
         <ToteQuantityStep
           formData={{
             ...formData,
@@ -315,6 +306,14 @@ const OnboardingWizard = ({
               calculateTotalTotes() : formData.toteQuantity
           }}
           updateFormData={handleFormUpdate}
+        />
+      )}
+
+      {currentStep === 2 && (
+        <CauseSelectionStep 
+          formData={formData} 
+          updateFormData={updateFormData} 
+          causeData={causeData}
         />
       )}
 
