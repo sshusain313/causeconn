@@ -19,9 +19,12 @@ const isProduction = import.meta.env.PROD || window.location.hostname === 'chang
 const apiDomain = isProduction ? 'https://api.changebag.org' : 'http://localhost:5000';
 
 const config: Config = {
+
+
+
   apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   uploadsUrl: import.meta.env.VITE_UPLOADS_URL || 'http://localhost:5000/uploads',
-  frontendUrl: import.meta.env.VITE_FRONTEND_URL || 'http://localhost:8085',
+  frontendUrl: 'http://localhost:8085',
   isProduction
 };
 

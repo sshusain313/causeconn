@@ -55,16 +55,13 @@ interface LogoUploadStepProps {
 
 const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
   // Fetch selected cause if available
-  const { data: selectedCauseData, isLoading, error: queryError } = useQuery({
+  const { data: selectedCauseData } = useQuery({
     queryKey: ['cause', formData.selectedCause],
     queryFn: async () => {
       if (!formData.selectedCause) return null;
       const response = await fetch(`${config.apiUrl}/causes/${formData.selectedCause}`);
       if (!response.ok) throw new Error('Failed to fetch cause');
-      const data = await response.json();
-      console.log('Fetched cause data:', data);
-      console.log('Tote preview image URL:', data.totePreviewImageUrl);
-      return data;
+      return response.json();
     },
     enabled: !!formData.selectedCause,
   });
@@ -152,92 +149,34 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
     // Set canvas size
     canvas.width = 400;
     canvas.height = 400;
-    
-    if (isLoading) {
-      showErrorState(ctx, 'Loading cause preview...');
-      return;
-    }
 
-    if (queryError) {
-      showErrorState(ctx, 'Failed to load cause preview');
-      console.error('Query error:', queryError);
-      return;
-    }
+    // Clear canvas first
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Get preview URL from cause data
-    const previewUrl = selectedCauseData?.totePreviewImageUrl;
-    console.log('Preview URL from server:', previewUrl);
+    // Draw tote bag image
+    const toteBag = new Image();
+    toteBag.src = '/totebag.png';
 
-    if (!previewUrl) {
-      showErrorState(ctx, formData.selectedCause 
-        ? 'No preview image available for this cause'
-        : 'Select a cause to see preview'
-      );
-      return;
-    }
+    toteBag.onload = () => {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Load and draw the preview with proper URL handling
-    const causePreview = new Image();
-    causePreview.crossOrigin = 'anonymous';
-    
-    // IMPROVED URL HANDLING LOGIC
-    let fullUrl = previewUrl;
-    
-    // Extract filename from absolute path (Windows or Unix style)
-    if (previewUrl.includes('/uploads/') || 
-        previewUrl.includes('\\uploads\\') || 
-        previewUrl.includes('C:/') || 
-        previewUrl.includes('C:\\')
-    ) {
-      // Get just the filename from the path
-      const filename = previewUrl.split('/').pop() || previewUrl.split('\\').pop();
-      if (filename) {
-        fullUrl = `${config.uploadsUrl}/${filename}`;
-        console.log('Converted absolute path to URL:', fullUrl);
+      // Draw tote bag centered
+      const scale = Math.min(canvas.width / toteBag.width, canvas.height / toteBag.height) * 0.9;
+      const x = (canvas.width - toteBag.width * scale) / 2;
+      const y = (canvas.height - toteBag.height * scale) / 2;
+      ctx.drawImage(toteBag, x, y, toteBag.width * scale, toteBag.height * scale);
+
+      // Draw admin logo if available
+      if (effectiveAdminImageUrl && adminLogoRef.current) {
+        drawLogo(ctx, adminLogoRef.current, { x: 200, y: 200, scale: 0.3, angle: 0 });
       }
-    } 
-    // Handle relative upload paths
-    else if (previewUrl.startsWith('/uploads/')) {
-      fullUrl = `${config.uploadsUrl}${previewUrl.replace('/uploads/', '/')}`;
-    }
-    // Handle paths without protocol
-    else if (!previewUrl.startsWith('http') && !previewUrl.startsWith('data:')) {
-      fullUrl = `${config.apiUrl}${previewUrl.startsWith('/') ? '' : '/'}${previewUrl}`;
-    }
-    
-    causePreview.src = fullUrl;
-    console.log('Loading preview from:', causePreview.src);
-
-    causePreview.onload = () => {
-      console.log('Cause preview loaded successfully');
-      const toteBag = new Image();
-      toteBag.src = '/totebag.png';
-      toteBag.onload = () => {
-        drawCausePreview(ctx, toteBag, causePreview);
-      };
-      toteBag.onerror = (err) => {
-        console.error('Failed to load totebag template:', err);
-        showErrorState(ctx, 'Failed to load preview template');
-      };
     };
 
-    causePreview.onerror = (err) => {
-      console.error('Failed to load cause preview:', err);
-      console.error('Failed URL:', causePreview.src);
-      showErrorState(ctx, 'Failed to load cause preview');
+    toteBag.onerror = (error) => {
+      console.error('Error loading totebag image for admin logo canvas:', error);
     };
-
-  }, [selectedCauseData, isLoading, queryError, formData.selectedCause]);
-
-  // Helper function to show error states
-  const showErrorState = (ctx: CanvasRenderingContext2D, message: string) => {
-    ctx.fillStyle = '#f9fafb';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.fillStyle = '#6b7280';
-    ctx.font = '14px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(message, ctx.canvas.width / 2, ctx.canvas.height / 2);
-  };
+  }, [effectiveAdminImageUrl, adminLogoLoaded]);
 
   // Load user logo image when URL changes
   useEffect(() => {
@@ -263,7 +202,6 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
   }, [userLogoPreview]);
 
   // Load admin logo image when available
-  // Load admin logo image when available
   useEffect(() => {
     console.log('=== Admin Logo Loading Effect ===');
     console.log('Effective Admin Image URL:', effectiveAdminImageUrl);
@@ -277,41 +215,18 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
     }
 
     const adminImg = new Image();
-    adminImg.crossOrigin = 'anonymous';
-    
-    // IMPROVED URL HANDLING LOGIC
-    let imgSrc = effectiveAdminImageUrl;
-    
-    // Extract filename from absolute path (Windows or Unix style)
-    if (effectiveAdminImageUrl.includes('/uploads/') || 
-        effectiveAdminImageUrl.includes('\\uploads\\') || 
-        effectiveAdminImageUrl.includes('C:/') || 
-        effectiveAdminImageUrl.includes('C:\\')
-    ) {
-      // Get just the filename from the path
-      const filename = effectiveAdminImageUrl.split('/').pop() || effectiveAdminImageUrl.split('\\').pop();
-      if (filename) {
-        imgSrc = `${config.uploadsUrl}/${filename}`;
-        console.log('Converted absolute path to URL:', imgSrc);
-      }
-    }
-    // Handle relative upload paths
-    else if (effectiveAdminImageUrl.startsWith('/uploads/')) {
-      imgSrc = `${config.uploadsUrl}${effectiveAdminImageUrl.replace('/uploads/', '/')}`;
-    } 
-    // Handle HTTP URLs
-    else if (effectiveAdminImageUrl.startsWith('http')) {
-      imgSrc = effectiveAdminImageUrl;
-    } 
-    // Handle other relative paths
-    else {
-      imgSrc = effectiveAdminImageUrl.startsWith('/') 
+    // Handle server-side URLs
+    if (effectiveAdminImageUrl.startsWith('/uploads/')) {
+      adminImg.src = `${config.uploadsUrl}${effectiveAdminImageUrl.replace('/uploads', '')}`;
+    } else if (effectiveAdminImageUrl.startsWith('http')) {
+      adminImg.src = effectiveAdminImageUrl;
+    } else {
+      adminImg.src = effectiveAdminImageUrl.startsWith('/') 
         ? `${config.apiUrl}${effectiveAdminImageUrl}` 
-        : `${config.apiUrl}/${effectiveAdminImageUrl}`;
+        : effectiveAdminImageUrl;
     }
 
-    console.log('Loading admin image from:', imgSrc);
-    adminImg.src = imgSrc;
+    console.log('Loading admin image from:', adminImg.src);
 
     adminImg.onload = () => {
       console.log('Admin logo image loaded successfully');
@@ -581,84 +496,28 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
     updateFormData({ logoPosition: newPosition });
   };
 
-  // Add helper function for drawing cause preview
-  const drawCausePreview = (
-    ctx: CanvasRenderingContext2D, 
-    toteBag: HTMLImageElement, 
-    preview: HTMLImageElement
-  ) => {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-    // Draw tote bag
-    const bagScale = Math.min(
-      ctx.canvas.width / toteBag.width,
-      ctx.canvas.height / toteBag.height
-    ) * 0.9;
-    
-    const bagX = (ctx.canvas.width - toteBag.width * bagScale) / 2;
-    const bagY = (ctx.canvas.height - toteBag.height * bagScale) / 2;
-    
-    ctx.drawImage(toteBag, bagX, bagY, 
-      toteBag.width * bagScale, 
-      toteBag.height * bagScale
-    );
-
-    // Calculate printable area
-    const printableWidth = toteBag.width * bagScale * 0.6;
-    const printableHeight = toteBag.height * bagScale * 0.6;
-
-    // Scale preview to fit
-    const previewScale = Math.min(
-      printableWidth / preview.width,
-      printableHeight / preview.height
-    ) * 0.8;
-
-    const previewWidth = preview.width * previewScale;
-    const previewHeight = preview.height * previewScale;
-
-    // Center preview on bag
-    const previewX = bagX + (toteBag.width * bagScale - previewWidth) / 2;
-    const previewY = bagY + (toteBag.height * bagScale - previewHeight) / 2;
-
-    // Draw preview
-    ctx.drawImage(preview, previewX, previewY, previewWidth, previewHeight);
-  };
-
   // Inside the LogoUploadStep component, add this debugging function
-  // Update the debugImageLoading function
   const debugImageLoading = (imageUrl: string | undefined, source: string) => {
     console.log(`[DEBUG] ${source} - Image URL:`, imageUrl);
     if (!imageUrl) {
       console.log(`[DEBUG] ${source} - No image URL provided`);
       return;
     }
-  
+
     // Test image loading
     const testImg = new Image();
-    testImg.crossOrigin = 'anonymous'; // Add this line
     testImg.onload = () => {
       console.log(`[DEBUG] ${source} - Successfully loaded image from:`, imageUrl);
     };
     testImg.onerror = (err) => {
       console.error(`[DEBUG] ${source} - Failed to load image from:`, imageUrl, err);
     };
-  
-    // Determine the correct URL to use - Fix the URL construction
+
+    // Determine the correct URL to use
     let fullUrl = imageUrl;
-    
-    // Handle absolute file paths by converting them to HTTP URLs
-    if (imageUrl.includes('C:/Users/hp/Desktop/causebags/server/uploads/') || 
-        imageUrl.includes('C:\\Users\\hp\\Desktop\\causebags\\server\\uploads\\')) {
-      // Extract just the filename
-      const filename = imageUrl.split('/').pop() || imageUrl.split('\\').pop();
-      fullUrl = `${config.uploadsUrl}/${filename}`;
-    } 
-    // Handle relative upload paths
-    else if (imageUrl.startsWith('/uploads/')) {
-      fullUrl = `${config.uploadsUrl}${imageUrl.replace('/uploads/', '/')}`;
-    } 
-    // Handle paths without protocol
-    else if (!imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
+    if (imageUrl.startsWith('/uploads/')) {
+      fullUrl = `${config.uploadsUrl}${imageUrl.replace('/uploads', '')}`;
+    } else if (!imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
       fullUrl = `${config.apiUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
     }
     
@@ -847,13 +706,13 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                Cause Preview
+                Admin Logo Preview
                 <Tooltip>
                   <TooltipTrigger>
                     <Info className="h-4 w-4 text-gray-400" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>This shows how your selected cause will appear on the tote bag</p>
+                    <p>This shows the admin-uploaded logo for the selected cause</p>
                   </TooltipContent>
                 </Tooltip>
               </CardTitle>
