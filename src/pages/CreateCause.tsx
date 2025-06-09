@@ -1,5 +1,5 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { getApiUrl, getFullUrl } from '@/utils/apiUtils';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -113,6 +113,7 @@ const CreateCause = () => {
       });
       
       try {
+<<<<<<< Updated upstream
         // Use axios instead of fetch for better CORS handling
         console.log('Sending request to:', `${config.apiUrl}/causes`);
         console.log('With token:', token ? 'Bearer token present' : 'No token');
@@ -120,6 +121,10 @@ const CreateCause = () => {
         // Create a detailed log of what we're about to send
         console.log('Request details:', {
           url: `${config.apiUrl}/causes`,
+=======
+        // Use a direct fetch call with FormData for file upload
+        const fetchResponse = await fetch(getApiUrl('/causes'), {
+>>>>>>> Stashed changes
           method: 'POST',
           headers: {
             'Authorization': token ? 'Bearer token present' : 'No token',

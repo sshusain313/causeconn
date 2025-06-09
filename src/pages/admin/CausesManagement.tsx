@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { getApiUrl, getFullUrl } from '@/utils/apiUtils';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,7 +46,11 @@ const CausesManagement = () => {
     const fetchCauses = async () => {
       try {
         setLoading(true);
+<<<<<<< Updated upstream
         const response = await fetch(`${config.apiUrl}/causes`, {
+=======
+        const response = await fetch(getApiUrl('/causes'), {
+>>>>>>> Stashed changes
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -98,8 +103,13 @@ const CausesManagement = () => {
         return c;
       }));
       
+<<<<<<< Updated upstream
       // Send update to the server using the status endpoint
       const response = await fetch(`${config.apiUrl}/causes/${causeId}/status`, {
+=======
+      // Send update to the server using the new toggle-online endpoint
+      const response = await fetch(getApiUrl(`/causes/${causeId}/toggle-online`), {
+>>>>>>> Stashed changes
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +155,11 @@ const CausesManagement = () => {
       });
       
       // Revert the optimistic update
+<<<<<<< Updated upstream
       const response = await fetch(`${config.apiUrl}/causes`);
+=======
+      const response = await fetch(getApiUrl('/causes'));
+>>>>>>> Stashed changes
       if (response.ok) {
         const data = await response.json();
         setCauses(data.map((cause: Cause) => ({

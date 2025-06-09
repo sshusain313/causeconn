@@ -3,11 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>altruism-action-portal</title>
+    <title>causebags</title>
     <meta name="description" content="Lovable Generated Project" />
     <meta name="author" content="Lovable" />
+    
+    <!-- Direct API Fix: Load before any other scripts to fix localhost:5000 references -->
+    <script>
+      // Inline script to immediately fix any localhost:5000 references
+      (function() {
+        console.log('Inline API Fix: Initializing...');
+        
+        // Only apply in production or on changebag.org
+        if (window.location.hostname === 'changebag.org' || 
+            window.location.hostname === 'www.changebag.org') {
+          console.log('Inline API Fix: Running on production domain, applying fixes');
+          
+          // Override fetch and XHR
+          const originalFetch = window.fetch;
+          window.fetch = function(resource, options) {
+            if (typeof resource === 'string' && resource.includes('localhost:5000')) {
+              resource = resource.replace('http://localhost:5000', window.location.origin);
+              console.log('Inline API Fix: Redirected fetch to ' + resource);
+            }
+            return originalFetch.apply(this, arguments);
+          };
+          
+          const originalOpen = XMLHttpRequest.prototype.open;
+          XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+            if (typeof url === 'string' && url.includes('localhost:5000')) {
+              url = url.replace('http://localhost:5000', window.location.origin);
+              console.log('Inline API Fix: Redirected XHR to ' + url);
+            }
+            return originalOpen.apply(this, arguments);
+          };
+          
+          // Create global override
+          window.__API_URLS__ = {
+            apiUrl: window.location.origin + '/api',
+            uploadsUrl: window.location.origin + '/uploads'
+          };
+          
+          console.log('Inline API Fix: Initialization complete');
+        }
+      })();
+    </script>
+    
+    <!-- Load external API interceptor scripts -->
+    <script src="/direct-fix.js"></script>
+    <script src="/api-interceptor.js"></script>
 
-    <meta property="og:title" content="altruism-action-portal" />
+    <meta property="og:title" content="causebags" />
     <meta property="og:description" content="Lovable Generated Project" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />

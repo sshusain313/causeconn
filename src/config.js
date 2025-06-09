@@ -10,9 +10,17 @@ const getApiUrl = () => {
   
   // Second priority: Production URL if in production mode
   if (import.meta.env.PROD) {
-    // Use the current domain for API requests
+    // Always use the current domain for API requests in production
     const currentDomain = window.location.origin;
     console.log('Using current domain for API URL:', `${currentDomain}/api`);
+    return `${currentDomain}/api`;
+  }
+  
+  // For local development, check if we're running on changebag.org
+  if (window.location.hostname === 'changebag.org' || 
+      window.location.hostname === 'www.changebag.org') {
+    const currentDomain = window.location.origin;
+    console.log('Detected changebag.org domain, using:', `${currentDomain}/api`);
     return `${currentDomain}/api`;
   }
   
@@ -31,7 +39,17 @@ const getUploadsUrl = () => {
   
   // Second priority: Production URL if in production mode
   if (import.meta.env.PROD) {
-    return 'https://changebag.org/uploads';
+    // Always use the current domain for uploads in production
+    const currentDomain = window.location.origin;
+    return `${currentDomain}/uploads`;
+  }
+  
+  // For local development, check if we're running on changebag.org
+  if (window.location.hostname === 'changebag.org' || 
+      window.location.hostname === 'www.changebag.org') {
+    const currentDomain = window.location.origin;
+    console.log('Detected changebag.org domain, using:', `${currentDomain}/uploads`);
+    return `${currentDomain}/uploads`;
   }
   
   // Default: Local development

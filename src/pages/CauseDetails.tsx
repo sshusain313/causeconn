@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getApiUrl, getFullUrl } from '@/utils/apiUtils';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCause } from '@/services/apiServices';
@@ -41,7 +42,11 @@ const CauseDetailsPage = () => {
     queryFn: async () => {
       try {
         // In a real app, this would fetch from the actual API endpoint
+<<<<<<< Updated upstream
         const response = await fetch(`${config.apiUrl}/causes/${id}`);
+=======
+        const response = await fetch(getApiUrl(`/causes/${id}`));
+>>>>>>> Stashed changes
         if (!response.ok) {
           throw new Error('Failed to fetch cause details');
         }
@@ -154,7 +159,11 @@ const CauseDetailsPage = () => {
         <HeroSection 
           title={cause.title}
           tagline={cause.description}
+<<<<<<< Updated upstream
           heroImageUrl={cause.imageUrl.startsWith('http') ? cause.imageUrl : `${config.uploadsUrl}${cause.imageUrl.replace('/uploads', '')}`}
+=======
+          heroImageUrl={getFullUrl(cause.imageUrl)}
+>>>>>>> Stashed changes
           onAction={handleAction}
           onSponsor={handleSponsor}
           onShare={handleShare}
@@ -203,7 +212,11 @@ const CauseDetailsPage = () => {
                   <CauseImageAndStory 
                     title={cause.title}
                     story={cause.story}
+<<<<<<< Updated upstream
                     imageUrl={cause.imageUrl.startsWith('http') ? cause.imageUrl : `${config.uploadsUrl}${cause.imageUrl.replace('/uploads', '')}`}
+=======
+                    imageUrl={getFullUrl(cause.imageUrl)}
+>>>>>>> Stashed changes
                   />
                 </CardContent>
               </Card> */}
@@ -219,7 +232,11 @@ const CauseDetailsPage = () => {
               {/* Why It Matters */}
               {/* <WhyItMatters 
                 microStoryText={cause.whyItMatters || cause.story || ''}
+<<<<<<< Updated upstream
                 microStoryImageUrl={cause.imageUrl.startsWith('http') ? cause.imageUrl : `${config.uploadsUrl}${cause.imageUrl.replace('/uploads', '')}`}
+=======
+                microStoryImageUrl={getFullUrl(cause.imageUrl)}
+>>>>>>> Stashed changes
               /> */}
 
               {/* FAQ Accordion */}
