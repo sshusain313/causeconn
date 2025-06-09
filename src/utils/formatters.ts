@@ -2,7 +2,7 @@
  * Formats a number as currency with the specified locale and currency code
  * @param amount - The amount to format
  * @param locale - The locale to use for formatting (default: 'en-US')
- * @param currencyCode - The currency code to use (default: 'USD')
+ * @param currencyCode - The currency code to use (default: 'INR')
  * @param minimumFractionDigits - The minimum number of fraction digits (default: 0)
  * @param maximumFractionDigits - The maximum number of fraction digits (default: 0)
  * @returns Formatted currency string
@@ -10,7 +10,7 @@
 export const formatCurrency = (
   amount: number,
   locale: string = 'en-US',
-  currencyCode: string = 'USD',
+  currencyCode: string = 'INR',
   minimumFractionDigits: number = 0,
   maximumFractionDigits: number = 0
 ): string => {

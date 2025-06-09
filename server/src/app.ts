@@ -29,6 +29,7 @@ app.use(cors({
       'https://www.changebag.org',
       'http://localhost:8083',
       'http://localhost:8085',
+      'http://localhost:8087',
       'http://localhost:3000',
       'http://localhost:5173'
     ];
@@ -57,6 +58,7 @@ app.use((req, res, next) => {
       'https://www.changebag.org',
       'http://localhost:8083',
       'http://localhost:8085',
+      'http://localhost:8087',
       'http://localhost:3000',
       'http://localhost:5173'
     ];

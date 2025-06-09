@@ -21,5 +21,15 @@ router.get('/user', authGuard, causeController.getCausesByUser);
 
 // Admin routes
 router.patch('/:id/status', authGuard, adminGuard, causeController.updateCauseStatus);
+router.post('/:id/tote-preview', authGuard, adminGuard, upload.single('image'), compressImage, causeController.updateCauseTotePreviewImage);
+router.post('/:id/upload-image', authGuard, adminGuard, upload.single('image'), compressImage, causeController.uploadCauseImage);
+// Update image upload route to match frontend
+router.post(
+  '/admin/causes/:id/images/upload',
+  authGuard,
+  adminGuard,
+  upload.single('image'),
+  causeController.uploadCauseImage
+);
 
 export default router;

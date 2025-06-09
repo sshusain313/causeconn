@@ -6,6 +6,7 @@
 interface Config {
   apiUrl: string;
   uploadsUrl: string;
+  frontendUrl: string;
   isProduction: boolean;
 }
 
@@ -18,9 +19,9 @@ const isProduction = import.meta.env.PROD || window.location.hostname === 'chang
 const apiDomain = isProduction ? 'https://api.changebag.org' : 'http://localhost:5000';
 
 const config: Config = {
-  // Always use the base API URL without specific endpoints
-  apiUrl: `${apiDomain}/api`,
-  uploadsUrl: `${apiDomain}/uploads`,
+  apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  uploadsUrl: import.meta.env.VITE_UPLOADS_URL || 'http://localhost:5000/uploads',
+  frontendUrl: import.meta.env.VITE_FRONTEND_URL || 'http://localhost:8085',
   isProduction
 };
 

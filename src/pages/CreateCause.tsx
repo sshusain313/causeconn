@@ -333,7 +333,7 @@ const CreateCause = () => {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="targetAmount">Target Amount (USD) *</Label>
+                  <Label htmlFor="targetAmount">Target Amount (₹) *</Label>
                   <Input
                     id="targetAmount"
                     type="number"

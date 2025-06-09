@@ -145,7 +145,7 @@ const SponsorDashboard = () => {
         <TabsContent value="sponsorships">
           <div className="space-y-6">
             {sponsoredCauses.map((cause) => (
-              <Card key={cause._id}>
+              <Card key={cause.id}>
                 <CardContent className="p-6">
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="md:w-1/4">

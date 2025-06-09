@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { Eye, EyeOff, PlusCircle, Search, ArrowUpDown, Download } from 'lucide-react';
+import { Eye, EyeOff, PlusCircle, Search, ArrowUpDown, Download, Image as ImageIcon } from 'lucide-react';
 import config from '@/config';
 
 // Interface for Cause data
@@ -23,6 +23,7 @@ interface Cause {
   updatedAt: string;
   isOnline?: boolean;
   imageUrl?: string;
+  adminImageUrl?: string;
   story?: string;
   location?: string;
   creator?: any;
@@ -72,6 +73,10 @@ const CausesManagement = () => {
 
     fetchCauses();
   }, []);
+
+  const handleSetAdminImage = (causeId: string) => {
+    navigate(`/admin/causes/${causeId}/upload-image`);
+  };
 
   const handleToggleStatus = async (causeId: string) => {
     try {
@@ -280,6 +285,15 @@ const CausesManagement = () => {
           <Card key={cause._id} className={!cause.isOnline ? 'opacity-70' : ''}>
             <CardContent className="p-6">
               <div className="flex flex-col lg:flex-row justify-between gap-4">
+                {cause.imageUrl && (
+                  <div className="lg:w-1/4 mb-4 lg:mb-0">
+                    <img 
+                      src={cause.imageUrl.startsWith('http') ? cause.imageUrl : `${config.apiUrl}/${cause.imageUrl}`} 
+                      alt={cause.title} 
+                      className="w-full h-48 object-cover rounded-md shadow-sm"
+                    />
+                  </div>
+                )}
                 <div className="flex-1">
                   <div className="flex items-center flex-wrap gap-2 mb-2">
                     <h3 className="text-xl font-semibold">{cause.title}</h3>
@@ -298,6 +312,11 @@ const CausesManagement = () => {
                     {!cause.isOnline && (
                       <Badge variant="outline" className="bg-gray-100 text-gray-800">
                         Offline
+                      </Badge>
+                    )}
+                    {cause.adminImageUrl && (
+                      <Badge variant="outline" className="bg-purple-100 text-purple-800">
+                        Admin Image Set
                       </Badge>
                     )}
                   </div>
@@ -323,8 +342,16 @@ const CausesManagement = () => {
                 </div>
                 <div className="flex flex-row lg:flex-col gap-2">
                   <Button 
+                    onClick={() => handleSetAdminImage(cause._id)}
+                    variant="outline" 
+                    className="flex-1 flex items-center gap-1"
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                    <span>Set Image</span>
+                  </Button>
+                  <Button 
                     onClick={() => navigate(`/admin/causes/${cause._id}`)}
-                    className="flex-1"
+                    className="flex-1 bg-black text-white"
                   >
                     Edit
                   </Button>

@@ -40,6 +40,7 @@ import AdminDashboard from "./pages/dashboard/AdminDashboard";
 
 // Admin Pages
 import CausesManagement from "./pages/admin/CausesManagement";
+import CauseImageUpload from '@/pages/admin/CauseImageUpload';
 import CampaignApprovals from "./pages/admin/CampaignApprovals";
 import LogoReview from "./pages/admin/LogoReview";
 import ClaimsManagement from "./pages/admin/ClaimsManagement";
@@ -156,6 +157,9 @@ const App: React.FC = () => {
                   <ProtectedRoute allowedRoles={['admin']}>
                     <ClaimDetails />
                   </ProtectedRoute>
+                } />
+                <Route path="/admin/causes/:id/upload-image" element={
+                    <CauseImageUpload />
                 } />
                 <Route path="/admin/distribution-settings" element={
                   <ProtectedRoute allowedRoles={['admin']}>

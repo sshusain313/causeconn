@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { toast } from '@/components/ui/use-toast';
 import CauseSelectionStep from './wizard/CauseSelectionStep';
 import ToteQuantityStep from './wizard/ToteQuantityStep';
 import LogoUploadStep from './wizard/LogoUploadStep';
@@ -225,7 +226,98 @@ const OnboardingWizard = ({
   const totalSteps = 5; // Increased from 4 to 5
   const progressPercentage = (currentStep / totalSteps) * 100;
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+  // Validate the current step before proceeding to the next step
+  const validateCurrentStep = (): { isValid: boolean; message?: string } => {
+    switch (currentStep) {
+      case 1: // ToteQuantityStep
+        if (formData.toteQuantity <= 0) {
+          return { isValid: false, message: 'Tote quantity must be greater than 0' };
+        }
+        if (!formData.distributionType) {
+          return { isValid: false, message: 'Please select a distribution type (online or physical)' };
+        }
+        return { isValid: true };
+
+      case 2: // CauseSelectionStep
+        if (!formData.selectedCause) {
+          return { isValid: false, message: 'Please select a cause to sponsor' };
+        }
+        if (!formData.organizationName || formData.organizationName.trim() === '') {
+          return { isValid: false, message: 'Organization name is required' };
+        }
+        if (!formData.contactName || formData.contactName.trim() === '') {
+          return { isValid: false, message: 'Contact name is required' };
+        }
+        if (!formData.email || formData.email.trim() === '') {
+          return { isValid: false, message: 'Email is required' };
+        }
+        if (!formData.phone || formData.phone.trim() === '') {
+          return { isValid: false, message: 'Phone number is required' };
+        }
+        return { isValid: true };
+
+      case 3: // LogoUploadStep
+        if (!formData.logoUrl || formData.logoUrl.trim() === '') {
+          return { isValid: false, message: 'Please upload your organization logo' };
+        }
+        return { isValid: true };
+
+      case 4: // DistributionInfoStep
+        // First check if distribution type is selected
+        if (!formData.distributionType) {
+          return { isValid: false, message: 'Please select a distribution type' };
+        }
+        
+        // Validate based on the selected distribution type
+        if (formData.distributionType === 'physical') {
+          // For physical distribution, check if at least one distribution point is selected
+          const hasSelectedPoints = Object.values(formData.distributionPoints || {}).some((city: any) =>
+            Object.values(city).some((category: any) =>
+              category.some((point: any) => point.selected)
+            )
+          );
+          
+          if (!hasSelectedPoints) {
+            return { isValid: false, message: 'Please select at least one distribution point' };
+          }
+          
+          if (!formData.distributionStartDate || !formData.distributionEndDate) {
+            return { isValid: false, message: 'Please specify distribution start and end dates' };
+          }
+          
+          // No need to validate online-specific fields for physical distribution
+        } else if (formData.distributionType === 'online') {
+          // For online distribution
+          // Online distribution requires campaign start and end dates
+          // Shipping address is NOT required for online campaigns
+          
+          // Online campaign date validation
+          if (!formData.distributionStartDate || !formData.distributionEndDate) {
+            return { isValid: false, message: 'Please specify campaign start and end dates' };
+          }
+          
+          // No need to validate physical-specific fields for online distribution
+        }
+        return { isValid: true };
+
+      default:
+        return { isValid: true };
+    }
+  };
+
+  const nextStep = () => {
+    const validation = validateCurrentStep();
+    if (validation.isValid) {
+      setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+    } else {
+      // Show validation error message using toast notification
+      toast({
+        title: "Form Validation Error",
+        description: validation.message || 'Please complete all required fields before continuing',
+        variant: "destructive"
+      });
+    }
+  };
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   // Calculate the unit price and total amount

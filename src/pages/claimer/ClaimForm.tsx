@@ -96,6 +96,30 @@ const ClaimFormPage = () => {
     },
   });
   
+  // Check if user has already claimed a tote for this cause when they enter their email
+  const checkExistingClaim = async (email: string) => {
+    if (!email || !id) return;
+    
+    try {
+      const response = await fetch(`${config.apiUrl}/claims/check?email=${encodeURIComponent(email)}&causeId=${id}`);
+      const data = await response.json();
+      
+      if (data.exists) {
+        toast({
+          title: "Already Claimed",
+          description: "You have already claimed a tote for this cause. Each user can claim only one tote per cause.",
+          variant: "default",
+        });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking existing claim:', error);
+      return false;
+    }
+  };
+  
+  
   // Check for waitlist data on mount
   useEffect(() => {
     if (isFromWaitlist) {
@@ -149,16 +173,27 @@ const ClaimFormPage = () => {
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit claim');
+        
+        // Check if this is a duplicate claim error
+        if (response.status === 400 && errorData.message && errorData.message.includes('already claimed')) {
+          toast({
+            title: "Already Claimed",
+            description: errorData.message || "You have already claimed a tote for this cause.",
+            variant: "destructive",
+          });
+        } else {
+          throw new Error(errorData.message || 'Failed to submit claim');
+        }
+        return;
       }
       
       // Navigate to verification page
       navigate('/claim/verify');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting claim:', error);
       toast({
         title: "Error",
-        description: "There was a problem submitting your claim. Please try again.",
+        description: error.message || "There was a problem submitting your claim. Please try again.",
         variant: "destructive",
       });
     }
@@ -296,8 +331,21 @@ const ClaimFormPage = () => {
                           <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                              <Input type="email" placeholder="jane.doe@example.com" {...field} />
+                              <Input 
+                                type="email" 
+                                placeholder="jane.doe@example.com" 
+                                {...field} 
+                                onBlur={async (e) => {
+                                  field.onBlur();
+                                  if (e.target.value) {
+                                    await checkExistingClaim(e.target.value);
+                                  }
+                                }}
+                              />
                             </FormControl>
+                            <FormDescription>
+                              You can only claim one tote per cause with the same email address.
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}

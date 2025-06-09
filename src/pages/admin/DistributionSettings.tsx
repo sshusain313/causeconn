@@ -118,13 +118,13 @@ const DistributionSettings = () => {
 
   // Filter cities by selected country
   const filteredCities = settings?.cities.filter(city => 
-    selectedCountryId && selectedCountryId !== 'all_countries' ? city.countryId === selectedCountryId : true
+    selectedCountryId ? city.countryId === selectedCountryId : true
   ) || [];
 
   // Filter distribution points by selected city and category
   const filteredPoints = settings?.points.filter(point => {
-    if (selectedCityId && selectedCityId !== 'all_cities' && point.cityId !== selectedCityId) return false;
-    if (selectedCategoryId && selectedCategoryId !== 'all_categories' && point.categoryId !== selectedCategoryId) return false;
+    if (selectedCityId && point.cityId !== selectedCityId) return false;
+    if (selectedCategoryId && point.categoryId !== selectedCategoryId) return false;
     return true;
   }) || [];
 
@@ -177,7 +177,7 @@ const DistributionSettings = () => {
                 <SelectValue placeholder="All countries" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all_countries">All countries</SelectItem>
+                <SelectItem value="">All countries</SelectItem>
                 {settings?.countries.map((country) => (
                   <SelectItem key={country._id} value={country._id!}>
                     {country.name}
