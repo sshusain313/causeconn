@@ -51,9 +51,10 @@ interface LogoUploadStepProps {
       angle: number;
     };
   }>) => void;
+  validationError: string | null;
 }
 
-const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
+const LogoUploadStep = ({ formData, updateFormData, validationError }: LogoUploadStepProps) => {
   // Fetch selected cause if available
   const { data: selectedCauseData } = useQuery({
     queryKey: ['cause', formData.selectedCause],
@@ -605,6 +606,12 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
   return (
     <TooltipProvider>
       <div className="space-y-6">
+        {validationError && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
+            {validationError}
+          </div>
+        )}
+        
         {/* File Upload Section */}
         <Card>
           <CardHeader>
@@ -616,7 +623,12 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
-                <label htmlFor="logo-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                <label 
+                  htmlFor="logo-upload" 
+                  className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 ${
+                    validationError && !formData.logoUrl ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <Upload className="w-8 h-8 mb-4 text-gray-500" />
                     <p className="mb-2 text-sm text-gray-500">
@@ -634,6 +646,12 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
                   />
                 </label>
               </div>
+              
+              {validationError && !formData.logoUrl && (
+                <p className="text-red-500 text-sm mt-1">
+                  Please upload your organization logo
+                </p>
+              )}
               
               {error && (
                 <Alert variant="destructive">

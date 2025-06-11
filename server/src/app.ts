@@ -156,4 +156,4 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-export default app;
+export default app
