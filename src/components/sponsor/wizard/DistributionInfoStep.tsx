@@ -400,6 +400,81 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
         {/* Physical Distribution Fields */}
         {formData.distributionType === 'physical' && (
           <div className="space-y-6">
+            {/* Campaign Duration */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Campaign Duration</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Set the start and end dates for your physical distribution campaign
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Campaign Start Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left",
+                            !formData.campaignStartDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.campaignStartDate ? (
+                            format(formData.campaignStartDate, "PPP")
+                          ) : (
+                            <span>Pick start date</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.campaignStartDate}
+                          onSelect={(date) => updateFormData({ campaignStartDate: date })}
+                          initialFocus
+                          className="p-3"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Campaign End Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left",
+                            !formData.campaignEndDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.campaignEndDate ? (
+                            format(formData.campaignEndDate, "PPP")
+                          ) : (
+                            <span>Pick end date</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.campaignEndDate}
+                          onSelect={(date) => updateFormData({ campaignEndDate: date })}
+                          initialFocus
+                          className="p-3"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* City Selection */}
             <Card>
               <CardHeader>

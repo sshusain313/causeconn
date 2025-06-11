@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getApiUrl, getFullUrl } from '@/utils/apiUtils';
 import { useNavigate } from 'react-router-dom';
@@ -8,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { Eye, EyeOff, PlusCircle, Search, ArrowUpDown, Download, Image as ImageIcon } from 'lucide-react';
-import config from '@/config';
+import { Eye, EyeOff, PlusCircle, Search, ArrowUpDown, Download, Image as ImageIcon, PenTool as PenIcon } from 'lucide-react';
 
 // Interface for Cause data
 interface Cause {
@@ -46,11 +44,7 @@ const CausesManagement = () => {
     const fetchCauses = async () => {
       try {
         setLoading(true);
-<<<<<<< Updated upstream
-        const response = await fetch(`${config.apiUrl}/causes`, {
-=======
         const response = await fetch(getApiUrl('/causes'), {
->>>>>>> Stashed changes
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -83,90 +77,55 @@ const CausesManagement = () => {
     navigate(`/admin/causes/${causeId}/upload-image`);
   };
 
+  const handleEdit = (causeId: string) => {
+    navigate(`/admin/causes/${causeId}/edit`);
+  };
+
   const handleToggleStatus = async (causeId: string) => {
     try {
       const cause = causes.find(c => c._id === causeId);
       if (!cause) return;
       
-      const newOnlineStatus = !cause.isOnline;
+      const newStatus = cause.status === 'approved' ? 'pending' : 'approved';
       
-      // Update in the UI optimistically
-      setCauses(prev => prev.map(c => {
-        if (c._id === causeId) {
-          return { 
-            ...c, 
-            isOnline: newOnlineStatus,
-            // If going online, also update status to approved if it's in draft
-            status: newOnlineStatus && c.status === 'draft' ? 'approved' : c.status
-          };
-        }
-        return c;
-      }));
-      
-<<<<<<< Updated upstream
-      // Send update to the server using the status endpoint
-      const response = await fetch(`${config.apiUrl}/causes/${causeId}/status`, {
-=======
-      // Send update to the server using the new toggle-online endpoint
-      const response = await fetch(getApiUrl(`/causes/${causeId}/toggle-online`), {
->>>>>>> Stashed changes
+      // Send update to the server
+      const response = await fetch(getApiUrl(`/causes/${causeId}/status`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // Add authentication token
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({
-          status: newOnlineStatus ? 'approved' : 'pending'
-        })
+        body: JSON.stringify({ status: newStatus })
       });
       
       if (!response.ok) {
         throw new Error('Failed to update cause status');
       }
       
-      // Get the updated cause from the server response
-      const data = await response.json();
-      console.log('Server response:', data);
-      
-      // Update the causes list with the server response to ensure sync
+      // Update local state
       setCauses(prev => prev.map(c => {
         if (c._id === causeId) {
-          // Make sure isOnline property is correctly set based on the status
           return { 
             ...c, 
-            ...data.cause,
-            isOnline: data.cause.status === 'approved' || data.cause.status === 'completed'
+            status: newStatus,
+            isOnline: newStatus === 'approved'
           };
         }
         return c;
       }));
       
       toast({
-        title: 'Campaign Status Updated',
-        description: `${cause.title} is now ${newOnlineStatus ? 'online' : 'offline'}.`,
+        title: 'Status Updated',
+        description: `Cause is now ${newStatus}`,
         duration: 3000
       });
     } catch (err) {
-      console.error('Error updating cause status:', err);
+      console.error('Error:', err);
       toast({
-        title: 'Update Failed',
-        description: 'Failed to update cause status. Please try again.',
+        title: 'Error',
+        description: 'Failed to update status',
         variant: 'destructive'
       });
-      
-      // Revert the optimistic update
-<<<<<<< Updated upstream
-      const response = await fetch(`${config.apiUrl}/causes`);
-=======
-      const response = await fetch(getApiUrl('/causes'));
->>>>>>> Stashed changes
-      if (response.ok) {
-        const data = await response.json();
-        setCauses(data.map((cause: Cause) => ({
-          ...cause,
-          isOnline: cause.status !== 'draft' && cause.status !== 'rejected'
-        })));
-      }
     }
   };
   
@@ -241,13 +200,6 @@ const CausesManagement = () => {
             <div className="text-red-500 text-center">
               <p className="text-xl font-semibold mb-2">Error</p>
               <p>{error}</p>
-              <Button 
-                onClick={() => window.location.reload()} 
-                className="mt-4"
-                variant="outline"
-              >
-                Try Again
-              </Button>
             </div>
           </div>
         </div>
@@ -256,157 +208,134 @@ const CausesManagement = () => {
   }
 
   return (
-    <AdminLayout title="Causes Management" subtitle="Create, view, and manage all cause campaigns">
-      <div className="mb-6 flex flex-col md:flex-row gap-4 justify-between">
-        <div className="flex gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:w-80">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-            <Input
-              placeholder="Search causes..."
-              className="pl-9"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Button onClick={() => handleSort('title')} variant="outline" className="hidden md:flex items-center gap-1">
-            <span>Title</span>
-            <ArrowUpDown className="h-3 w-3" />
-          </Button>
-          <Button onClick={() => handleSort('status')} variant="outline" className="hidden md:flex items-center gap-1">
-            <span>Status</span>
-            <ArrowUpDown className="h-3 w-3" />
-          </Button>
-          <Button onClick={() => handleSort('currentAmount')} variant="outline" className="hidden md:flex items-center gap-1">
-            <span>Raised</span>
-            <ArrowUpDown className="h-3 w-3" />
-          </Button>
+    <AdminLayout title="Causes Management" subtitle="Manage and monitor all causes">
+      <div className="p-4 md:p-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl font-bold">Causes Management</h1>
         </div>
-        
-        <div className="flex gap-2">
-          <Button variant="outline" className="flex items-center gap-1">
-            <Download className="h-4 w-4" />
-            <span>Export</span>
-          </Button>
-          <Button className="flex items-center gap-1" onClick={() => navigate('/admin/causes/new')}>
-            <PlusCircle className="h-4 w-4" />
-            <span>New Cause</span>
-          </Button>
-        </div>
-      </div>
 
-      <div className="space-y-4">
-        {filteredAndSortedCauses.map((cause) => (
-          <Card key={cause._id} className={!cause.isOnline ? 'opacity-70' : ''}>
-            <CardContent className="p-6">
-              <div className="flex flex-col lg:flex-row justify-between gap-4">
-                {cause.imageUrl && (
-                  <div className="lg:w-1/4 mb-4 lg:mb-0">
-                    <img 
-                      src={cause.imageUrl.startsWith('http') ? cause.imageUrl : `${config.apiUrl}/${cause.imageUrl}`} 
-                      alt={cause.title} 
-                      className="w-full h-48 object-cover rounded-md shadow-sm"
+        {/* Search and Sort Controls */}
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="w-full">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
+              <Input
+                placeholder="Search causes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <Button
+              variant="outline"
+              onClick={() => handleSort('date')}
+              className="w-full text-sm"
+            >
+              <span className="hidden sm:inline">Date</span>
+              <span className="sm:hidden">Date</span>
+              {sortBy === 'date' && <ArrowUpDown className="ml-2 h-3 w-3" />}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleSort('title')}
+              className="w-full text-sm"
+            >
+              <span className="hidden sm:inline">Title</span>
+              <span className="sm:hidden">Title</span>
+              {sortBy === 'title' && <ArrowUpDown className="ml-2 h-3 w-3" />}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleSort('status')}
+              className="w-full text-sm"
+            >
+              <span className="hidden sm:inline">Status</span>
+              <span className="sm:hidden">Status</span>
+              {sortBy === 'status' && <ArrowUpDown className="ml-2 h-3 w-3" />}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleSort('currentAmount')}
+              className="w-full text-sm"
+            >
+              <span className="hidden sm:inline">Amount</span>
+              <span className="sm:hidden">$</span>
+              {sortBy === 'currentAmount' && <ArrowUpDown className="ml-2 h-3 w-3" />}
+            </Button>
+          </div>
+        </div>
+
+        {/* Causes Grid */}
+        <div className="grid lg:grid-cols-2 gap-3 max-w-9xl mx-auto sm:grid-cols-1">
+          {filteredAndSortedCauses.map((cause) => (
+            <Card key={cause._id} className="overflow-hidden">
+              <div className="flex flex-col md:flex-row">
+                <div className="w-full md:w-1/3 lg:w-1/2 relative">
+                  <div className="relative aspect-video md:aspect-square">
+                    <img
+                      src={cause.imageUrl || '/placeholder-image.jpg'}
+                      alt={cause.title}
+                      className="w-full h-full object-cover"
                     />
-                  </div>
-                )}
-                <div className="flex-1">
-                  <div className="flex items-center flex-wrap gap-2 mb-2">
-                    <h3 className="text-xl font-semibold">{cause.title}</h3>
-                    <Badge 
-                      variant="outline" 
-                      className={
-                        cause.status === 'open'
-                          ? 'bg-green-100 text-green-800'
-                          : cause.status === 'sponsored'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-amber-100 text-amber-800'
-                      }
-                    >
-                      {cause.status.charAt(0).toUpperCase() + cause.status.slice(1)}
-                    </Badge>
-                    {!cause.isOnline && (
-                      <Badge variant="outline" className="bg-gray-100 text-gray-800">
-                        Offline
+                    <div className="absolute top-2 right-2 flex flex-col sm:flex-row gap-2">
+                      <Badge variant={cause.isOnline ? 'default' : 'secondary'} className="text-xs">
+                        {cause.isOnline ? 'Online' : 'Offline'}
                       </Badge>
-                    )}
-                    {cause.adminImageUrl && (
-                      <Badge variant="outline" className="bg-purple-100 text-purple-800">
-                        Admin Image Set
+                      <Badge variant="outline" className="text-xs">
+                        {cause.status}
                       </Badge>
-                    )}
-                  </div>
-                  <p className="text-gray-600 mb-4">{cause.description}</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500">Category</p>
-                      <p className="font-medium">{cause.category}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Goal</p>
-                      <p className="font-medium">${cause.targetAmount.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Raised</p>
-                      <p className="font-medium">${cause.currentAmount.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Created</p>
-                      <p className="font-medium">{new Date(cause.createdAt).toLocaleDateString()}</p>
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-row lg:flex-col gap-2">
-                  <Button 
-                    onClick={() => handleSetAdminImage(cause._id)}
-                    variant="outline" 
-                    className="flex-1 flex items-center gap-1"
-                  >
-                    <ImageIcon className="h-4 w-4" />
-                    <span>Set Image</span>
-                  </Button>
-                  <Button 
-                    onClick={() => navigate(`/admin/causes/${cause._id}`)}
-                    className="flex-1 bg-black text-white"
-                  >
-                    Edit
-                  </Button>
-                  <Button 
-                    onClick={() => handleToggleStatus(cause._id)}
-                    variant="outline" 
-                    className="flex-1 flex items-center gap-1"
-                  >
-                    {cause.isOnline ? (
-                      <>
-                        <EyeOff className="h-4 w-4" />
-                        <span>Set Offline</span>
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4" />
-                        <span>Set Online</span>
-                      </>
-                    )}
-                  </Button>
-                  {cause.status === 'open' && (
-                    <Button 
-                      onClick={() => handleForceCloseClaims(cause._id)}
-                      variant="outline" 
-                      className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                <div className="w-full md:w-2/3 lg:w-1/2 p-4 md:p-6">
+                  <h3 className="text-lg md:text-xl font-semibold mb-2">{cause.title}</h3>
+                  <p className="text-gray-500 text-sm mb-4 line-clamp-2">{cause.description}</p>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">Target: ${cause.targetAmount.toLocaleString()}</p>
+                      <p className="text-sm text-gray-500">Current: ${cause.currentAmount.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">{new Date(cause.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleToggleStatus(cause._id)}
+                      className="flex-1 sm:flex-none"
                     >
-                      Close Claims
+                      {cause.status === 'approved' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      <span className="ml-2 text-xs sm:text-sm">{cause.status === 'approved' ? 'Take Offline' : 'Put Online'}</span>
                     </Button>
-                  )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(cause._id)}
+                      className="flex-1 sm:flex-none"
+                    >
+                      <PenIcon className="w-4 h-4" />
+                      <span className="ml-2 text-xs sm:text-sm">Edit</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSetAdminImage(cause._id)}
+                      className="flex-1 sm:flex-none"
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                      <span className="ml-2 text-xs sm:text-sm">Set Image</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-        
-        {filteredAndSortedCauses.length === 0 && (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No causes found</h3>
-            <p className="text-gray-500">Try changing your search criteria</p>
-          </div>
-        )}
+            </Card>
+          ))}
+        </div>
       </div>
     </AdminLayout>
   );

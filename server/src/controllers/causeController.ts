@@ -231,10 +231,10 @@ export const updateCause = async (req: Request, res: Response) => {
       imageUrl, 
       targetAmount, 
       status,
-      endDate, 
       location, 
-      category, 
-      tags 
+      category,
+      distributionStartDate,
+      distributionEndDate
     } = req.body;
     
     const cause = await Cause.findById(req.params.id);
@@ -258,10 +258,10 @@ export const updateCause = async (req: Request, res: Response) => {
     if (imageUrl) cause.imageUrl = imageUrl;
     if (targetAmount) cause.targetAmount = targetAmount;
     if (status && req.user?.role === 'admin') cause.status = status as CauseStatus;
-    if (endDate) cause.endDate = new Date(endDate);
     if (location) cause.location = location;
     if (category) cause.category = category;
-    if (tags) cause.tags = tags;
+    if (distributionStartDate) cause.distributionStartDate = new Date(distributionStartDate);
+    if (distributionEndDate) cause.distributionEndDate = new Date(distributionEndDate);
     
     await cause.save();
     

@@ -22,7 +22,7 @@ export interface ICause extends Document {
   creator: mongoose.Types.ObjectId | IUser;
   status: CauseStatus;
   startDate: Date;
-  location: string;
+  location?: string;
   category: string;
   createdAt: Date;
   updatedAt: Date;
@@ -32,6 +32,8 @@ export interface ICause extends Document {
   totalTotes?: number;
   claimedTotes?: number;
   availableTotes?: number;
+  distributionStartDate?: Date;
+  distributionEndDate?: Date;
 }
 
 const causeSchema = new Schema<ICause>(
@@ -97,6 +99,12 @@ const causeSchema = new Schema<ICause>(
     images: {
       type: [String],
       default: []
+    },
+    distributionStartDate: {
+      type: Date
+    },
+    distributionEndDate: {
+      type: Date
     }
   },
   {
