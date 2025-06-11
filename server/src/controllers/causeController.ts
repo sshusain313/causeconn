@@ -231,10 +231,10 @@ export const updateCause = async (req: Request, res: Response) => {
       imageUrl, 
       targetAmount, 
       status,
-      endDate, 
       location, 
-      category, 
-      tags 
+      category,
+      distributionStartDate,
+      distributionEndDate
     } = req.body;
     
     const cause = await Cause.findById(req.params.id);
@@ -258,10 +258,10 @@ export const updateCause = async (req: Request, res: Response) => {
     if (imageUrl) cause.imageUrl = imageUrl;
     if (targetAmount) cause.targetAmount = targetAmount;
     if (status && req.user?.role === 'admin') cause.status = status as CauseStatus;
-    if (endDate) cause.endDate = new Date(endDate);
     if (location) cause.location = location;
     if (category) cause.category = category;
-    if (tags) cause.tags = tags;
+    if (distributionStartDate) cause.distributionStartDate = new Date(distributionStartDate);
+    if (distributionEndDate) cause.distributionEndDate = new Date(distributionEndDate);
     
     await cause.save();
     
@@ -350,6 +350,85 @@ export const updateCauseStatus = async (req: Request, res: Response) => {
   }
 };
 
+// Update a cause's tote preview image
+export const updateCauseTotePreviewImage = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if cause exists
+    const cause = await Cause.findById(id);
+    if (!cause) {
+      return res.status(404).json({ message: 'Cause not found' });
+    }
+    
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file provided' });
+    }
+    
+    // Get the file path
+    const filePath = req.file.path.replace(/\\/g, '/'); // Normalize path for Windows
+    
+    // Update the cause with the new tote preview image URL
+    cause.totePreviewImageUrl = filePath;
+    await cause.save();
+    
+    res.json({ 
+      message: 'Tote preview image updated successfully',
+      cause: {
+        _id: cause._id,
+        title: cause.title,
+        totePreviewImageUrl: cause.totePreviewImageUrl
+      }
+    });
+  } catch (error) {
+    console.error('Error updating tote preview image:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const uploadCauseImage = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if cause exists
+    const cause = await Cause.findById(id);
+    if (!cause) {
+      return res.status(404).json({ message: 'Cause not found' });
+    }
+    
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file provided' });
+    }
+    
+    // Get the file path
+    const filePath = req.file.path.replace(/\\/g, '/'); // Normalize path for Windows
+    
+    // Add the new image to the cause's images array
+    cause.images = cause.images || [];
+    cause.images.push(filePath);
+    
+    // Also set it as the admin image URL
+    cause.adminImageUrl = filePath;
+    
+    await cause.save();
+    
+    res.json({ 
+      success: true,
+      message: 'Image uploaded successfully',
+      cause: {
+        _id: cause._id,
+        title: cause.title,
+        images: cause.images
+      }
+    });
+  } catch (error) {
+    console.error('Error uploading cause image:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 export default {
   getAllCauses,
   getCauseById,
@@ -357,5 +436,7 @@ export default {
   updateCause,
   deleteCause,
   getCausesByUser,
-  updateCauseStatus
+  updateCauseStatus,
+  updateCauseTotePreviewImage,
+  uploadCauseImage
 };

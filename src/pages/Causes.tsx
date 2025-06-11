@@ -13,9 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import axios from 'axios';
 import { getImageUrl, handleImageError } from '@/utils/imageUtils';
 import config from '@/config';
+import api from '@/utils/apiClient';
 
 interface Cause {
   _id: string;
@@ -53,12 +53,10 @@ const CausesPage = () => {
       try {
         setLoading(true);
         // Fetch causes with their sponsorships
-        console.log('Using API URL:', config.apiUrl);
-        const response = await axios.get(`${config.apiUrl}/causes`, {
-          params: { 
-            status: 'approved',
-            include: 'sponsorships'
-          }
+        console.log('Fetching causes using API client');
+        const response = await api.get('/causes', { 
+          status: 'approved',
+          include: 'sponsorships'
         });
         
         console.log('Fetched causes:', response.data);

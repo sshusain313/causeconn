@@ -5,9 +5,40 @@ export const createSponsorship = async (req: Request, res: Response): Promise<vo
   try {
     console.log('Received sponsorship request body:', JSON.stringify(req.body, null, 2));
     
+    // If selectedCause is provided but cause isn't, use selectedCause as cause
+    if (!req.body.cause && req.body.selectedCause) {
+      req.body.cause = req.body.selectedCause;
+    }
+
+    // Extract distributionLocations from physicalDistributionDetails if present
+    if (!req.body.distributionLocations && req.body.physicalDistributionDetails?.distributionLocations) {
+      req.body.distributionLocations = req.body.physicalDistributionDetails.distributionLocations;
+    }
+    
     // Check for required fields
-    const requiredFields = ['cause', 'organizationName', 'contactName', 'email', 'phone', 'toteQuantity', 'unitPrice', 'totalAmount'];
+    const requiredFields = [
+      'cause',
+      'organizationName',
+      'contactName',
+      'email',
+      'phone',
+      'toteQuantity',
+      'numberOfTotes',
+      'unitPrice',
+      'totalAmount',
+      'distributionType',
+      'selectedCities',
+      'distributionStartDate',
+      'distributionEndDate',
+      'logoPosition'
+    ];
+    
     const missingFields = requiredFields.filter(field => !req.body[field]);
+    
+    // Special check for distributionLocations
+    if (!req.body.distributionLocations?.length) {
+      missingFields.push('distributionLocations');
+    }
     
     if (missingFields.length > 0) {
       console.error('Missing required fields:', missingFields);
@@ -27,25 +58,31 @@ export const createSponsorship = async (req: Request, res: Response): Promise<vo
     const sponsorshipData = {
       ...req.body,
       status: SponsorshipStatus.PENDING,
-      // Set default dates if not provided
-      distributionStartDate: req.body.distributionStartDate || new Date(),
-      distributionEndDate: req.body.distributionEndDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      // Set default values for other required fields if not present
-      distributionType: req.body.distributionType || DistributionType.ONLINE,
-      distributionPoints: req.body.distributionPoints || [{ 
-        name: 'Online', 
-        address: 'N/A', 
-        contactPerson: req.body.contactName || 'N/A', 
-        phone: req.body.phone || 'N/A' 
-      }],
       // Set default demographics if not provided
       demographics: req.body.demographics || {
-        ageGroups: ['18-24', '25-34', '35-44'],
-        income: 'Mixed',
-        education: 'Mixed',
-        other: 'General audience'
+        ageGroups: [],
+        income: '',
+        education: '',
+        other: ''
       }
     };
+
+    // Remove redundant fields that are now properly placed
+    delete sponsorshipData.physicalDistributionDetails;
+    delete sponsorshipData.distributionPoints;
+    delete sponsorshipData.distributionPointName;
+    delete sponsorshipData.distributionPointAddress;
+    delete sponsorshipData.distributionPointContact;
+    delete sponsorshipData.distributionPointPhone;
+    delete sponsorshipData.distributionPointLocation;
+    delete sponsorshipData.selectedMalls;
+    delete sponsorshipData.selectedMetroStations;
+    delete sponsorshipData.selectedAirports;
+    delete sponsorshipData.selectedSchools;
+    delete sponsorshipData.shippingAddress;
+    delete sponsorshipData.shippingContactName;
+    delete sponsorshipData.shippingPhone;
+    delete sponsorshipData.shippingInstructions;
     
     console.log('Creating sponsorship with data:', JSON.stringify(sponsorshipData, null, 2));
     
@@ -102,7 +139,7 @@ export const approveSponsorship = async (req: Request, res: Response): Promise<v
     }
 
     sponsorship.status = SponsorshipStatus.APPROVED;
-    sponsorship.approvedBy = req.user?._id; // Assuming you have user info in the request
+    sponsorship.approvedBy = req.user?._id;
     sponsorship.approvedAt = new Date();
     await sponsorship.save();
 

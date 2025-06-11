@@ -7,9 +7,6 @@
  */
 import config from '@/config';
 
-// For debugging purposes
-console.log('API URL configuration:', config.apiUrl);
-
 /**
  * Formats an image URL to ensure it can be properly displayed
  * - Handles both server-uploaded images and external URLs
@@ -32,20 +29,11 @@ export const getImageUrl = (url: string | undefined, fallbackImage: string = '/t
   
   // If it's a server upload path (starts with /uploads/), ensure it's properly formatted
   if (url.startsWith('/uploads/')) {
-    console.log('Server upload path detected');
-    
-    // Extract the API domain without any path
-    let apiDomain = '';
-    
-    if (config.apiUrl.includes('://')) {
-      // Get just the domain part (e.g., 'api.changebag.org')
-      const urlParts = config.apiUrl.split('://');
-      const protocol = urlParts[0]; // 'https'
-      const domainWithPath = urlParts[1].split('/')[0]; // 'api.changebag.org'
-      apiDomain = `${protocol}://${domainWithPath}`;
-    } else {
-      // Fallback if apiUrl doesn't have protocol
-      apiDomain = config.apiUrl.split('/')[0];
+    // Extract the filename
+    const filename = url.split('/').pop();
+    if (filename) {
+      // Use the configured uploads URL
+      return `${config.uploadsUrl}/${filename}`;
     }
     
     console.log('Using API domain for images:', apiDomain);

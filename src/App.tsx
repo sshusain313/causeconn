@@ -40,6 +40,7 @@ import AdminDashboard from "./pages/dashboard/AdminDashboard";
 
 // Admin Pages
 import CausesManagement from "./pages/admin/CausesManagement";
+import CauseImageUpload from '@/pages/admin/CauseImageUpload';
 import CampaignApprovals from "./pages/admin/CampaignApprovals";
 import LogoReview from "./pages/admin/LogoReview";
 import ClaimsManagement from "./pages/admin/ClaimsManagement";
@@ -49,6 +50,7 @@ import Settings from "./pages/admin/Settings";
 import QrScanner from "./pages/admin/QrScanner";
 import ClaimDetails from '@/pages/admin/claims/ClaimDetails';
 import DistributionSettings from './pages/admin/DistributionSettings';
+import EditCause from './pages/admin/EditCause';
 
 // Create QueryClient once, outside of component
 const queryClient = new QueryClient();
@@ -155,6 +157,14 @@ const App: React.FC = () => {
                 <Route path="/admin/claims/:id" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <ClaimDetails />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/causes/:id/upload-image" element={
+                    <CauseImageUpload />
+                } />
+                <Route path="/admin/causes/:id/edit" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <EditCause />
                   </ProtectedRoute>
                 } />
                 <Route path="/admin/distribution-settings" element={

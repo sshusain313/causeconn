@@ -1,5 +1,5 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { getApiUrl, getFullUrl } from '@/utils/apiUtils';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,9 +62,7 @@ const CreateCause = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!formData.title || !formData.description || !formData.category || 
-        !formData.targetAmount) {
+    if (!formData.title || !formData.description || !formData.category || !formData.targetAmount) {
       toast({
         title: 'Missing Information',
         description: 'Please fill in all required fields.',
@@ -75,146 +73,56 @@ const CreateCause = () => {
     
     try {
       setIsSubmitting(true);
+      const token = localStorage.getItem('token');
       
-      // Check all possible token storage locations
-      const token = localStorage.getItem('token') || 
-                   localStorage.getItem('authToken') || 
-                   localStorage.getItem('jwtToken') || 
-                   sessionStorage.getItem('token');
-      
-      console.log('Found authentication token:', token ? 'Yes' : 'No');
-      
-      let response;
-      
-      // Create FormData for file upload
+      // Create FormData
       const formDataToSend = new FormData();
       formDataToSend.append('title', formData.title);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('targetAmount', formData.targetAmount);
-      formDataToSend.append('location', formData.location || '');
       formDataToSend.append('category', formData.category);
+      if (formData.location) {
+        formDataToSend.append('location', formData.location);
+      }
       
-      // If we have an image file, append it to the form data
+      // Handle image
       if (imageFile) {
         formDataToSend.append('image', imageFile);
       } else if (formData.imageUrl) {
-        // If no file but URL provided, use the URL
         formDataToSend.append('imageUrl', formData.imageUrl);
       }
       
-      console.log('Sending cause data with image');
-      
-      // Log the API URL being used
-      console.log('Creating cause using API URL:', `${config.apiUrl}/causes`);
-      console.log('Config details:', {
-        apiUrl: config.apiUrl,
-        isProduction: config.isProduction,
-        hostname: window.location.hostname
+      const response = await fetch(getApiUrl('/causes'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formDataToSend
       });
       
-      try {
-        // Use axios instead of fetch for better CORS handling
-        console.log('Sending request to:', `${config.apiUrl}/causes`);
-        console.log('With token:', token ? 'Bearer token present' : 'No token');
-        
-        // Create a detailed log of what we're about to send
-        console.log('Request details:', {
-          url: `${config.apiUrl}/causes`,
-          method: 'POST',
-          headers: {
-            'Authorization': token ? 'Bearer token present' : 'No token',
-            'Accept': 'application/json'
-          },
-          withCredentials: true
-        });
-        
-        // Use axios instead of fetch
-        const fetchResponse = await axios.post(`${config.apiUrl}/causes`, formDataToSend, {
-          headers: {
-            'Authorization': token ? `Bearer ${token}` : '',
-            // Note: Do not set Content-Type when sending FormData
-            // Axios will set it automatically with the correct boundary
-            'Accept': 'application/json'
-          },
-          withCredentials: true // This enables sending cookies with cross-origin requests
-        });
-        
-        // Log the response details for debugging
-        console.log('Response status:', fetchResponse.status);
-        console.log('Response headers:', fetchResponse.headers);
-        console.log('Response data:', fetchResponse.data);
-        
-        // With axios, the response is already parsed as JSON
-        // and status codes are handled automatically
-        
-        // Convert to a format compatible with our existing code
-        response = {
-          status: fetchResponse.status,
-          data: fetchResponse.data
-        };
-        
-        console.log('API response:', response);
-      } catch (error) {
-        console.error('Error sending request:', error);
-        toast({
-          title: 'Connection Error',
-          description: 'Could not connect to the server. Please try again later.',
-          variant: 'destructive'
-        });
-        setIsSubmitting(false);
-        return;
+      const data = await response.json();
+      
+      if (!response.ok) {
+        if (response.status === 500) {
+          throw new Error('Server error. Please try again later.');
+        }
+        throw new Error(data.message || 'Failed to create cause');
       }
       
-      if (response && response.status === 201) {
-        toast({
-          title: 'Cause Created!',
-          description: 'Your cause has been submitted for review. You will be notified once it\'s approved.'
-        });
-        
-        // Navigate to the cause detail page or causes list
-        navigate('/causes');
-      }
+      toast({
+        title: 'Success',
+        description: 'Cause created successfully!'
+      });
+      
+      navigate('/causes');
+      
     } catch (error: any) {
       console.error('Error creating cause:', error);
-      
-      // Log detailed error information for debugging
-      console.error('Error details:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        headers: error.response?.headers,
-        config: error.config
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to create cause. Please try again.',
+        variant: 'destructive'
       });
-      
-      // Handle different types of errors
-      if (error.message.includes('Network Error') || error.message.includes('CORS')) {
-        toast({
-          title: 'CORS Error',
-          description: 'There was a cross-origin request issue. Please try again or contact support.',
-          variant: 'destructive'
-        });
-      } else if (error.response?.status === 401) {
-        toast({
-          title: 'Authentication Error',
-          description: 'You must be logged in to create a cause. Please log in and try again.',
-          variant: 'destructive'
-        });
-        // Redirect to login page
-        navigate('/login');
-      } else if (error.response?.status === 400) {
-        toast({
-          title: 'Validation Error',
-          description: error.response.data.message || 'Please check your form inputs and try again.',
-          variant: 'destructive'
-        });
-      } else {
-        toast({
-          title: 'Error',
-          description: error.response?.data?.message || 'Failed to create cause. Please try again.',
-          variant: 'destructive'
-        });
-      }
     } finally {
       setIsSubmitting(false);
     }
@@ -333,7 +241,7 @@ const CreateCause = () => {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="targetAmount">Target Amount (USD) *</Label>
+                  <Label htmlFor="targetAmount">Target Amount (₹) *</Label>
                   <Input
                     id="targetAmount"
                     type="number"

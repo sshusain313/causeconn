@@ -1,11 +1,47 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Claim, { ClaimStatus } from '../models/claims';
 
 // Create a new claim
 export const createClaim = async (req: Request, res: Response): Promise<void> => {
   try {
     const claimData = req.body;
+    
+    // Check if user has already claimed a tote for this cause
+    const existingClaim = await Claim.findOne({
+      email: claimData.email,
+      causeId: claimData.causeId
+    });
+    
+    if (existingClaim) {
+      res.status(400).json({
+        message: 'You have already claimed a tote for this cause. Each user can claim only one tote per cause.'
+      });
+      return;
+    }
+    
+    // Check if there are available totes for this cause
+    const Cause = mongoose.model('Cause');
+    const cause = await Cause.findById(claimData.causeId);
+    
+    if (!cause) {
+      res.status(404).json({ message: 'Cause not found' });
+      return;
+    }
+    
+    if (cause.availableTotes <= 0) {
+      res.status(400).json({ message: 'No totes available for this cause' });
+      return;
+    }
+    
+    // Create the claim
     const claim = await Claim.create(claimData);
+    
+    // Update the cause's available totes count
+    await Cause.findByIdAndUpdate(claimData.causeId, {
+      $inc: { claimedTotes: 1, availableTotes: -1 }
+    });
+    
     res.status(201).json(claim);
   } catch (error) {
     console.error('Error creating claim:', error);
@@ -82,6 +118,31 @@ export const updateClaimStatus = async (req: Request, res: Response): Promise<vo
   } catch (error) {
     console.error('Error updating claim status:', error);
     res.status(500).json({ message: 'Error updating claim status' });
+  }
+};
+
+// Check if a user has already claimed a tote for a specific cause
+export const checkExistingClaim = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, causeId } = req.query;
+    
+    if (!email || !causeId) {
+      res.status(400).json({ message: 'Email and causeId are required' });
+      return;
+    }
+    
+    const existingClaim = await Claim.findOne({
+      email: email as string,
+      causeId: causeId as string
+    });
+    
+    res.status(200).json({
+      exists: !!existingClaim,
+      message: existingClaim ? 'User has already claimed a tote for this cause' : 'No existing claim found'
+    });
+  } catch (error) {
+    console.error('Error checking existing claim:', error);
+    res.status(500).json({ message: 'Error checking existing claim' });
   }
 };
 

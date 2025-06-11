@@ -62,8 +62,17 @@ const AdminLayout = ({ children, title, subtitle, loading = false }: AdminLayout
     navigate('/login');
   };
 
-  if (!user || user.role !== 'admin') {
-    navigate('/login');
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    if (!user || user.role !== 'admin') {
+      navigate('/login');
+    } else {
+      setIsLoading(false);
+    }
+  }, [user, navigate]);
+
+  if (isLoading) {
     return null;
   }
 

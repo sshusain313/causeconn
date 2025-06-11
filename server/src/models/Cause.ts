@@ -14,12 +14,15 @@ export interface ICause extends Document {
   title: string;
   description: string;
   imageUrl: string;
+  adminImageUrl?: string;
+  totePreviewImageUrl?: string;
+  images?: string[];
   targetAmount: number;
   currentAmount: number;
   creator: mongoose.Types.ObjectId | IUser;
   status: CauseStatus;
   startDate: Date;
-  location: string;
+  location?: string;
   category: string;
   createdAt: Date;
   updatedAt: Date;
@@ -29,6 +32,8 @@ export interface ICause extends Document {
   totalTotes?: number;
   claimedTotes?: number;
   availableTotes?: number;
+  distributionStartDate?: Date;
+  distributionEndDate?: Date;
 }
 
 const causeSchema = new Schema<ICause>(
@@ -43,6 +48,14 @@ const causeSchema = new Schema<ICause>(
       required: true
     },
     imageUrl: {
+      type: String,
+      default: ''
+    },
+    adminImageUrl: {
+      type: String,
+      default: ''
+    },
+    totePreviewImageUrl: {
       type: String,
       default: ''
     },
@@ -82,6 +95,16 @@ const causeSchema = new Schema<ICause>(
     isOnline: {
       type: Boolean,
       default: false
+    },
+    images: {
+      type: [String],
+      default: []
+    },
+    distributionStartDate: {
+      type: Date
+    },
+    distributionEndDate: {
+      type: Date
     }
   },
   {

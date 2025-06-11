@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getApiUrl } from '@/utils/apiUtils';
 import { User, UserRole } from '@/types';
 import config from '@/config';
 
@@ -46,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // For testing with the real backend
       try {
         // Make a real API call to get a token
-        const response = await fetch(`${config.apiUrl}/auth/login`, {
+        const response = await fetch(getApiUrl('/auth/login'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -142,7 +143,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         console.log('Registering user with API:', { email, name, password, role });
         
-        const response = await fetch(`${config.apiUrl}/auth/register`, {
+        const response = await fetch(getApiUrl('/auth/register'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
