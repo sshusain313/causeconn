@@ -22,6 +22,8 @@ app.use((express as any).json({ limit: '10mb' }));
 app.use((express as any).urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 // Configure CORS to allow requests from the frontend domain
+// Comment out or remove this section
+/*
 app.use(cors({
   origin: (origin, callback) => {
     const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
@@ -48,6 +50,7 @@ app.use(cors({
   optionsSuccessStatus: 204,
   maxAge: 86400 // Cache preflight response for 24 hours
 }));
+*/
 
 // Add CORS headers to all responses with improved preflight handling
 app.use((req, res, next) => {
