@@ -19,15 +19,30 @@ const isProduction = import.meta.env.PROD || window.location.hostname === 'chang
 const apiDomain = isProduction ? 'https://api.changebag.org' : 'http://localhost:5000';
 
 const config: Config = {
-
-
-
   apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   uploadsUrl: import.meta.env.VITE_UPLOADS_URL || 'http://localhost:5000/uploads',
   frontendUrl: 'http://localhost:8085',
   isProduction
 };
 
+// Helper function to get the full image URL
+export function getFullImageUrl(path: string): string {
+  // If the path is already an absolute URL, return it as-is
+  if (/^(http|https):\/\//i.test(path)) {
+    return path;
+  }
+
+  // Otherwise, assume it's a relative path and prepend the API URL
+  return `${config.apiUrl}${path}`;
+}
+
+// Debug function to log API URL and uploads URL
+export function debugConfig() {
+  console.log('API URL:', config.apiUrl);
+  console.log('Uploads URL:', config.uploadsUrl);
+}
+
+// Log the current configuration for debugging
 console.log('App config:', { 
   isProduction, 
   apiUrl: config.apiUrl, 

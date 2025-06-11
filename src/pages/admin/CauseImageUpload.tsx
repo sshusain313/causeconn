@@ -160,71 +160,75 @@ const CauseImageUpload = () => {
   };
 
   const handleUpload = async () => {
-
-      if (!preview) {
-        toast({
-          title: "Preview Error",
-          description: "Failed to load image preview",
-          variant: "destructive"
-        });
-        return;
-      }
+    if (!preview) {
+      toast({
+        title: "Preview Error",
+        description: "Failed to load image preview",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setUploading(true);
     try {
       const formData = new FormData();
 
-      // Handle file upload
+      // Handle file upload vs URL
       if (preview.startsWith('data:') || preview.startsWith('blob:')) {
+        // For file uploads, convert canvas to blob
+        const canvas = previewCanvasRef.current;
+        if (!canvas) throw new Error('Canvas not found');
+        
+        canvas.toBlob(async (blob) => {
+          if (!blob) throw new Error('Failed to create blob from image');
+          
+          formData.append('image', blob, 'image.jpg');
+          await uploadToServer(formData);
+        }, 'image/jpeg', 0.95);
+      } else {
+        // For URLs, fetch the image first and then upload as blob
         const response = await fetch(preview);
         const blob = await response.blob();
-        formData.append('image', blob, 'cause-image.jpg');
-      } else {
-        formData.append('imageUrl', preview);
-      }
-
-      // Add cause ID
-      formData.append('causeId', id || '');
-
-      // Update endpoint to match backend structure
-      const uploadEndpoint = `${config.apiUrl}/causes/${id}/upload-image`;
-      console.log('Uploading to:', uploadEndpoint);
-
-      const response = await axios.post(
-        uploadEndpoint,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json'
-          }
-        }
-      );
-
-      if (response.data?.success) {
-        toast({
-          title: "Success",
-          description: "Image uploaded successfully"
-        });
-        navigate('/admin/causes');
+        formData.append('image', blob, 'image.jpg');
+        await uploadToServer(formData);
       }
     } catch (error: any) {
-      console.error('Upload error:', {
-        message: error.message,
-        status: error.response?.status,
-        endpoint: error.config?.url
-      });
-
+      console.error('Upload error:', error);
       toast({
         title: "Upload Failed",
-        description: error.response?.status === 404
-          ? "Upload service not available. Please contact support."
-          : "Failed to upload image. Please try again.",
+        description: error.message || "Failed to upload image. Please try again.",
         variant: "destructive"
       });
     } finally {
       setUploading(false);
+    }
+  };
+
+  const uploadToServer = async (formData: FormData) => {
+    const response = await fetch(`${config.apiUrl}/causes/${id}/upload-image`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        // Remove Content-Type header to let browser set it with boundary
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.message || `Upload failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.success || data.adminImageUrl) {
+      toast({
+        title: "Success",
+        description: "Image uploaded successfully"
+      });
+      navigate('/admin/causes');
+    } else {
+      throw new Error('Invalid response from server');
     }
   };
 
@@ -237,64 +241,15 @@ const CauseImageUpload = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
-    canvas.width = 400;
-    canvas.height = 400;
+    // Set canvas size while maintaining aspect ratio
+    const maxWidth = 400;
+    const maxHeight = 400;
+    const scale = Math.min(maxWidth / img.width, maxHeight / img.height);
+    canvas.width = img.width * scale;
+    canvas.height = img.height * scale;
 
-    // Draw tote bag image first
-    const toteBag = new Image();
-    toteBag.src = '/totebag.png';
-    
-    toteBag.onload = () => {
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw tote bag centered
-      const bagScale = Math.min(canvas.width / toteBag.width, canvas.height / toteBag.height) * 0.9;
-      const bagX = (canvas.width - toteBag.width * bagScale) / 2;
-      const bagY = (canvas.height - toteBag.height * bagScale) / 2;
-      
-      // Draw the totebag
-      ctx.drawImage(toteBag, bagX, bagY, toteBag.width * bagScale, toteBag.height * bagScale);
-
-      // Calculate printable area (60% of totebag size)
-      const printableWidth = toteBag.width * bagScale * 0.6;
-      const printableHeight = toteBag.height * bagScale * 0.6;
-
-      // Scale the uploaded image to fit printable area
-      const imageScale = Math.min(
-        printableWidth / img.width,
-        printableHeight / img.height
-      ) * 0.8; // 80% of printable area
-
-      const scaledWidth = img.width * imageScale;
-      const scaledHeight = img.height * imageScale;
-
-      // Center the image on the totebag
-      const imageX = bagX + (toteBag.width * bagScale - scaledWidth) / 2;
-      const imageY = bagY + (toteBag.height * bagScale - scaledHeight) / 2;
-
-      // Draw the uploaded image
-      ctx.drawImage(img, imageX, imageY, scaledWidth, scaledHeight);
-
-      // Debug rectangles to show printable area (uncomment to debug)
-      // ctx.strokeStyle = 'red';
-      // ctx.strokeRect(
-      //   bagX + (toteBag.width * bagScale - printableWidth) / 2,
-      //   bagY + (toteBag.height * bagScale - printableHeight) / 2,
-      //   printableWidth,
-      //   printableHeight
-      // );
-    };
-
-    toteBag.onerror = (error) => {
-      console.error('Error loading totebag image:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load preview template",
-        variant: "destructive"
-      });
-    };
+    // Draw the uploaded image
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   };
 
   // Add previewImageRef onError handler
@@ -396,7 +351,7 @@ const CauseImageUpload = () => {
                   <div className="border rounded-lg p-4 bg-gray-50">
                     <canvas
                       ref={previewCanvasRef}
-                      className="w-full h-auto max-h-64 mx-auto"
+                      className="max-w-full h-auto mx-auto"
                     />
                   </div>
                 </div>

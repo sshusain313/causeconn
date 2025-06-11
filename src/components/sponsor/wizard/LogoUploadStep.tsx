@@ -86,6 +86,10 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
   // Admin logo state
   const [adminLogoLoaded, setAdminLogoLoaded] = useState(false);
 
+  // Add new state for admin canvas
+  const [adminCanvasSize] = useState({ width: 400, height: 400 });
+  const [isAdminImageLoading, setIsAdminImageLoading] = useState(true);
+
   // Debug logging for admin image
   useEffect(() => {
     console.log('=== Admin Logo Debug ===');
@@ -98,7 +102,41 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
   // Get the effective admin image URL
   const effectiveAdminImageUrl = selectedCauseData?.adminImageUrl;
 
-  // Draw user logo canvas
+  // Function to draw logo on canvas
+  const drawLogo = (ctx: CanvasRenderingContext2D, logo: HTMLImageElement, pos: { x: number, y: number, scale: number, angle: number }) => {
+    ctx.save();
+
+    // Move to position and apply transformations
+    ctx.translate(pos.x, pos.y);
+    ctx.rotate(pos.angle * Math.PI / 180);
+    ctx.scale(pos.scale, pos.scale);
+
+    // Draw logo centered
+    const width = logo.width;
+    const height = logo.height;
+    ctx.drawImage(logo, -width / 2, -height / 2, width, height);
+
+    ctx.restore();
+  };
+
+  // Function to draw admin image on canvas
+  const drawAdminImage = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, canvasWidth: number, canvasHeight: number) => {
+    // Calculate scale to fit image within canvas while preserving aspect ratio
+    // Reduced from 0.8 to 0.5 for smaller size
+    const scale = Math.min(
+      canvasWidth / img.width,
+      canvasHeight / img.height
+    ) * 0.5; // 50% of canvas size instead of 80%
+
+    // Calculate centered position
+    const x = (canvasWidth - img.width * scale) / 2;
+    const y = (canvasHeight - img.height * scale) / 2;
+
+    // Draw the admin image
+    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+  };
+
+  // Update canvas drawing effect
   useEffect(() => {
     const canvas = userLogoCanvasRef.current;
     if (!canvas) return;
@@ -127,6 +165,11 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
       const y = (canvas.height - toteBag.height * scale) / 2;
       ctx.drawImage(toteBag, x, y, toteBag.width * scale, toteBag.height * scale);
 
+      // Draw admin image if available
+      if (selectedCauseData?.adminImageUrl && adminLogoRef.current) {
+        drawAdminImage(ctx, adminLogoRef.current, canvas.width, canvas.height);
+      }
+
       // Draw user logo if available
       if (userLogoPreview && userLogoRef.current) {
         drawLogo(ctx, userLogoRef.current, logoPosition);
@@ -134,49 +177,103 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
     };
 
     toteBag.onerror = (error) => {
-      console.error('Error loading totebag image for user logo canvas:', error);
+      console.error('Error loading totebag image:', error);
     };
-  }, [userLogoPreview, logoPosition]);
+  }, [userLogoPreview, logoPosition, selectedCauseData?.adminImageUrl]);
 
-  // Draw admin logo canvas
+  // Function to get correct image URL
+  const getFullImageUrl = (imageUrl: string): string => {
+    if (!imageUrl) return '';
+    
+    // If it's already a full URL (http/https), return as is
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    
+    // If it's a server-side uploads path
+    if (imageUrl.startsWith('/uploads/')) {
+      return `${config.uploadsUrl}${imageUrl.replace('/uploads', '')}`;
+    }
+
+    // If it's an absolute path to the uploads directory
+    if (imageUrl.includes('/uploads/') || imageUrl.includes('\\uploads\\')) {
+      // Extract just the filename from the path
+      const filename = imageUrl.split(/[\/\\]/).pop();
+      return `${config.uploadsUrl}/${filename}`;
+    }
+    
+    // For relative paths, append to API URL
+    return `${config.apiUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+  };
+
+  // Update admin logo loading effect with canvas drawing
   useEffect(() => {
     const canvas = adminLogoCanvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !selectedCauseData?.adminImageUrl) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
-    canvas.width = 400;
-    canvas.height = 400;
+    // Set fixed canvas size
+    canvas.width = adminCanvasSize.width;
+    canvas.height = adminCanvasSize.height;
 
-    // Clear canvas first
+    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw tote bag image
+    // Start loading sequence
+    setIsAdminImageLoading(true);
+
+    // Load and draw tote bag first
     const toteBag = new Image();
     toteBag.src = '/totebag.png';
 
     toteBag.onload = () => {
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw tote bag centered and scaled
+      const toteBagScale = Math.min(canvas.width / toteBag.width, canvas.height / toteBag.height) * 0.9;
+      const toteBagX = (canvas.width - toteBag.width * toteBagScale) / 2;
+      const toteBagY = (canvas.height - toteBag.height * toteBagScale) / 2;
+      ctx.drawImage(toteBag, toteBagX, toteBagY, toteBag.width * toteBagScale, toteBag.height * toteBagScale);
 
-      // Draw tote bag centered
-      const scale = Math.min(canvas.width / toteBag.width, canvas.height / toteBag.height) * 0.9;
-      const x = (canvas.width - toteBag.width * scale) / 2;
-      const y = (canvas.height - toteBag.height * scale) / 2;
-      ctx.drawImage(toteBag, x, y, toteBag.width * scale, toteBag.height * scale);
+      // Now load and draw admin image
+      const adminImg = new Image();
+      const fullImageUrl = getFullImageUrl(selectedCauseData.adminImageUrl);
+      
+      console.log('[DEBUG] Admin Image - Attempting to load from:', fullImageUrl);
+      
+      adminImg.onload = () => {
+        // Calculate scale to fit admin image within canvas
+        const scale = Math.min(
+          canvas.width / adminImg.width,
+          canvas.height / adminImg.height
+        ) * 0.4; // 40% of canvas size
 
-      // Draw admin logo if available
-      if (effectiveAdminImageUrl && adminLogoRef.current) {
-        drawLogo(ctx, adminLogoRef.current, { x: 200, y: 200, scale: 0.3, angle: 0 });
-      }
+        // Calculate centered position with offset for y to move image down
+        const x = (canvas.width - adminImg.width * scale) / 2;
+        const y = ((canvas.height - adminImg.height * scale) / 2) + 80; // Added +50 to move down
+
+        // Draw the admin image on top
+        ctx.drawImage(adminImg, x, y, adminImg.width * scale, adminImg.height * scale);
+        
+        console.log('[DEBUG] Admin Image - Successfully loaded and drawn');
+        setIsAdminImageLoading(false);
+        setAdminLogoLoaded(true);
+      };
+
+      adminImg.onerror = (error) => {
+        console.error('[DEBUG] Admin Image - Failed to load from:', fullImageUrl, error);
+        setIsAdminImageLoading(false);
+        setAdminLogoLoaded(false);
+      };
+
+      adminImg.src = fullImageUrl;
     };
 
     toteBag.onerror = (error) => {
-      console.error('Error loading totebag image for admin logo canvas:', error);
+      console.error('Error loading tote bag:', error);
+      setIsAdminImageLoading(false);
     };
-  }, [effectiveAdminImageUrl, adminLogoLoaded]);
+  }, [selectedCauseData?.adminImageUrl, adminCanvasSize]);
 
   // Load user logo image when URL changes
   useEffect(() => {
@@ -200,62 +297,6 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
       console.error('Error loading user logo image:', error);
     };
   }, [userLogoPreview]);
-
-  // Load admin logo image when available
-  useEffect(() => {
-    console.log('=== Admin Logo Loading Effect ===');
-    console.log('Effective Admin Image URL:', effectiveAdminImageUrl);
-    
-    // Reset loaded state when URL changes
-    setAdminLogoLoaded(false);
-    
-    if (!effectiveAdminImageUrl) {
-      console.log('No admin image URL available');
-      return;
-    }
-
-    const adminImg = new Image();
-    // Handle server-side URLs
-    if (effectiveAdminImageUrl.startsWith('/uploads/')) {
-      adminImg.src = `${config.uploadsUrl}${effectiveAdminImageUrl.replace('/uploads', '')}`;
-    } else if (effectiveAdminImageUrl.startsWith('http')) {
-      adminImg.src = effectiveAdminImageUrl;
-    } else {
-      adminImg.src = effectiveAdminImageUrl.startsWith('/') 
-        ? `${config.apiUrl}${effectiveAdminImageUrl}` 
-        : effectiveAdminImageUrl;
-    }
-
-    console.log('Loading admin image from:', adminImg.src);
-
-    adminImg.onload = () => {
-      console.log('Admin logo image loaded successfully');
-      adminLogoRef.current = adminImg;
-      setAdminLogoLoaded(true);
-    };
-
-    adminImg.onerror = (error) => {
-      console.error('Error loading admin logo image:', error);
-      console.error('Failed URL:', adminImg.src);
-    };
-  }, [effectiveAdminImageUrl]);
-
-  // Function to draw logo on canvas
-  const drawLogo = (ctx: CanvasRenderingContext2D, logo: HTMLImageElement, pos: { x: number, y: number, scale: number, angle: number }) => {
-    ctx.save();
-
-    // Move to position and apply transformations
-    ctx.translate(pos.x, pos.y);
-    ctx.rotate(pos.angle * Math.PI / 180);
-    ctx.scale(pos.scale, pos.scale);
-
-    // Draw logo centered
-    const width = logo.width;
-    const height = logo.height;
-    ctx.drawImage(logo, -width / 2, -height / 2, width, height);
-
-    ctx.restore();
-  };
 
   // Mouse event handlers for user logo dragging
   const handleUserLogoMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -319,83 +360,83 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
       // First, show a preview of the selected image
       const reader = new FileReader();
 
-      reader.onload = async (event) => {
-        if (!event.target?.result) {
-          throw new Error('Failed to read file');
-        }
+              reader.onload = async (event) => {
+                if (!event.target?.result) {
+                  throw new Error('Failed to read file');
+                }
 
-        // Use the data URL as the preview temporarily
-        const dataUrl = event.target.result as string;
-        console.log('Logo loaded as data URL for preview');
+                // Use the data URL as the preview temporarily
+                const dataUrl = event.target.result as string;
+                console.log('Logo loaded as data URL for preview');
 
-        try {
-          // Compress the image before uploading to server
-          const compressedDataUrl = await compressImage(dataUrl, file.type, 400, 0.5);
-          console.log('Original size:', Math.round(dataUrl.length / 1024), 'KB');
-          console.log('Compressed size:', Math.round(compressedDataUrl.length / 1024), 'KB');
+                try {
+                  // Compress the image before uploading to server - reduced scale for smaller display
+                  const compressedDataUrl = await compressImage(dataUrl, file.type, 300, 0.4);
+                  console.log('Original size:', Math.round(dataUrl.length / 1024), 'KB');
+                  console.log('Compressed size:', Math.round(compressedDataUrl.length / 1024), 'KB');
 
-          // Create a FormData object to send the file to the server
-          const formData = new FormData();
+                  // Create a FormData object to send the file to the server
+                  const formData = new FormData();
 
-          // Convert the compressed data URL back to a Blob
-          const byteString = atob(compressedDataUrl.split(',')[1]);
-          const mimeType = compressedDataUrl.split(',')[0].split(':')[1].split(';')[0];
-          const ab = new ArrayBuffer(byteString.length);
-          const ia = new Uint8Array(ab);
+                  // Convert the compressed data URL back to a Blob
+                  const byteString = atob(compressedDataUrl.split(',')[1]);
+                  const mimeType = compressedDataUrl.split(',')[0].split(':')[1].split(';')[0];
+                  const ab = new ArrayBuffer(byteString.length);
+                  const ia = new Uint8Array(ab);
 
-          for (let i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-          }
+                  for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                  }
 
-          const blob = new Blob([ab], { type: mimeType });
-          formData.append('logo', blob, file.name);
+                  const blob = new Blob([ab], { type: mimeType });
+                  formData.append('logo', blob, file.name);
 
-          // Upload to server
-          console.log('Uploading logo to server...');
-          const response = await axios.post(`${config.apiUrl}/upload/logo`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
+                  // Upload to server
+                  console.log('Uploading logo to server...');
+                  const response = await axios.post(`${config.apiUrl}/upload/logo`, formData, {
+                    headers: {
+                      'Content-Type': 'multipart/form-data',
+                    },
+                  });
 
-          console.log('Server response:', response.data);
+                  console.log('Server response:', response.data);
 
-          if (response.data && response.data.url) {
-            // Use the server-provided URL
-            const logoUrl = response.data.url;
-            console.log('Logo uploaded successfully, server URL:', logoUrl);
+                  if (response.data && response.data.url) {
+                    // Use the server-provided URL
+                    const logoUrl = response.data.url;
+                    console.log('Logo uploaded successfully, server URL:', logoUrl);
 
-            // Set the preview to the compressed data URL for immediate display
-            setUserLogoPreview(compressedDataUrl);
+                    // Set the preview to the compressed data URL for immediate display
+                    setUserLogoPreview(compressedDataUrl);
 
-            // But save the server URL to the form data
-            updateFormData({ logoUrl });
+                    // But save the server URL to the form data
+                    updateFormData({ logoUrl });
 
-            // Reset position for new logo
-            const newPosition = { x: 200, y: 280, scale: 0.25, angle: 0 };
-            setLogoPosition(newPosition);
-            updateFormData({ logoPosition: newPosition });
-          } else {
-            throw new Error('Invalid server response');
-          }
-        } catch (uploadError) {
-          console.error('Error uploading logo to server:', uploadError);
+                    // Reset position for new logo with smaller scale
+                    const newPosition = { x: 200, y: 280, scale: 0.15, angle: 0 };
+                    setLogoPosition(newPosition);
+                    updateFormData({ logoPosition: newPosition });
+                  } else {
+                    throw new Error('Invalid server response');
+                  }
+                } catch (uploadError) {
+                  console.error('Error uploading logo to server:', uploadError);
 
-          // Fall back to client-side approach if server upload fails
-          console.log('Falling back to client-side approach');
-          setUserLogoPreview(dataUrl);
-          updateFormData({ logoUrl: dataUrl });
+                  // Fall back to client-side approach if server upload fails
+                  console.log('Falling back to client-side approach');
+                  setUserLogoPreview(dataUrl);
+                  updateFormData({ logoUrl: dataUrl });
 
-          // Reset position for new logo
-          const newPosition = { x: 200, y: 280, scale: 0.25, angle: 0 };
-          setLogoPosition(newPosition);
-          updateFormData({ logoPosition: newPosition });
+                  // Reset position for new logo with smaller scale
+                  const newPosition = { x: 200, y: 280, scale: 0.15, angle: 0 };
+                  setLogoPosition(newPosition);
+                  updateFormData({ logoPosition: newPosition });
 
-          setError('Could not upload to server. Using local preview instead.');
-        }
+                  setError('Could not upload to server. Using local preview instead.');
+                }
 
-        setUploading(false);
-      };
+                setUploading(false);
+              };
 
       reader.onerror = () => {
         console.error('Error reading file');
@@ -498,30 +539,21 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
 
   // Inside the LogoUploadStep component, add this debugging function
   const debugImageLoading = (imageUrl: string | undefined, source: string) => {
-    console.log(`[DEBUG] ${source} - Image URL:`, imageUrl);
     if (!imageUrl) {
       console.log(`[DEBUG] ${source} - No image URL provided`);
       return;
     }
 
-    // Test image loading
+    const fullUrl = getFullImageUrl(imageUrl);
+    console.log(`[DEBUG] ${source} - Attempting to load from:`, fullUrl);
+    
     const testImg = new Image();
     testImg.onload = () => {
-      console.log(`[DEBUG] ${source} - Successfully loaded image from:`, imageUrl);
+      console.log(`[DEBUG] ${source} - Successfully loaded image from:`, fullUrl);
     };
     testImg.onerror = (err) => {
-      console.error(`[DEBUG] ${source} - Failed to load image from:`, imageUrl, err);
+      console.error(`[DEBUG] ${source} - Failed to load image from:`, fullUrl, err);
     };
-
-    // Determine the correct URL to use
-    let fullUrl = imageUrl;
-    if (imageUrl.startsWith('/uploads/')) {
-      fullUrl = `${config.uploadsUrl}${imageUrl.replace('/uploads', '')}`;
-    } else if (!imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
-      fullUrl = `${config.apiUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
-    }
-    
-    console.log(`[DEBUG] ${source} - Attempting to load from:`, fullUrl);
     testImg.src = fullUrl;
   };
 
@@ -532,33 +564,38 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
     // Rest of your existing code...
   }, [effectiveAdminImageUrl]);
 
-  // Add this to your render function to show a fallback message when admin image fails to load
+  // Update the render function for admin preview
   const renderAdminPreview = () => {
     if (!formData.selectedCause) {
       return (
-        <div className="flex items-center justify-center h-full">
+        <div className="flex items-center justify-center h-full min-h-[400px] bg-gray-50 rounded-lg">
           <p className="text-gray-400">No cause selected</p>
         </div>
       );
     }
     
-    if (!effectiveAdminImageUrl) {
+    if (!selectedCauseData?.adminImageUrl) {
       return (
-        <div className="flex items-center justify-center h-full">
+        <div className="flex items-center justify-center h-full min-h-[400px] bg-gray-50 rounded-lg">
           <p className="text-gray-400">No admin image available for this cause</p>
         </div>
       );
     }
     
     return (
-      <div className="relative border rounded-lg overflow-hidden">
+      <div className="relative border rounded-lg overflow-hidden bg-gray-50">
         <canvas 
-          ref={adminLogoCanvasRef} 
-          className="w-full h-auto" 
+          ref={adminLogoCanvasRef}
+          width={adminCanvasSize.width}
+          height={adminCanvasSize.height}
+          className="w-full h-auto"
         />
-        {!adminLogoLoaded && (
+        {isAdminImageLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-70">
-            <p className="text-gray-600">Loading admin image...</p>
+            <div className="flex flex-col items-center gap-2">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-gray-600">Loading preview...</p>
+            </div>
           </div>
         )}
       </div>
@@ -725,19 +762,16 @@ const LogoUploadStep = ({ formData, updateFormData }: LogoUploadStepProps) => {
                     ref={adminLogoCanvasRef} 
                     className="w-full h-auto" 
                   />
-                  {!effectiveAdminImageUrl && (
+                  {!selectedCauseData?.adminImageUrl && (
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75">
                       <p className="text-gray-500 text-sm text-center">
-                        {formData.selectedCause 
-                          ? "No admin logo available for this cause" 
-                          : "Select a cause to see admin logo"
-                        }
+                        Select a cause to see admin logo
                       </p>
                     </div>
                   )}
                 </div>
                 
-                {effectiveAdminImageUrl && (
+                {selectedCauseData?.adminImageUrl && (
                   <div className="mt-3 p-3 bg-blue-50 rounded-md">
                     <p className="text-sm text-blue-800">
                       Admin logo for "{selectedCauseData?.title}"

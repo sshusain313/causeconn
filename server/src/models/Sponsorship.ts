@@ -15,82 +15,54 @@ export enum DistributionType {
   PHYSICAL = 'physical'
 }
 
-export interface IDistributionPoint {
-  name: string;
-  address: string;
-  contactPerson: string;
-  phone: string;
-  location?: string;
-  totesCount?: number;
-  coordinates?: {
-    latitude: number;
-    longitude: number;
-  };
-  openingHours?: string;
-  distributionInstructions?: string;
-  accessibilityInfo?: string;
-  photoUrl?: string;
+interface ILogoPosition {
+  x: number;
+  y: number;
+  scale: number;
+  angle: number;
 }
 
-export interface IDemographics {
+interface IDistributionLocation {
+  name: {
+    name: string;
+    address: string;
+    contactPerson: string;
+    phone: string;
+    location: string;
+    totesCount: number;
+  };
+  type: string;
+  totesCount: number;
+}
+
+interface IDemographics {
   ageGroups: string[];
   income: string;
   education: string;
   other: string;
 }
 
-export enum DistributionLocationType {
-  MALL = 'mall',
-  METRO_STATION = 'metro_station',
-  AIRPORT = 'airport',
-  SCHOOL = 'school',
-  OTHER = 'other'
-}
-
-export interface IDistributionLocation {
-  name: string;
-  type: string; // Use string instead of enum for better compatibility
-  address?: string;
-  totesCount?: number;
-  contactPerson?: string;
-  phone?: string;
-  openingHours?: string;
-  distributionInstructions?: string;
-}
-
-export interface IPhysicalDistributionDetails {
-  shippingAddress?: string;
-  shippingContactName?: string;
-  shippingPhone?: string;
-  shippingInstructions?: string;
-  trackingNumber?: string;
-  shippingProvider?: string;
-  estimatedDeliveryDate?: Date;
-  deliveryConfirmation?: boolean;
-  deliverySignature?: string;
-  deliveryDate?: Date;
-  distributionLocations?: IDistributionLocation[];
-}
-
 export interface ISponsorship extends Document {
   cause: mongoose.Types.ObjectId | ICause;
+  selectedCause?: string;
   organizationName: string;
   contactName: string;
   email: string;
   phone: string;
   toteQuantity: number;
+  numberOfTotes: number;
   unitPrice: number;
   totalAmount: number;
   logoUrl: string;
   mockupUrl?: string;
   message: string;
   distributionType: DistributionType;
-  distributionPoints: IDistributionPoint[];
+  selectedCities: string[];
   distributionStartDate: Date;
   distributionEndDate: Date;
-  distributionDate?: Date; // Keeping for backward compatibility
-  physicalDistributionDetails?: IPhysicalDistributionDetails;
+  distributionLocations: IDistributionLocation[];
   demographics: IDemographics;
+  logoPosition: ILogoPosition;
   status: SponsorshipStatus;
   approvedBy?: mongoose.Types.ObjectId | IUser;
   approvedAt?: Date;
@@ -105,6 +77,10 @@ const sponsorshipSchema = new Schema<ISponsorship>(
       type: Schema.Types.ObjectId,
       ref: 'Cause',
       required: true
+    },
+    selectedCause: {
+      type: String,
+      required: false
     },
     organizationName: {
       type: String,
@@ -125,28 +101,29 @@ const sponsorshipSchema = new Schema<ISponsorship>(
     toteQuantity: {
       type: Number,
       required: true,
-      min: 1,
-      default: 50
+      min: 1
+    },
+    numberOfTotes: {
+      type: Number,
+      required: true,
+      min: 1
     },
     unitPrice: {
       type: Number,
       required: true,
-      min: 0,
-      default: 10
+      min: 0
     },
     totalAmount: {
       type: Number,
       required: true,
-      min: 0,
-      default: 0
+      min: 0
     },
     logoUrl: {
       type: String,
       required: true
     },
     mockupUrl: {
-      type: String,
-      required: false
+      type: String
     },
     message: {
       type: String,
@@ -155,46 +132,12 @@ const sponsorshipSchema = new Schema<ISponsorship>(
     distributionType: {
       type: String,
       enum: Object.values(DistributionType),
-      default: DistributionType.ONLINE
+      required: true
     },
-    distributionPoints: [{
-      name: String,
-      address: String,
-      contactPerson: String,
-      phone: String,
-      location: String,
-      totesCount: Number,
-      coordinates: {
-        latitude: Number,
-        longitude: Number
-      },
-      openingHours: String,
-      distributionInstructions: String,
-      accessibilityInfo: String,
-      photoUrl: String
+    selectedCities: [{
+      type: String,
+      required: true
     }],
-    physicalDistributionDetails: {
-      shippingAddress: String,
-      shippingContactName: String,
-      shippingPhone: String,
-      shippingInstructions: String,
-      trackingNumber: String,
-      shippingProvider: String,
-      estimatedDeliveryDate: Date,
-      deliveryConfirmation: Boolean,
-      deliverySignature: String,
-      deliveryDate: Date,
-      distributionLocations: [{
-        name: String,
-        type: String, // Simplified to just String type
-        address: String,
-        totesCount: Number,
-        contactPerson: String,
-        phone: String,
-        openingHours: String,
-        distributionInstructions: String
-      }]
-    },
     distributionStartDate: {
       type: Date,
       required: true
@@ -203,15 +146,29 @@ const sponsorshipSchema = new Schema<ISponsorship>(
       type: Date,
       required: true
     },
-    distributionDate: {
-      type: Date,
-      required: false
-    },
+    distributionLocations: [{
+      name: {
+        name: { type: String, required: true },
+        address: { type: String, required: true },
+        contactPerson: { type: String, required: true },
+        phone: { type: String, required: true },
+        location: { type: String, required: true },
+        totesCount: { type: Number, required: true }
+      },
+      type: { type: String, required: true },
+      totesCount: { type: Number, required: true }
+    }],
     demographics: {
       ageGroups: [String],
       income: String,
       education: String,
       other: String
+    },
+    logoPosition: {
+      x: { type: Number, required: true },
+      y: { type: Number, required: true },
+      scale: { type: Number, required: true },
+      angle: { type: Number, required: true }
     },
     status: {
       type: String,
@@ -239,7 +196,6 @@ sponsorshipSchema.index({ createdAt: 1 });
 
 // Calculate totalAmount before saving
 sponsorshipSchema.pre('save', function(next) {
-  // Calculate total amount if not already set
   if (!this.totalAmount && this.toteQuantity && this.unitPrice) {
     this.totalAmount = this.toteQuantity * this.unitPrice;
   }
@@ -249,10 +205,7 @@ sponsorshipSchema.pre('save', function(next) {
 // Update cause's currentAmount after sponsorship is saved
 sponsorshipSchema.post('save', async function() {
   try {
-    // Import Cause model
     const Cause = mongoose.model('Cause');
-    
-    // Update the cause's current amount
     if (this.cause) {
       await Cause.updateCauseAmount(this.cause);
     }
@@ -274,7 +227,6 @@ sponsorshipSchema.post('findOneAndUpdate', async function(doc) {
 });
 
 // Update cause's currentAmount after sponsorship is removed
-// Using findOneAndDelete instead of 'remove' which is deprecated
 sponsorshipSchema.post('findOneAndDelete', async function(doc) {
   try {
     if (doc && doc.cause) {
