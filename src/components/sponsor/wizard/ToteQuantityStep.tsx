@@ -11,9 +11,10 @@
     updateFormData: (data: Partial<{
       toteQuantity: number;
     }>) => void;
+    validationError: string | null;
   }
 
-  const ToteQuantityStep = ({ formData, updateFormData }: ToteQuantityStepProps) => {
+  const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQuantityStepProps) => {
     const handleSliderChange = (value: number[]) => {
       updateFormData({ toteQuantity: value[0] });
     };
@@ -46,6 +47,13 @@
     return (
       <div className="space-y-6">
         <h2 className="text-xl font-bold mb-4">Tote Quantity</h2>
+        
+        {validationError && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
+            {validationError}
+          </div>
+        )}
+        
         <p className="text-gray-600 mb-6">
           Select the quantity of totes you'd like to sponsor. The minimum quantity is 50 totes and the maximum is 10,000 totes. The unit price decreases as quantity increases.
         </p>

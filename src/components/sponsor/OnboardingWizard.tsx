@@ -24,6 +24,7 @@ const OnboardingWizard = ({
   const [currentStep, setCurrentStep] = useState(1);
   const [causeData, setCauseData] = useState<any>(null);
   const [claimedTotes, setClaimedTotes] = useState(0);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     organizationName: '',
     contactName: '',
@@ -306,16 +307,15 @@ const OnboardingWizard = ({
   };
 
   const nextStep = () => {
+    // Clear any existing validation errors
+    setValidationError(null);
+    
     const validation = validateCurrentStep();
     if (validation.isValid) {
       setCurrentStep(prev => Math.min(prev + 1, totalSteps));
     } else {
-      // Show validation error message using toast notification
-      toast({
-        title: "Form Validation Error",
-        description: validation.message || 'Please complete all required fields before continuing',
-        variant: "destructive"
-      });
+      // Set the validation error message to be displayed inline
+      setValidationError(validation.message || 'Please complete all required fields before continuing');
     }
   };
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
@@ -398,6 +398,7 @@ const OnboardingWizard = ({
               calculateTotalTotes() : formData.toteQuantity
           }}
           updateFormData={handleFormUpdate}
+          validationError={validationError}
         />
       )}
 
@@ -406,6 +407,7 @@ const OnboardingWizard = ({
           formData={formData} 
           updateFormData={updateFormData} 
           causeData={causeData}
+          validationError={validationError}
         />
       )}
 
@@ -413,6 +415,7 @@ const OnboardingWizard = ({
         <LogoUploadStep
           formData={formData}
           updateFormData={updateFormData}
+          validationError={validationError}
         />
       )}
 
@@ -420,6 +423,7 @@ const OnboardingWizard = ({
         <DistributionInfoStep
           formData={formData}
           updateFormData={updateFormData}
+          validationError={validationError}
         />
       )}
 

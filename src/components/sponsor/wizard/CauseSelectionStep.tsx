@@ -27,9 +27,10 @@ interface CauseSelectionStepProps {
     selectedCause: string;
   }>) => void;
   causeData?: any; // Make causeData optional
+  validationError: string | null;
 }
 
-const CauseSelectionStep = ({ formData, updateFormData, causeData }: CauseSelectionStepProps) => {
+const CauseSelectionStep = ({ formData, updateFormData, causeData, validationError }: CauseSelectionStepProps) => {
   // Mock causes data (would fetch from API)
   const causes = [
     { id: '1', title: 'Clean Water Initiative' },
@@ -51,6 +52,12 @@ const CauseSelectionStep = ({ formData, updateFormData, causeData }: CauseSelect
     <div className="space-y-6">
       <h2 className="text-xl font-bold mb-4">Organization Details</h2>
       
+      {validationError && (
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
+          {validationError}
+        </div>
+      )}
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="organizationName">Organization Name</Label>
@@ -60,7 +67,11 @@ const CauseSelectionStep = ({ formData, updateFormData, causeData }: CauseSelect
             value={formData.organizationName}
             onChange={handleInputChange}
             required
+            className={validationError && !formData.organizationName ? "border-red-500" : ""}
           />
+          {validationError && !formData.organizationName && (
+            <p className="text-red-500 text-sm mt-1">Organization name is required</p>
+          )}
         </div>
         
         <div className="space-y-2">
@@ -71,7 +82,11 @@ const CauseSelectionStep = ({ formData, updateFormData, causeData }: CauseSelect
             value={formData.contactName}
             onChange={handleInputChange}
             required
+            className={validationError && !formData.contactName ? "border-red-500" : ""}
           />
+          {validationError && !formData.contactName && (
+            <p className="text-red-500 text-sm mt-1">Contact name is required</p>
+          )}
         </div>
       </div>
       
@@ -85,7 +100,11 @@ const CauseSelectionStep = ({ formData, updateFormData, causeData }: CauseSelect
             value={formData.email}
             onChange={handleInputChange}
             required
+            className={validationError && !formData.email ? "border-red-500" : ""}
           />
+          {validationError && !formData.email && (
+            <p className="text-red-500 text-sm mt-1">Email is required</p>
+          )}
         </div>
         
         <div className="space-y-2">
@@ -96,7 +115,12 @@ const CauseSelectionStep = ({ formData, updateFormData, causeData }: CauseSelect
             type="tel"
             value={formData.phone}
             onChange={handleInputChange}
+            required
+            className={validationError && !formData.phone ? "border-red-500" : ""}
           />
+          {validationError && !formData.phone && (
+            <p className="text-red-500 text-sm mt-1">Phone number is required</p>
+          )}
         </div>
       </div>
     </div>
