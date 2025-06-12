@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -73,62 +72,42 @@ const OnboardingWizard = ({
   });
 
   const handleFormUpdate = (data: Partial<any>) => {
-    // Handle special case for toteQuantity to sync with distribution points
-    if (data.toteQuantity !== undefined && 
-        formData.distributionType === 'physical' && 
-        formData.distributionPoints && 
-        Object.keys(formData.distributionPoints).length > 0) {
-      
-      // Calculate current total totes in distribution points
-      const currentTotalTotes = calculateTotalTotes();
-      
-      // Only adjust if there's a difference to avoid infinite loops
-      if (currentTotalTotes !== data.toteQuantity) {
-        // Calculate scale factor to adjust all distribution points
-        const scaleFactor = data.toteQuantity / (currentTotalTotes || 1);
-        
-        // Create a deep copy of the distribution points
-        const updatedDistributionPoints = JSON.parse(JSON.stringify(formData.distributionPoints));
-        
-        // Scale all tote values proportionally
-        Object.entries(updatedDistributionPoints).forEach(([city, categories]: [string, any]) => {
-          Object.entries(categories).forEach(([category, points]: [string, any]) => {
-            points.forEach((point: any, index: number) => {
-              if (point.selected) {
-                // Scale the totes, ensuring at least 10 totes per location
-                updatedDistributionPoints[city][category][index].totes = 
-                  Math.max(10, Math.round(point.totes * scaleFactor));
-              }
-            });
-          });
-        });
-        
-        // Update form data with both the new quantity and scaled distribution points
-        setFormData(prev => ({
-          ...prev,
-          ...data,
-          distributionPoints: updatedDistributionPoints
-        }));
-        return;
-      }
+    // If we're updating toteQuantity directly from ToteQuantityStep, just update it
+    if (data.toteQuantity !== undefined && !data.distributionPoints && !data.distributionType) {
+      setFormData(prev => ({
+        ...prev,
+        toteQuantity: data.toteQuantity
+      }));
+      return;
     }
-    
-    // Handle special case for distributionPoints to sync with toteQuantity
-    if (data.distributionPoints && formData.distributionType === 'physical') {
-      // Calculate the new total based on the updated distribution points
-      const newTotal = calculateTotalTotesFromData(data.distributionPoints);
-      
-      // Update both distributionPoints and toteQuantity
+
+    // If we're changing distribution type, preserve the current tote quantity
+    if (data.distributionType !== undefined) {
+      const currentToteQuantity = formData.toteQuantity;
       setFormData(prev => ({
         ...prev,
         ...data,
-        toteQuantity: newTotal || prev.toteQuantity
+        toteQuantity: currentToteQuantity // Preserve the user's selected quantity
       }));
       return;
     }
     
-    // Default case: just update the data
-    setFormData(prev => ({ ...prev, ...data }));
+    // Handle distribution points updates without modifying tote quantity
+    if (data.distributionPoints && formData.distributionType === 'physical') {
+      setFormData(prev => ({
+        ...prev,
+        ...data,
+        toteQuantity: prev.toteQuantity // Keep the existing tote quantity
+      }));
+      return;
+    }
+    
+    // Default case: update the data while preserving tote quantity
+    setFormData(prev => ({ 
+      ...prev, 
+      ...data,
+      toteQuantity: data.toteQuantity !== undefined ? data.toteQuantity : prev.toteQuantity
+    }));
   };
 
   // Helper function to calculate total totes from distribution points data
@@ -285,19 +264,11 @@ const OnboardingWizard = ({
           if (!formData.distributionStartDate || !formData.distributionEndDate) {
             return { isValid: false, message: 'Please specify distribution start and end dates' };
           }
-          
-          // No need to validate online-specific fields for physical distribution
         } else if (formData.distributionType === 'online') {
-          // For online distribution
-          // Online distribution requires campaign start and end dates
-          // Shipping address is NOT required for online campaigns
-          
-          // Online campaign date validation
+          // For online distribution, only validate campaign dates
           if (!formData.distributionStartDate || !formData.distributionEndDate) {
             return { isValid: false, message: 'Please specify campaign start and end dates' };
           }
-          
-          // No need to validate physical-specific fields for online distribution
         }
         return { isValid: true };
 
@@ -424,6 +395,7 @@ const OnboardingWizard = ({
           formData={formData}
           updateFormData={updateFormData}
           validationError={validationError}
+          goToStep={(step) => setCurrentStep(step)}
         />
       )}
 

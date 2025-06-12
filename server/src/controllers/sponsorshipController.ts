@@ -35,8 +35,8 @@ export const createSponsorship = async (req: Request, res: Response): Promise<vo
     
     const missingFields = requiredFields.filter(field => !req.body[field]);
     
-    // Special check for distributionLocations
-    if (!req.body.distributionLocations?.length) {
+    // Special check for distributionLocations - only required for physical distribution
+    if (req.body.distributionType === 'physical' && !req.body.distributionLocations?.length) {
       missingFields.push('distributionLocations');
     }
     

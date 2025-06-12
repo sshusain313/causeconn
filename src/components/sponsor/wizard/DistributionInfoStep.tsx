@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { format } from "date-fns";
-import { CalendarIcon, Plus, Minus, MapPin, Building, Trees, Train, GraduationCap, Search, X, ChevronDown } from "lucide-react";
+import { CalendarIcon, Plus, Minus, MapPin, Building, Trees, Train, GraduationCap, Search, X, ChevronDown, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -22,6 +22,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface DistributionInfoStepProps {
   formData: {
@@ -29,7 +30,7 @@ interface DistributionInfoStepProps {
     campaignStartDate?: Date;
     campaignEndDate?: Date;
     selectedCities?: string[];
-    toteQuantity: number; // Add toteQuantity to sync with distribution points
+    toteQuantity: number;
     distributionPoints?: {
       [city: string]: {
         malls: { name: string; totes: number; selected: boolean }[];
@@ -41,6 +42,7 @@ interface DistributionInfoStepProps {
     };
   };
   updateFormData: (data: Partial<any>) => void;
+  goToStep?: (step: number) => void;
 }
 
 // Indian cities with quick picks
@@ -114,10 +116,12 @@ const distributionCategories = {
 const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
   formData,
   updateFormData,
+  goToStep
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [openCity, setOpenCity] = useState<string | null>(null);
   const [openCategory, setOpenCategory] = useState<{ city: string; category: string } | null>(null);
+  const [toteError, setToteError] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const filteredCities = indianCities.filter(city => 
@@ -126,31 +130,57 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
   );
 
   const handleDistributionTypeChange = (type: 'online' | 'physical') => {
+    const currentToteQuantity = formData.toteQuantity;
     updateFormData({
       distributionType: type,
       campaignStartDate: undefined,
       campaignEndDate: undefined,
       selectedCities: [],
-      distributionPoints: {}
+      distributionPoints: {},
+      toteQuantity: currentToteQuantity
     });
   };
 
   const handleCityAdd = (city: string) => {
     const currentCities = formData.selectedCities || [];
     const updatedCities = [...currentCities, city];
-    updateFormData({ selectedCities: updatedCities });
     
+    // Initialize distribution points with default totes but not selected
     const updatedDistributionPoints = {
       ...formData.distributionPoints,
       [city]: {
-        malls: distributionCategories.malls.options.map(name => ({ name, totes: distributionCategories.malls.defaultTotes, selected: false })),
-        parks: distributionCategories.parks.options.map(name => ({ name, totes: distributionCategories.parks.defaultTotes, selected: false })),
-        theatres: distributionCategories.theatres.options.map(name => ({ name, totes: distributionCategories.theatres.defaultTotes, selected: false })),
-        metroStations: distributionCategories.metroStations.options.map(name => ({ name, totes: distributionCategories.metroStations.defaultTotes, selected: false })),
-        schools: distributionCategories.schools.options.map(name => ({ name, totes: distributionCategories.schools.defaultTotes, selected: false }))
+        malls: distributionCategories.malls.options.map(name => ({ 
+          name, 
+          totes: distributionCategories.malls.defaultTotes, 
+          selected: false 
+        })),
+        parks: distributionCategories.parks.options.map(name => ({ 
+          name, 
+          totes: distributionCategories.parks.defaultTotes, 
+          selected: false 
+        })),
+        theatres: distributionCategories.theatres.options.map(name => ({ 
+          name, 
+          totes: distributionCategories.theatres.defaultTotes, 
+          selected: false 
+        })),
+        metroStations: distributionCategories.metroStations.options.map(name => ({ 
+          name, 
+          totes: distributionCategories.metroStations.defaultTotes, 
+          selected: false 
+        })),
+        schools: distributionCategories.schools.options.map(name => ({ 
+          name, 
+          totes: distributionCategories.schools.defaultTotes, 
+          selected: false 
+        }))
       }
     };
-    updateFormData({ distributionPoints: updatedDistributionPoints });
+
+    updateFormData({ 
+      selectedCities: updatedCities,
+      distributionPoints: updatedDistributionPoints
+    });
     setSearchTerm('');
   };
 
@@ -168,15 +198,33 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
     }
   };
 
+  const wouldExceedToteLimit = (additionalTotes: number = 0): boolean => {
+    const currentTotal = getOverallTotals().totalTotes;
+    return (currentTotal + additionalTotes) > formData.toteQuantity;
+  };
+
   const handleLocationToggle = (city: string, category: string, locationIndex: number) => {
     const currentPoints = formData.distributionPoints || {};
     const cityPoints = currentPoints[city];
     if (!cityPoints) return;
 
+    const point = cityPoints[category as keyof typeof cityPoints][locationIndex];
+    const defaultTotes = distributionCategories[category as keyof typeof distributionCategories].defaultTotes;
+
+    const { totalTotes: currentTotalTotes } = getOverallTotals();
+
+    if (!point.selected) {
+      if ((currentTotalTotes + defaultTotes) > formData.toteQuantity) {
+        setToteError(`Cannot select this location. Adding ${defaultTotes} totes would exceed your total tote quantity of ${formData.toteQuantity}. Please increase your tote quantity first.`);
+        return;
+      }
+    }
+
     const updatedCategoryPoints = [...cityPoints[category as keyof typeof cityPoints]];
     updatedCategoryPoints[locationIndex] = {
       ...updatedCategoryPoints[locationIndex],
-      selected: !updatedCategoryPoints[locationIndex].selected
+      selected: !point.selected,
+      totes: !point.selected ? defaultTotes : point.totes
     };
 
     updateFormData({
@@ -188,6 +236,7 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
         }
       }
     });
+    setToteError(null);
   };
 
   const handleToteChange = (city: string, category: string, locationIndex: number, newTotes: number) => {
@@ -195,8 +244,19 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
     const cityPoints = currentPoints[city];
     if (!cityPoints) return;
 
+    const point = cityPoints[category as keyof typeof cityPoints][locationIndex];
     const minTotes = distributionCategories[category as keyof typeof distributionCategories].defaultTotes;
     const finalTotes = Math.max(newTotes, minTotes);
+
+    const toteDifference = finalTotes - point.totes;
+    const { totalTotes: currentTotalTotes } = getOverallTotals();
+    const newTotalTotes = currentTotalTotes + toteDifference;
+
+    if (newTotalTotes > formData.toteQuantity) {
+      const remainingTotes = formData.toteQuantity - (currentTotalTotes - point.totes);
+      setToteError(`Cannot allocate ${finalTotes} totes. You have ${remainingTotes} totes remaining out of your total ${formData.toteQuantity}. Please increase your tote quantity first.`);
+      return;
+    }
 
     const updatedCategoryPoints = [...cityPoints[category as keyof typeof cityPoints]];
     updatedCategoryPoints[locationIndex] = {
@@ -213,6 +273,7 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
         }
       }
     });
+    setToteError(null);
   };
 
   const getTotalSelectedLocations = (city: string) => {
@@ -262,9 +323,8 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
   React.useEffect(() => {
     const { totalTotes } = getOverallTotals();
     
-    // Only update if there's a significant difference to avoid infinite loops
-    if (totalTotes > 0 && Math.abs(totalTotes - formData.toteQuantity) > 5) {
-      updateFormData({ toteQuantity: totalTotes });
+    if (totalTotes === 0 && formData.toteQuantity < 50) {
+      updateFormData({ toteQuantity: 50 });
     }
   }, [formData.distributionPoints]);
 
@@ -293,6 +353,26 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
         </p>
       </div>
       
+      {toteError && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTitle className="flex items-center gap-2">
+            Tote Quantity Exceeded
+            {goToStep && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-2"
+                onClick={() => goToStep(1)}
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Back to Tote Quantity
+              </Button>
+            )}
+          </AlertTitle>
+          <AlertDescription>{toteError}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-6">
         {/* Distribution Type Selection */}
         <Card>
