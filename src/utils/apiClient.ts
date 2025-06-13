@@ -36,6 +36,11 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => {
     console.log('API response:', response.config.url, response.status);
+    // If the response is HTML, it means we're getting a raw response
+    if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+      console.error('Received HTML response instead of JSON:', response.data);
+      return Promise.reject(new Error('Invalid response format'));
+    }
     return response;
   },
   (error: AxiosError) => {

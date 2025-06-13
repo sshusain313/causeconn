@@ -55,7 +55,7 @@ const CausesPage = () => {
         setLoading(true);
         // Fetch causes with their sponsorships
         console.log('Fetching causes using API client');
-        const response: AxiosResponse<Cause[]> = await api.get('/causes', { 
+        const response: AxiosResponse<Cause[]> = await api.get('/api/causes', { 
           params: {
             status: 'approved',
             include: 'sponsorships'
