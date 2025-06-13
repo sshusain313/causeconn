@@ -55,7 +55,7 @@ const CausesPage = () => {
         setLoading(true);
         // Fetch causes with their sponsorships
         console.log('Fetching causes using API client');
-        const response: AxiosResponse<Cause[]> = await api.get('/causes', { 
+        const response: AxiosResponse<Cause[]> = await api.get('/api/causes', { 
           params: {
             status: 'approved',
             include: 'sponsorships'
@@ -76,6 +76,8 @@ const CausesPage = () => {
         }
       } catch (err: any) {
         console.error('Error fetching causes:', err);
+        console.error('Response data:', err.response?.data);
+        console.error('Response status:', err.response?.status);
         setError(err.response?.data?.message || 'Failed to load causes. Please try again later.');
       } finally {
         setLoading(false);

@@ -18,9 +18,11 @@ const apiClient = axios.create({
   withCredentials: true, // Important for cookies/authentication
 });
 
-// Request interceptor for adding auth token
+// Add request logging for debugging
 apiClient.interceptors.request.use(
   (config) => {
+    console.log('Making API request to:', config.url);
+    console.log('With params:', config.params);
     const token = localStorage.getItem('token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -30,10 +32,16 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor for handling common errors
+// Add response logging for debugging
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('API response:', response.config.url, response.status);
+    return response;
+  },
   (error: AxiosError) => {
+    console.error('API error:', error.config?.url, error.response?.status);
+    console.error('Error details:', error.response?.data);
+    
     // Handle authentication errors
     if (error.response?.status === 401) {
       // Clear token and redirect to login if unauthorized
