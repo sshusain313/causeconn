@@ -16,6 +16,7 @@ import {
 import { getImageUrl, handleImageError } from '@/utils/imageUtils';
 import config from '@/config';
 import api from '@/utils/apiClient';
+import { AxiosResponse } from 'axios';
 
 interface Cause {
   _id: string;
@@ -54,22 +55,28 @@ const CausesPage = () => {
         setLoading(true);
         // Fetch causes with their sponsorships
         console.log('Fetching causes using API client');
-        const response = await api.get('/causes', { 
+        const response: AxiosResponse<Cause[]> = await api.get('/causes', { 
           params: {
             status: 'approved',
             include: 'sponsorships'
           }
         });
         
-        console.log('Fetched causes:', response.data);
-        setCauses(response.data);
-        
-        // Extract unique categories from the fetched causes
-        const uniqueCategories = Array.from(new Set(response.data.map((cause: Cause) => cause.category)));
-        setCategories(uniqueCategories as string[]);
-      } catch (err) {
+        // Check if response.data is an array
+        if (Array.isArray(response.data)) {
+          console.log('Fetched causes:', response.data);
+          setCauses(response.data);
+          
+          // Extract unique categories from the fetched causes
+          const uniqueCategories = Array.from(new Set(response.data.map((cause: Cause) => cause.category)));
+          setCategories(uniqueCategories as string[]);
+        } else {
+          console.error('Invalid response format:', response.data);
+          setError('Invalid response format from server');
+        }
+      } catch (err: any) {
         console.error('Error fetching causes:', err);
-        setError('Failed to load causes. Please try again later.');
+        setError(err.response?.data?.message || 'Failed to load causes. Please try again later.');
       } finally {
         setLoading(false);
       }
