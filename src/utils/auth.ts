@@ -13,13 +13,15 @@ interface LoginResponse {
 
 export const login = async (email: string, password: string): Promise<LoginResponse> => {
   try {
-    const response: AxiosResponse<LoginResponse> = await api.post<LoginResponse>('/api/auth/login', { email, password });
-    const { token, user } = response.data;
+    const response = await api.post<LoginResponse>(
+      isProduction ? '/auth/login' : '/api/auth/login',
+      { email, password }
+    );
     
     // Store token in localStorage
-    localStorage.setItem('token', token);
+    localStorage.setItem('token', response.token);
     
-    return { token, user };
+    return response;
   } catch (error) {
     console.error('Login failed:', error);
     throw new Error('Login failed. Please check your credentials and try again.');
