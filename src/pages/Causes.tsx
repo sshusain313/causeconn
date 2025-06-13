@@ -55,8 +55,10 @@ const CausesPage = () => {
         // Fetch causes with their sponsorships
         console.log('Fetching causes using API client');
         const response = await api.get('/causes', { 
-          status: 'approved',
-          include: 'sponsorships'
+          params: {
+            status: 'approved',
+            include: 'sponsorships'
+          }
         });
         
         console.log('Fetched causes:', response.data);
