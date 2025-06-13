@@ -26,10 +26,13 @@ export const apiUrl = (endpoint: string): string => {
   // Remove leading slash if present to avoid double slashes
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
   
-  // Check if the base URL already ends with a slash
-  const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+  // In production, we don't need to add /api since we're using api.changebag.org
+  if (isProduction) {
+    return `${API_BASE_URL}/${cleanEndpoint}`;
+  }
   
-  return `${baseUrl}/${cleanEndpoint}`;
+  // In development, add /api prefix
+  return `${API_BASE_URL}/api/${cleanEndpoint}`;
 };
 
 /**
