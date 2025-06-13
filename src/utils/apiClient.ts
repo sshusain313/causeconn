@@ -11,7 +11,7 @@ import { API_BASE_URL, isProduction } from './apiConfig';
 
 // Create an axios instance with default configuration
 const apiClient = axios.create({
-  baseURL: isProduction ? 'https://api.changebag.org' : `${API_BASE_URL}/api`,
+  baseURL: isProduction ? 'https://api.changebag.org' : API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
