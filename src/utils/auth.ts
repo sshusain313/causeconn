@@ -13,10 +13,7 @@ interface LoginResponse {
 
 export const login = async (email: string, password: string): Promise<LoginResponse> => {
   try {
-    const response = await api.post<LoginResponse>('/auth/login', { email, password });
-    if (!response.data) {
-      throw new Error('Invalid response from server');
-    }
+    const response: AxiosResponse<LoginResponse> = await api.post<LoginResponse>('/api/auth/login', { email, password });
     const { token, user } = response.data;
     
     // Store token in localStorage
@@ -25,21 +22,7 @@ export const login = async (email: string, password: string): Promise<LoginRespo
     return { token, user };
   } catch (error) {
     console.error('Login failed:', error);
-    if (isProduction) {
-      throw new Error('Login failed: API error and mock login not allowed in production');
-    }
-    // Mock login for development
-    console.warn('API login failed, using mock login');
-    const mockResponse: LoginResponse = {
-      token: 'mock-token',
-      user: {
-        _id: 'mock-id',
-        email,
-        name: 'Mock User'
-      }
-    };
-    localStorage.setItem('token', mockResponse.token);
-    return mockResponse;
+    throw new Error('Login failed. Please check your credentials and try again.');
   }
 };
 
