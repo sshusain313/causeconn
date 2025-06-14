@@ -29,12 +29,21 @@
   const originalFetch = window.fetch;
   const originalXhrOpen = XMLHttpRequest.prototype.open;
   
-  // Function to replace localhost URLs with the current domain
+  // Function to replace localhost URLs with the correct production URL
   const fixUrl = (url) => {
-    if (typeof url === 'string' && url.includes('localhost:5000')) {
-      const newUrl = url.replace('http://localhost:5000', window.location.origin);
-      console.log(`API URL Fixer: Redirecting ${url} to ${newUrl}`);
-      return newUrl;
+    if (typeof url === 'string') {
+      if (url.includes('localhost:5000')) {
+        // In production, use api.changebag.org
+        const newUrl = url.replace('http://localhost:5000', 'https://api.changebag.org');
+        console.log(`API URL Fixer: Redirecting ${url} to ${newUrl}`);
+        return newUrl;
+      }
+      // If the URL is using the current domain with /api, replace with api.changebag.org
+      if (url.includes('/api/') && (url.includes('changebag.org') || url.includes(window.location.origin))) {
+        const newUrl = url.replace(/https?:\/\/[^\/]+\/api\//, 'https://api.changebag.org/');
+        console.log(`API URL Fixer: Redirecting ${url} to ${newUrl}`);
+        return newUrl;
+      }
     }
     return url;
   };
@@ -77,13 +86,13 @@
   setTimeout(() => {
     if (window.config) {
       console.log('API URL Fixer: Patching global config object');
-      if (window.config.apiUrl && window.config.apiUrl.includes('localhost:5000')) {
-        window.config.apiUrl = window.config.apiUrl.replace('http://localhost:5000', window.location.origin);
+      if (window.config.apiUrl && (window.config.apiUrl.includes('localhost:5000') || window.config.apiUrl.includes('/api/'))) {
+        window.config.apiUrl = 'https://api.changebag.org';
         console.log(`API URL Fixer: Updated config.apiUrl to ${window.config.apiUrl}`);
       }
       
-      if (window.config.uploadsUrl && window.config.uploadsUrl.includes('localhost:5000')) {
-        window.config.uploadsUrl = window.config.uploadsUrl.replace('http://localhost:5000', window.location.origin);
+      if (window.config.uploadsUrl && (window.config.uploadsUrl.includes('localhost:5000') || window.config.uploadsUrl.includes('/api/'))) {
+        window.config.uploadsUrl = 'https://api.changebag.org/uploads';
         console.log(`API URL Fixer: Updated config.uploadsUrl to ${window.config.uploadsUrl}`);
       }
     }

@@ -15,7 +15,7 @@ interface Config {
 const isProduction = import.meta.env.PROD || window.location.hostname === 'changebag.org' || window.location.hostname === 'www.changebag.org';
 
 // Base domain for API requests
-// In production, use api.changebag.org if that's where the API is hosted
+// In production, use api.changebag.org
 const apiDomain = isProduction ? 'https://api.changebag.org' : 'http://localhost:5000';
 
 const config: Config = {
