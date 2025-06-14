@@ -41,7 +41,7 @@ const SponsorFormContainer: React.FC<SponsorFormContainerProps> = ({ causeId }) 
       
       // Send data to the server using config.apiUrl to ensure consistency
       // This will properly handle both development and production environments
-      const apiEndpoint = `${config.apiUrl}/sponsorships`;
+      const apiEndpoint = `${config.apiUrl}/api/sponsorships`;
       console.log('Sending sponsorship to endpoint:', apiEndpoint);
       
       // Add additional debugging for API URL
