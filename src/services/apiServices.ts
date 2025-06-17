@@ -1,4 +1,3 @@
-
 import { Story } from '@/models/Story';
 import { Cause } from '@/types';
 import config from '../config';

@@ -1,15 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { format } from "date-fns";
 import { CalendarIcon, Plus, Minus, MapPin, Building, Trees, Train, GraduationCap, Search, X, ChevronDown, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Popover,
   PopoverContent,
@@ -23,6 +16,18 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useQuery } from '@tanstack/react-query';
+import { fetchDistributionSettings, fetchPointsByCityAndCategory } from '@/services/distributionService';
+import { DistributionCategory, DistributionPoint } from '@/types/distribution';
+
+// Icon mapping for dynamic icons
+const iconMap = {
+  Building,
+  Trees,
+  MapPin,
+  Train,
+  GraduationCap
+};
 
 interface DistributionInfoStepProps {
   formData: {
@@ -33,85 +38,13 @@ interface DistributionInfoStepProps {
     toteQuantity: number;
     distributionPoints?: {
       [city: string]: {
-        malls: { name: string; totes: number; selected: boolean }[];
-        parks: { name: string; totes: number; selected: boolean }[];
-        theatres: { name: string; totes: number; selected: boolean }[];
-        metroStations: { name: string; totes: number; selected: boolean }[];
-        schools: { name: string; totes: number; selected: boolean }[];
+        [categoryId: string]: { name: string; totes: number; selected: boolean }[];
       };
     };
   };
   updateFormData: (data: Partial<any>) => void;
   goToStep?: (step: number) => void;
 }
-
-// Indian cities with quick picks
-const indianCities = [
-  'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad',
-  'Jaipur', 'Surat', 'Lucknow', 'Kanpur', 'Nagpur', 'Indore', 'Thane', 'Bhopal',
-  'Visakhapatnam', 'Pimpri-Chinchwad', 'Patna', 'Vadodara', 'Ghaziabad', 'Ludhiana',
-  'Agra', 'Nashik', 'Faridabad', 'Meerut', 'Rajkot', 'Kalyan-Dombivli', 'Vasai-Virar',
-  'Varanasi', 'Srinagar', 'Aurangabad', 'Dhanbad', 'Amritsar', 'Navi Mumbai', 'Allahabad',
-  'Ranchi', 'Howrah', 'Coimbatore', 'Jabalpur', 'Gwalior', 'Vijayawada', 'Jodhpur',
-  'Madurai', 'Raipur', 'Kota', 'Guwahati', 'Chandigarh', 'Solapur', 'Hubli-Dharwad'
-];
-
-const quickPickCities = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad'];
-
-const distributionCategories = {
-  malls: {
-    name: 'Malls',
-    defaultTotes: 400,
-    icon: Building,
-    color: 'text-blue-600',
-    options: [
-      'Phoenix MarketCity', 'Select CityWalk', 'DLF Mall', 'Inorbit Mall', 'Forum Mall',
-      'Express Avenue', 'Palladium Mall', 'Ambience Mall', 'Nexus Mall', 'VR Mall'
-    ]
-  },
-  parks: {
-    name: 'Parks',
-    defaultTotes: 600,
-    icon: Trees,
-    color: 'text-green-600',
-    options: [
-      'Central Park', 'Lodi Gardens', 'Cubbon Park', 'Sanjay Gandhi National Park', 'Hussain Sagar',
-      'Marina Beach Park', 'Victoria Memorial Park', 'Law Garden', 'Rock Garden', 'Buddha Jayanti Park'
-    ]
-  },
-  theatres: {
-    name: 'Theatres',
-    defaultTotes: 400,
-    icon: MapPin,
-    color: 'text-purple-600',
-    options: [
-      'PVR Cinemas', 'INOX', 'Cinepolis', 'Carnival Cinemas', 'Big Cinemas',
-      'Fun Republic', 'MovieTime', 'Miraj Cinemas', 'Mukta A2', 'Wave Cinemas'
-    ]
-  },
-  metroStations: {
-    name: 'Metro Stations',
-    defaultTotes: 800,
-    icon: Train,
-    color: 'text-orange-600',
-    options: [
-      'Rajiv Chowk Metro Station', 'Connaught Place Metro', 'MG Road Metro', 'Andheri Metro',
-      'Bandra-Kurla Complex Metro', 'Mysore Road Metro', 'High Court Metro', 'Airport Metro',
-      'City Centre Metro', 'Electronic City Metro'
-    ]
-  },
-  schools: {
-    name: 'Schools',
-    defaultTotes: 400,
-    icon: GraduationCap,
-    color: 'text-red-600',
-    options: [
-      'Delhi Public School', 'Kendriya Vidyalaya', 'DAV School', 'Ryan International',
-      'Bharatiya Vidya Bhavan', 'St. Xavier\'s School', 'Modern School', 'Sardar Patel Vidyalaya',
-      'La Martiniere School', 'Bishop Cotton School'
-    ]
-  }
-};
 
 const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
   formData,
@@ -124,73 +57,75 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
   const [toteError, setToteError] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const filteredCities = indianCities.filter(city => 
-    city.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    !(formData.selectedCities || []).includes(city)
-  );
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['distribution-settings'],
+    queryFn: fetchDistributionSettings
+  });
 
-  const handleDistributionTypeChange = (type: 'online' | 'physical') => {
-    const currentToteQuantity = formData.toteQuantity;
-    updateFormData({
-      distributionType: type,
-      campaignStartDate: undefined,
-      campaignEndDate: undefined,
-      selectedCities: [],
-      distributionPoints: {},
-      toteQuantity: currentToteQuantity
-    });
+  // Get active cities and categories
+  const activeCities = settings?.cities.filter(city => city.isActive) || [];
+  const activeCategories = settings?.categories.filter(cat => cat.isActive) || [];
+
+  // Get quick pick cities (first 8 active cities)
+  const quickPickCities = activeCities.slice(0, 8).map(city => city.name);
+
+  const filteredCities = activeCities
+    .filter(city => 
+      city.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !(formData.selectedCities || []).includes(city.name)
+    )
+    .map(city => city.name);
+
+  // Add query for fetching points by city and category
+  const fetchPointsForCityAndCategory = async (cityId: string, categoryId: string) => {
+    if (!cityId || !categoryId) return [];
+    return await fetchPointsByCityAndCategory(cityId, categoryId);
   };
 
-  const handleCityAdd = (city: string) => {
+  const handleCityAdd = async (cityName: string) => {
     const currentCities = formData.selectedCities || [];
-    const updatedCities = [...currentCities, city];
+    const updatedCities = [...currentCities, cityName];
     
-    // Initialize distribution points with default totes but not selected
+    // Get the city ID
+    const cityData = settings?.cities.find(c => c.name === cityName);
+    if (!cityData?._id) return;
+
+    // Initialize distribution points structure
     const updatedDistributionPoints = {
       ...formData.distributionPoints,
-      [city]: {
-        malls: distributionCategories.malls.options.map(name => ({ 
-          name, 
-          totes: distributionCategories.malls.defaultTotes, 
-          selected: false 
-        })),
-        parks: distributionCategories.parks.options.map(name => ({ 
-          name, 
-          totes: distributionCategories.parks.defaultTotes, 
-          selected: false 
-        })),
-        theatres: distributionCategories.theatres.options.map(name => ({ 
-          name, 
-          totes: distributionCategories.theatres.defaultTotes, 
-          selected: false 
-        })),
-        metroStations: distributionCategories.metroStations.options.map(name => ({ 
-          name, 
-          totes: distributionCategories.metroStations.defaultTotes, 
-          selected: false 
-        })),
-        schools: distributionCategories.schools.options.map(name => ({ 
-          name, 
-          totes: distributionCategories.schools.defaultTotes, 
-          selected: false 
-        }))
-      }
+      [cityName]: {}
     };
 
-    updateFormData({ 
+    // Fetch points for each active category
+    const categoryPromises = activeCategories.map(async category => {
+      const points = await fetchPointsForCityAndCategory(cityData._id!, category._id!);
+      updatedDistributionPoints[cityName][category._id!] = points.map(point => ({
+        name: point.name,
+        totes: point.defaultToteCount,
+        selected: false
+      }));
+    });
+
+    await Promise.all(categoryPromises);
+
+    const updatedData = {
       selectedCities: updatedCities,
       distributionPoints: updatedDistributionPoints
-    });
+    };
+    updateFormData(updatedData);
     setSearchTerm('');
   };
 
-  const handleCityRemove = (cityToRemove: string) => {
+  const handleCityRemove = async (cityToRemove: string) => {
     const updatedCities = (formData.selectedCities || []).filter(city => city !== cityToRemove);
-    updateFormData({ selectedCities: updatedCities });
-    
     const updatedDistributionPoints = { ...formData.distributionPoints };
     delete updatedDistributionPoints[cityToRemove];
-    updateFormData({ distributionPoints: updatedDistributionPoints });
+    
+    const updatedData = {
+      selectedCities: updatedCities,
+      distributionPoints: updatedDistributionPoints
+    };
+    updateFormData(updatedData);
     
     if (openCity === cityToRemove) {
       setOpenCity(null);
@@ -209,7 +144,7 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
     if (!cityPoints) return;
 
     const point = cityPoints[category as keyof typeof cityPoints][locationIndex];
-    const defaultTotes = distributionCategories[category as keyof typeof distributionCategories].defaultTotes;
+    const defaultTotes = activeCategories.find(cat => cat._id === category)?.defaultToteCount || 0;
 
     const { totalTotes: currentTotalTotes } = getOverallTotals();
 
@@ -245,7 +180,7 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
     if (!cityPoints) return;
 
     const point = cityPoints[category as keyof typeof cityPoints][locationIndex];
-    const minTotes = distributionCategories[category as keyof typeof distributionCategories].defaultTotes;
+    const minTotes = activeCategories.find(cat => cat._id === category)?.defaultToteCount || 0;
     const finalTotes = Math.max(newTotes, minTotes);
 
     const toteDifference = finalTotes - point.totes;
@@ -339,6 +274,35 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
     const newCategoryKey = `${city}-${category}`;
     const currentKey = openCategory ? `${openCategory.city}-${openCategory.category}` : null;
     
+    if (currentKey !== newCategoryKey) {
+      // Fetch points when opening a new category
+      const cityData = settings?.cities.find(c => c.name === city);
+      if (cityData?._id) {
+        fetchPointsForCityAndCategory(cityData._id, category)
+          .then(points => {
+            const currentPoints = formData.distributionPoints || {};
+            const cityPoints = currentPoints[city] || {};
+            
+            // Update the distribution points with fetched data
+            const updatedPoints = points.map(point => ({
+              name: point.name,
+              totes: point.defaultToteCount,
+              selected: false
+            }));
+            
+            updateFormData({
+              distributionPoints: {
+                ...currentPoints,
+                [city]: {
+                  ...cityPoints,
+                  [category]: updatedPoints
+                }
+              }
+            });
+          });
+      }
+    }
+    
     setOpenCategory(
       currentKey === newCategoryKey ? null : { city, category }
     );
@@ -382,7 +346,18 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
           <CardContent>
             <RadioGroup
               value={formData.distributionType || ''}
-              onValueChange={handleDistributionTypeChange}
+              onValueChange={(type) => {
+                const currentToteQuantity = formData.toteQuantity;
+                const updatedData = {
+                  distributionType: type,
+                  campaignStartDate: undefined,
+                  campaignEndDate: undefined,
+                  selectedCities: [],
+                  distributionPoints: {},
+                  toteQuantity: currentToteQuantity
+                };
+                updateFormData(updatedData);
+              }}
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
               <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50">
@@ -645,47 +620,47 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {formData.selectedCities.map((city) => (
-                      <div key={city} className="border rounded-lg">
+                    {formData.selectedCities.map((cityName) => (
+                      <div key={cityName} className="border rounded-lg">
                         {/* City Header */}
                         <button
-                          onClick={() => handleCityAccordionToggle(city)}
+                          onClick={() => handleCityAccordionToggle(cityName)}
                           className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg"
-                          aria-expanded={openCity === city}
-                          aria-controls={`city-${city}-content`}
+                          aria-expanded={openCity === cityName}
+                          aria-controls={`city-${cityName}-content`}
                         >
                           <div className="flex items-center space-x-3">
                             <ChevronDown 
                               className={cn(
                                 "h-4 w-4 transition-transform",
-                                openCity === city && "rotate-180"
+                                openCity === cityName && "rotate-180"
                               )}
                             />
-                            <span className="font-medium">{city}</span>
+                            <span className="font-medium">{cityName}</span>
                           </div>
                           <Badge variant="outline" className="text-xs">
-                            {getTotalSelectedLocations(city)} locations • {getTotalTotes(city)} totes
+                            {getTotalSelectedLocations(cityName)} locations • {getTotalTotes(cityName)} totes
                           </Badge>
                         </button>
 
                         {/* City Content */}
-                        {openCity === city && (
-                          <div id={`city-${city}-content`} className="px-4 pb-4 space-y-2">
-                            {Object.entries(distributionCategories).map(([categoryKey, category]) => {
-                              const Icon = category.icon;
-                              const cityPoints = formData.distributionPoints?.[city];
-                              const categoryPoints = cityPoints?.[categoryKey as keyof typeof cityPoints] || [];
+                        {openCity === cityName && (
+                          <div id={`city-${cityName}-content`} className="px-4 pb-4 space-y-2">
+                            {activeCategories.map((category) => {
+                              const Icon = iconMap[category.icon as keyof typeof iconMap] || MapPin;
+                              const cityPoints = formData.distributionPoints?.[cityName];
+                              const categoryPoints = cityPoints?.[category._id!] || [];
                               const selectedCount = categoryPoints.filter(point => point.selected).length;
-                              const isOpen = openCategory?.city === city && openCategory?.category === categoryKey;
+                              const isOpen = openCategory?.city === cityName && openCategory?.category === category._id;
                               
                               return (
-                                <div key={categoryKey} className="border rounded-lg">
+                                <div key={category._id} className="border rounded-lg">
                                   {/* Category Header */}
                                   <button
-                                    onClick={() => handleCategoryAccordionToggle(city, categoryKey)}
+                                    onClick={() => handleCategoryAccordionToggle(cityName, category._id!)}
                                     className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
                                     aria-expanded={isOpen}
-                                    aria-controls={`category-${city}-${categoryKey}-content`}
+                                    aria-controls={`category-${cityName}-${category._id}-content`}
                                   >
                                     <div className="flex items-center space-x-2">
                                       <ChevronDown 
@@ -704,7 +679,7 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
 
                                   {/* Category Content */}
                                   {isOpen && (
-                                    <div id={`category-${city}-${categoryKey}-content`} className="px-3 pb-3 space-y-2">
+                                    <div id={`category-${cityName}-${category._id}-content`} className="px-3 pb-3 space-y-2">
                                       {categoryPoints.map((point, index) => (
                                         <div key={index} className={cn(
                                           "flex items-center justify-between p-2 border rounded",
@@ -712,12 +687,12 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                                         )}>
                                           <div className="flex items-center space-x-2">
                                             <Checkbox 
-                                              id={`${city}-${categoryKey}-${index}`}
+                                              id={`${cityName}-${category._id}-${index}`}
                                               checked={point.selected}
-                                              onCheckedChange={() => handleLocationToggle(city, categoryKey, index)}
+                                              onCheckedChange={() => handleLocationToggle(cityName, category._id!, index)}
                                             />
                                             <Label
-                                              htmlFor={`${city}-${categoryKey}-${index}`}
+                                              htmlFor={`${cityName}-${category._id}-${index}`}
                                               className="text-xs cursor-pointer"
                                             >
                                               {point.name}
@@ -728,8 +703,8 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                                               <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => handleToteChange(city, categoryKey, index, point.totes - 50)}
-                                                disabled={point.totes <= category.defaultTotes}
+                                                onClick={() => handleToteChange(cityName, category._id!, index, point.totes - 50)}
+                                                disabled={point.totes <= category.defaultToteCount}
                                                 className="h-6 w-6 p-0"
                                               >
                                                 <Minus className="h-2 w-2" />
@@ -737,14 +712,14 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                                               <Input
                                                 type="number"
                                                 value={point.totes}
-                                                onChange={(e) => handleToteChange(city, categoryKey, index, parseInt(e.target.value) || category.defaultTotes)}
+                                                onChange={(e) => handleToteChange(cityName, category._id!, index, parseInt(e.target.value) || category.defaultToteCount)}
                                                 className="w-16 h-6 text-xs text-center p-1"
-                                                min={category.defaultTotes}
+                                                min={category.defaultToteCount}
                                               />
                                               <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => handleToteChange(city, categoryKey, index, point.totes + 50)}
+                                                onClick={() => handleToteChange(cityName, category._id!, index, point.totes + 50)}
                                                 className="h-6 w-6 p-0"
                                               >
                                                 <Plus className="h-2 w-2" />

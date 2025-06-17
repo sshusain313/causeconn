@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -177,9 +178,9 @@ const DistributionSettings = () => {
                 <SelectValue placeholder="All countries" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All countries</SelectItem>
+                <SelectItem value="all">All countries</SelectItem>
                 {settings?.countries.map((country) => (
-                  <SelectItem key={country._id} value={country._id!}>
+                  <SelectItem key={country._id} value={country._id || ''}>
                     {country.name}
                   </SelectItem>
                 ))}
@@ -280,7 +281,7 @@ const DistributionSettings = () => {
               <SelectContent>
                 <SelectItem value="all_cities">All cities</SelectItem>
                 {settings?.cities.slice(0, 50).map((city) => (
-                  <SelectItem key={city._id} value={city._id!}>
+                  <SelectItem key={city._id} value={city._id || ''}>
                     {city.name}
                   </SelectItem>
                 ))}
@@ -296,7 +297,7 @@ const DistributionSettings = () => {
               <SelectContent>
                 <SelectItem value="all_categories">All categories</SelectItem>
                 {settings?.categories.map((category) => (
-                  <SelectItem key={category._id} value={category._id!}>
+                  <SelectItem key={category._id} value={category._id || ''}>
                     {category.name}
                   </SelectItem>
                 ))}
@@ -400,6 +401,9 @@ const DistributionSettings = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Country</DialogTitle>
+            <DialogDescription>
+              Enter the details for the new country you want to add to the system.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -459,6 +463,9 @@ const DistributionSettings = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New City</DialogTitle>
+            <DialogDescription>
+              Enter the details for the new city you want to add to the system.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -469,7 +476,7 @@ const DistributionSettings = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {settings?.countries.map((country) => (
-                    <SelectItem key={country._id} value={country._id!}>
+                    <SelectItem key={country._id} value={country._id || ''}>
                       {country.name}
                     </SelectItem>
                   ))}
@@ -536,6 +543,9 @@ const DistributionSettings = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Category</DialogTitle>
+            <DialogDescription>
+              Enter the details for the new distribution category.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -599,6 +609,9 @@ const DistributionSettings = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Distribution Point</DialogTitle>
+            <DialogDescription>
+              Enter the details for the new distribution point location.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -609,7 +622,7 @@ const DistributionSettings = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {settings?.cities.slice(0, 20).map((city) => (
-                    <SelectItem key={city._id} value={city._id!}>
+                    <SelectItem key={city._id} value={city._id || ''}>
                       {city.name}
                     </SelectItem>
                   ))}
@@ -624,7 +637,7 @@ const DistributionSettings = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {settings?.categories.map((category) => (
-                    <SelectItem key={category._id} value={category._id!}>
+                    <SelectItem key={category._id} value={category._id || ''}>
                       {category.name}
                     </SelectItem>
                   ))}
