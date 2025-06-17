@@ -48,6 +48,15 @@ const CausesPage = () => {
   const [error, setError] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
   
+  // Helper functions - moved to the top
+  const isTargetAchieved = (cause: Cause) => {
+    return (cause.currentAmount || 0) >= cause.targetAmount;
+  };
+
+  const hasApprovedSponsorship = (cause: Cause) => {
+    return cause.sponsorships?.some(s => s.status === 'approved') || false;
+  };
+
   // Fetch causes from the API
   useEffect(() => {
     const fetchCauses = async () => {
@@ -89,6 +98,9 @@ const CausesPage = () => {
 
   // Filter causes based on search and filters
   const filteredCauses = causes.filter(cause => {
+    // Hide causes that have achieved their target amount
+    if (isTargetAchieved(cause)) return false;
+
     const matchesSearch = cause.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          cause.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || cause.category === categoryFilter;
@@ -105,25 +117,12 @@ const CausesPage = () => {
         case 'sponsored':
           matchesStatus = hasApprovedSponsorship;
           break;
-        case 'waitlist':
-          matchesStatus = cause.status === 'waitlist';
-          break;
       }
     }
     
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
-  // Check if a cause has approved sponsorships
-  const hasApprovedSponsorship = (cause: Cause) => {
-    return cause.sponsorships?.some(s => s.status === 'approved') || false;
-  };
-  
-  // Check if funding target is achieved
-  const isTargetAchieved = (cause: Cause) => {
-    return (cause.currentAmount || 0) >= cause.targetAmount;
-  };
-  
   // Handle claim button click
   const handleClaimAction = (cause: Cause) => {
     navigate(`/claim/${cause._id}`);
@@ -138,8 +137,8 @@ const CausesPage = () => {
   const getDetailsOrClaimButton = (cause: Cause) => {
     const isSponsored = hasApprovedSponsorship(cause);
     
+    // Always show Claim a Tote button if sponsored
     if (isSponsored) {
-      // If sponsored, show Claim a Tote button
       return (
         <Button 
           onClick={() => handleClaimAction(cause)} 
@@ -148,18 +147,18 @@ const CausesPage = () => {
           Claim a Tote
         </Button>
       );
-    } else {
-      // If not sponsored, show See Details button
-      return (
-        <Button 
-          onClick={() => navigate(`/cause/${cause._id}`)} 
-          variant="outline" 
-          className="w-full"
-        >
-          See Details
-        </Button>
-      );
     }
+    
+    // Show See Details button only if not sponsored
+    return (
+      <Button 
+        onClick={() => navigate(`/cause/${cause._id}`)} 
+        variant="outline" 
+        className="w-full"
+      >
+        See Details
+      </Button>
+    );
   };
   
   // Get the sponsor button if target not achieved
@@ -279,7 +278,7 @@ const CausesPage = () => {
                     <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="open">Open for Sponsorship</SelectItem>
                     <SelectItem value="sponsored">Fully Sponsored</SelectItem>
-                    <SelectItem value="waitlist">Waitlist Available</SelectItem>
+                    {/* <SelectItem value="waitlist">Waitlist Available</SelectItem> */}
                   </SelectContent>
                 </Select>
               </div>

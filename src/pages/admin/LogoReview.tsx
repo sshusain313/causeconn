@@ -225,9 +225,9 @@ const LogoReview = () => {
     );
   }
 
-  // Update the card content to include the canvas preview
+  // Update the card content to include both original logo and preview
   const renderSponsorshipCard = (sponsorship: Sponsorship) => (
-    <Card key={sponsorship._id}>
+    <Card key={sponsorship._id} className="overflow-hidden">
       <CardHeader>
         <div className="flex justify-between items-start mb-1">
           <CardTitle className="text-lg">{sponsorship.cause?.title || 'Unnamed Campaign'}</CardTitle>
@@ -246,66 +246,81 @@ const LogoReview = () => {
         )}
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {/* Original Logo */}
-          {/* <div>
-            <p className="text-sm font-medium text-gray-500 mb-2">Original Logo</p>
-            <img 
-              src={sponsorship.logoUrl.startsWith('http') 
-                ? sponsorship.logoUrl 
-                : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`
-              } 
-              alt="Campaign Logo" 
-              className="w-full h-32 object-contain bg-gray-50 rounded border"
-              onError={(e) => {
-                console.error('Image failed to load:', sponsorship.logoUrl);
-                e.currentTarget.src = '/placeholder.svg';
-              }}
-            />
-          </div> */}
+        <div className="space-y-6">
+          {/* Logo Preview Section */}
+          <div className="grid grid-cols-2 gap-6">
+            {/* Original Logo */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-500">Original Logo</p>
+              <div className="relative aspect-square bg-gray-50 rounded-lg border overflow-hidden">
+                <img 
+                  src={sponsorship.logoUrl.startsWith('http') 
+                    ? sponsorship.logoUrl 
+                    : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`
+                  } 
+                  alt="Campaign Logo" 
+                  className="w-full h-full object-contain p-4"
+                  onError={(e) => {
+                    console.error('Image failed to load:', sponsorship.logoUrl);
+                    e.currentTarget.src = '/placeholder.svg';
+                  }}
+                />
+              </div>
+            </div>
 
-          {/* Tote Bag Preview */}
-          <div>
-            <p className="text-sm font-medium text-gray-500 mb-2">Tote Bag Preview</p>
-            <div className="relative border rounded-lg overflow-hidden bg-gray-50">
-              <canvas
-                ref={canvas => {
-                  if (canvas) {
-                    drawLogoPreview(
-                      canvas,
-                      sponsorship.logoUrl,
-                      sponsorship.logoPosition
-                    );
-                  }
-                }}
-                width={previewCanvasSize.width}
-                height={previewCanvasSize.height}
-                className="w-full h-auto"
-              />
+            {/* Tote Bag Preview */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-500">Tote Bag Preview</p>
+              <div className="relative aspect-square bg-gray-50 rounded-lg border overflow-hidden">
+                <canvas
+                  ref={canvas => {
+                    if (canvas) {
+                      drawLogoPreview(
+                        canvas,
+                        sponsorship.logoUrl,
+                        sponsorship.logoPosition
+                      );
+                    }
+                  }}
+                  width={previewCanvasSize.width}
+                  height={previewCanvasSize.height}
+                  className="w-full h-full"
+                />
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+          {/* Sponsorship Details */}
+          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
             <div>
-              <p className="text-gray-500">Amount</p>
-              <p className="font-medium">${sponsorship.totalAmount}</p>
+              <p className="text-sm text-gray-500">Amount</p>
+              <p className="font-medium">${sponsorship.totalAmount.toLocaleString()}</p>
             </div>
             <div>
-              <p className="text-gray-500">Tote Quantity</p>
-              <p className="font-medium">{sponsorship.toteQuantity}</p>
+              <p className="text-sm text-gray-500">Tote Quantity</p>
+              <p className="font-medium">{sponsorship.toteQuantity.toLocaleString()}</p>
             </div>
             <div className="col-span-2">
-              <p className="text-gray-500">Submitted</p>
-              <p className="font-medium">{new Date(sponsorship.createdAt).toLocaleDateString()}</p>
+              <p className="text-sm text-gray-500">Submitted</p>
+              <p className="font-medium">
+                {new Date(sponsorship.createdAt).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
             </div>
           </div>
 
+          {/* Action Buttons */}
           <div className="flex flex-col gap-2">
             <div className="flex gap-2">
               <Button 
                 onClick={() => handleApprove(sponsorship._id)}
-                className="flex-1 flex items-center justify-center gap-1"
-                size="sm"
+                className="flex-1 flex items-center justify-center gap-1 bg-green-600 hover:bg-green-700"
+                size="default"
                 disabled={approveMutation.isPending}
               >
                 {approveMutation.isPending ? (
@@ -313,13 +328,13 @@ const LogoReview = () => {
                 ) : (
                   <CheckCircle className="w-4 h-4" />
                 )}
-                Approve
+                Approve Logo
               </Button>
               <Button 
                 onClick={() => handleReject(sponsorship._id)}
-                variant="outline"
-                className="flex-1 flex items-center justify-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
-                size="sm"
+                variant="destructive"
+                className="flex-1 flex items-center justify-center gap-1"
+                size="default"
                 disabled={rejectMutation.isPending}
               >
                 {rejectMutation.isPending ? (
@@ -327,18 +342,20 @@ const LogoReview = () => {
                 ) : (
                   <XCircle className="w-4 h-4" />
                 )}
-                Reject
+                Reject Logo
+              </Button>
+              <Button 
+                variant="outline" 
+                size="default"
+                className="flex items-center justify-center gap-1 min-w-[120px]"
+                onClick={() => window.open(sponsorship.logoUrl.startsWith('http') 
+                  ? sponsorship.logoUrl 
+                  : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`, '_blank')}
+              >
+                <Download className="w-4 h-4" />
+                Download
               </Button>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex items-center justify-center gap-1"
-              onClick={() => window.open(sponsorship.logoUrl.startsWith('http') ? sponsorship.logoUrl : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`, '_blank')}
-            >
-              <Download className="w-4 h-4" />
-              Download Original
-            </Button>
           </div>
         </div>
       </CardContent>
@@ -347,13 +364,14 @@ const LogoReview = () => {
 
   return (
     <AdminLayout title="Logo Review" subtitle="Review and approve submitted campaign logos">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
         {Array.isArray(sponsorships) && sponsorships.length > 0 ? (
           sponsorships.map(renderSponsorshipCard)
         ) : (
-          <div className="col-span-full text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No pending logos</h3>
-            <p className="text-gray-500">All logos have been reviewed</p>
+          <div className="col-span-full flex flex-col items-center justify-center py-16 bg-gray-50 rounded-lg">
+            <CheckCircle className="w-12 h-12 text-green-500 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">All Caught Up!</h3>
+            <p className="text-gray-500 text-center">No pending logos to review at the moment.</p>
           </div>
         )}
       </div>

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import config from '@/config';
 import { Country, City, DistributionCategory, DistributionPoint, DistributionSettings } from '@/types/distribution';
 
 const BASE_URL = '/api/admin/distribution';
@@ -56,4 +57,39 @@ export const updateDistributionPoint = async (id: string, updates: Partial<Distr
 export const deleteDistributionPoint = async (id: string): Promise<void> => {
   const { data } = await axios.delete(`${BASE_URL}/points/${id}`);
   return data;
+};
+
+export const updateCountryStatus = async (id: string, isActive: boolean) => {
+  const response = await axios.patch(`${config.apiUrl}/api/admin/distribution/countries/${id}/status`, { isActive });
+  return response.data;
+};
+
+export const updateCityStatus = async (id: string, isActive: boolean) => {
+  const response = await axios.patch(`${config.apiUrl}/api/admin/distribution/cities/${id}/status`, { isActive });
+  return response.data;
+};
+
+export const updateCategoryStatus = async (id: string, isActive: boolean) => {
+  const response = await axios.patch(`${config.apiUrl}/api/admin/distribution/categories/${id}/status`, { isActive });
+  return response.data;
+};
+
+export const updateDistributionPointStatus = async (id: string, isActive: boolean) => {
+  const response = await axios.patch(`${config.apiUrl}/api/admin/distribution/points/${id}/status`, { isActive });
+  return response.data;
+};
+
+export const deleteCountry = async (id: string) => {
+  const response = await axios.delete(`${config.apiUrl}/api/admin/distribution/countries/${id}`);
+  return response.data;
+};
+
+export const deleteCity = async (id: string) => {
+  const response = await axios.delete(`${config.apiUrl}/api/admin/distribution/cities/${id}`);
+  return response.data;
+};
+
+export const deleteCategory = async (id: string) => {
+  const response = await axios.delete(`${config.apiUrl}/api/admin/distribution/categories/${id}`);
+  return response.data;
 };

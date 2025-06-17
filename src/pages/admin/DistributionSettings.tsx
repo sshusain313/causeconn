@@ -39,7 +39,14 @@ import {
   createCategory,
   createDistributionPoint,
   updateDistributionPoint,
-  deleteDistributionPoint
+  deleteDistributionPoint,
+  updateCountryStatus,
+  updateCityStatus,
+  updateCategoryStatus,
+  updateDistributionPointStatus,
+  deleteCountry,
+  deleteCity,
+  deleteCategory
 } from '@/services/distributionService';
 import { Country, City, DistributionCategory, DistributionPoint } from '@/types/distribution';
 
@@ -107,6 +114,66 @@ const DistributionSettings = () => {
     },
   });
 
+  const updateCountryStatusMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      updateCountryStatus(id, isActive),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['distribution-settings'] });
+      toast({ title: 'Country status updated successfully' });
+    },
+  });
+
+  const updateCityStatusMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      updateCityStatus(id, isActive),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['distribution-settings'] });
+      toast({ title: 'City status updated successfully' });
+    },
+  });
+
+  const updateCategoryStatusMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      updateCategoryStatus(id, isActive),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['distribution-settings'] });
+      toast({ title: 'Category status updated successfully' });
+    },
+  });
+
+  const updatePointStatusMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      updateDistributionPointStatus(id, isActive),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['distribution-settings'] });
+      toast({ title: 'Distribution point status updated successfully' });
+    },
+  });
+
+  const deleteCountryMutation = useMutation({
+    mutationFn: deleteCountry,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['distribution-settings'] });
+      toast({ title: 'Country deleted successfully' });
+    },
+  });
+
+  const deleteCityMutation = useMutation({
+    mutationFn: deleteCity,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['distribution-settings'] });
+      toast({ title: 'City deleted successfully' });
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: deleteCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['distribution-settings'] });
+      toast({ title: 'Category deleted successfully' });
+    },
+  });
+
   if (isLoading) {
     return (
       <AdminLayout title="Distribution Settings" subtitle="Manage countries, cities, categories, and distribution points">
@@ -143,6 +210,7 @@ const DistributionSettings = () => {
               <TableHead>Code</TableHead>
               <TableHead>Cities</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -157,6 +225,17 @@ const DistributionSettings = () => {
                   <Badge variant={country.isActive ? 'default' : 'secondary'}>
                     {country.isActive ? 'Active' : 'Inactive'}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteCountryMutation.mutate(country._id!)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -199,6 +278,7 @@ const DistributionSettings = () => {
               <TableHead>State</TableHead>
               <TableHead>Distribution Points</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -216,6 +296,17 @@ const DistributionSettings = () => {
                   <Badge variant={city.isActive ? 'default' : 'secondary'}>
                     {city.isActive ? 'Active' : 'Inactive'}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteCityMutation.mutate(city._id!)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -239,6 +330,7 @@ const DistributionSettings = () => {
               <TableHead>Default Totes</TableHead>
               <TableHead>Total Points</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -258,6 +350,17 @@ const DistributionSettings = () => {
                   <Badge variant={category.isActive ? 'default' : 'secondary'}>
                     {category.isActive ? 'Active' : 'Inactive'}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteCategoryMutation.mutate(category._id!)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
