@@ -60,36 +60,36 @@ export const deleteDistributionPoint = async (id: string): Promise<void> => {
 };
 
 export const updateCountryStatus = async (id: string, isActive: boolean) => {
-  const response = await axios.patch(`${config.apiUrl}/api/admin/distribution/countries/${id}/status`, { isActive });
+  const response = await axios.patch(`${BASE_URL}/countries/${id}/status`, { isActive });
   return response.data;
 };
 
 export const updateCityStatus = async (id: string, isActive: boolean) => {
-  const response = await axios.patch(`${config.apiUrl}/api/admin/distribution/cities/${id}/status`, { isActive });
+  const response = await axios.patch(`${BASE_URL}/cities/${id}/status`, { isActive });
   return response.data;
 };
 
 export const updateCategoryStatus = async (id: string, isActive: boolean) => {
-  const response = await axios.patch(`${config.apiUrl}/api/admin/distribution/categories/${id}/status`, { isActive });
+  const response = await axios.patch(`${BASE_URL}/categories/${id}/status`, { isActive });
   return response.data;
 };
 
 export const updateDistributionPointStatus = async (id: string, isActive: boolean) => {
-  const response = await axios.patch(`${config.apiUrl}/api/admin/distribution/points/${id}/status`, { isActive });
+  const response = await axios.patch(`${BASE_URL}/points/${id}/status`, { isActive });
   return response.data;
 };
 
 export const deleteCountry = async (id: string) => {
-  const response = await axios.delete(`${config.apiUrl}/api/admin/distribution/countries/${id}`);
+  const response = await axios.delete(`${BASE_URL}/countries/${id}`);
   return response.data;
 };
 
 export const deleteCity = async (id: string) => {
-  const response = await axios.delete(`${config.apiUrl}/api/admin/distribution/cities/${id}`);
+  const response = await axios.delete(`${BASE_URL}/cities/${id}`);
   return response.data;
 };
 
 export const deleteCategory = async (id: string) => {
-  const response = await axios.delete(`${config.apiUrl}/api/admin/distribution/categories/${id}`);
+  const response = await axios.delete(`${BASE_URL}/categories/${id}`);
   return response.data;
 };

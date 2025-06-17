@@ -67,4 +67,124 @@ export const updatePoint = async (req: Request, res: Response) => {
 export const deletePoint = async (req: Request, res: Response) => {
   await DistributionPoint.findByIdAndDelete(req.params.id);
   res.json({ success: true });
+};
+
+// Delete methods
+export const deleteCountry = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const country = await Country.findByIdAndDelete(id);
+    if (!country) {
+      return res.status(404).json({ message: 'Country not found' });
+    }
+    res.json({ message: 'Country deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting country:', error);
+    res.status(500).json({ message: 'Error deleting country' });
+  }
+};
+
+export const deleteCity = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const city = await City.findByIdAndDelete(id);
+    if (!city) {
+      return res.status(404).json({ message: 'City not found' });
+    }
+    res.json({ message: 'City deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting city:', error);
+    res.status(500).json({ message: 'Error deleting city' });
+  }
+};
+
+export const deleteCategory = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const category = await DistributionCategory.findByIdAndDelete(id);
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    res.json({ message: 'Category deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    res.status(500).json({ message: 'Error deleting category' });
+  }
+};
+
+// Status update methods
+export const updateCountryStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+    const country = await Country.findByIdAndUpdate(
+      id,
+      { isActive },
+      { new: true }
+    );
+    if (!country) {
+      return res.status(404).json({ message: 'Country not found' });
+    }
+    res.json(country);
+  } catch (error) {
+    console.error('Error updating country status:', error);
+    res.status(500).json({ message: 'Error updating country status' });
+  }
+};
+
+export const updateCityStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+    const city = await City.findByIdAndUpdate(
+      id,
+      { isActive },
+      { new: true }
+    );
+    if (!city) {
+      return res.status(404).json({ message: 'City not found' });
+    }
+    res.json(city);
+  } catch (error) {
+    console.error('Error updating city status:', error);
+    res.status(500).json({ message: 'Error updating city status' });
+  }
+};
+
+export const updateCategoryStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+    const category = await DistributionCategory.findByIdAndUpdate(
+      id,
+      { isActive },
+      { new: true }
+    );
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    res.json(category);
+  } catch (error) {
+    console.error('Error updating category status:', error);
+    res.status(500).json({ message: 'Error updating category status' });
+  }
+};
+
+export const updatePointStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+    const point = await DistributionPoint.findByIdAndUpdate(
+      id,
+      { isActive },
+      { new: true }
+    );
+    if (!point) {
+      return res.status(404).json({ message: 'Distribution point not found' });
+    }
+    res.json(point);
+  } catch (error) {
+    console.error('Error updating distribution point status:', error);
+    res.status(500).json({ message: 'Error updating distribution point status' });
+  }
 }; 
