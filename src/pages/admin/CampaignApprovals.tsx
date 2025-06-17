@@ -1,168 +1,72 @@
-
-// import React, { useState } from 'react';
-// import AdminLayout from '@/components/admin/AdminLayout';
-// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// import { Button } from '@/components/ui/button';
-// import { Badge } from '@/components/ui/badge';
-// import { Input } from '@/components/ui/input';
-// import { useToast } from '@/components/ui/use-toast';
-// import { Search, CheckCircle, XCircle, Clock } from 'lucide-react';
-
-// // Mock pending campaigns data
-// const mockPendingCampaigns = [
-//   {
-//     _id: '1',
-//     title: 'Tech for Good Initiative',
-//     description: 'Providing technology solutions for non-profit organizations.',
-//     category: 'Technology',
-//     targetAmount: 10000,
-//     submittedBy: 'TechCorp Inc.',
-//     submittedAt: new Date('2025-03-20'),
-//     status: 'pending',
-//     documents: ['business-plan.pdf', 'financial-overview.xlsx']
-//   },
-//   {
-//     _id: '2',
-//     title: 'Green Energy Project',
-//     description: 'Installing solar panels in rural communities.',
-//     category: 'Environment',
-//     targetAmount: 15000,
-//     submittedBy: 'GreenFuture Ltd.',
-//     submittedAt: new Date('2025-03-18'),
-//     status: 'under_review',
-//     documents: ['project-proposal.pdf', 'environmental-impact.pdf']
-//   }
-// ];
-
-// const CampaignApprovals = () => {
-//   const { toast } = useToast();
-//   const [searchTerm, setSearchTerm] = useState('');
-//   const [campaigns, setCampaigns] = useState(mockPendingCampaigns);
-
-//   const handleApprove = (campaignId: string) => {
-//     setCampaigns(prev => prev.filter(c => c._id !== campaignId));
-//     toast({
-//       title: 'Campaign Approved',
-//       description: 'The campaign has been approved and is now live.'
-//     });
-//   };
-
-//   const handleReject = (campaignId: string) => {
-//     setCampaigns(prev => prev.filter(c => c._id !== campaignId));
-//     toast({
-//       title: 'Campaign Rejected',
-//       description: 'The campaign has been rejected and the submitter will be notified.',
-//       variant: 'destructive'
-//     });
-//   };
-
-//   const filteredCampaigns = campaigns.filter(campaign =>
-//     campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//     campaign.submittedBy.toLowerCase().includes(searchTerm.toLowerCase())
-//   );
-
-//   return (
-//     <AdminLayout title="Campaign Approvals" subtitle="Review and approve new campaign submissions">
-//       <div className="mb-6">
-//         <div className="relative w-full md:w-80">
-//           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-//           <Input
-//             placeholder="Search campaigns..."
-//             className="pl-9"
-//             value={searchTerm}
-//             onChange={(e) => setSearchTerm(e.target.value)}
-//           />
-//         </div>
-//       </div>
-
-//       <div className="space-y-4">
-//         {filteredCampaigns.map((campaign) => (
-//           <Card key={campaign._id}>
-//             <CardHeader>
-//               <div className="flex justify-between items-start">
-//                 <div>
-//                   <CardTitle className="text-xl">{campaign.title}</CardTitle>
-//                   <p className="text-gray-600 mt-1">Submitted by {campaign.submittedBy}</p>
-//                 </div>
-//                 <Badge 
-//                   variant="outline" 
-//                   className={
-//                     campaign.status === 'pending'
-//                       ? 'bg-yellow-100 text-yellow-800'
-//                       : 'bg-blue-100 text-blue-800'
-//                   }
-//                 >
-//                   <Clock className="w-3 h-3 mr-1" />
-//                   {campaign.status === 'pending' ? 'Pending Review' : 'Under Review'}
-//                 </Badge>
-//               </div>
-//             </CardHeader>
-//             <CardContent>
-//               <p className="text-gray-700 mb-4">{campaign.description}</p>
-//               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-//                 <div>
-//                   <p className="text-sm text-gray-500">Category</p>
-//                   <p className="font-medium">{campaign.category}</p>
-//                 </div>
-//                 <div>
-//                   <p className="text-sm text-gray-500">Goal Amount</p>
-//                   <p className="font-medium">${campaign.targetAmount.toLocaleString()}</p>
-//                 </div>
-//                 <div>
-//                   <p className="text-sm text-gray-500">Submitted</p>
-//                   <p className="font-medium">{campaign.submittedAt.toLocaleDateString()}</p>
-//                 </div>
-//               </div>
-//               <div className="mb-4">
-//                 <p className="text-sm text-gray-500 mb-2">Documents</p>
-//                 <div className="flex flex-wrap gap-2">
-//                   {campaign.documents.map((doc, index) => (
-//                     <Badge key={index} variant="secondary">{doc}</Badge>
-//                   ))}
-//                 </div>
-//               </div>
-//               <div className="flex gap-2">
-//                 <Button 
-//                   onClick={() => handleApprove(campaign._id)}
-//                   className="flex items-center gap-1"
-//                 >
-//                   <CheckCircle className="w-4 h-4" />
-//                   Approve
-//                 </Button>
-//                 <Button 
-//                   onClick={() => handleReject(campaign._id)}
-//                   variant="outline"
-//                   className="flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
-//                 >
-//                   <XCircle className="w-4 h-4" />
-//                   Reject
-//                 </Button>
-//                 <Button variant="outline">Review Details</Button>
-//               </div>
-//             </CardContent>
-//           </Card>
-//         ))}
-
-//         {filteredCampaigns.length === 0 && (
-//           <div className="text-center py-12">
-//             <h3 className="text-xl font-semibold text-gray-700 mb-2">No pending campaigns</h3>
-//             <p className="text-gray-500">All campaigns have been reviewed</p>
-//           </div>
-//         )}
-//       </div>
-//     </AdminLayout>
-//   );
-// };
-
-// export default CampaignApprovals;
-
-
-import { useState } from 'react';
-// import { AdminSidebar } from '@/components/AdminSidebar';
+import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Search, ChevronDown, ChevronRight, Download, Check, X, Eye } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import authAxios from '@/utils/authAxios';
+import { AxiosResponse } from 'axios';
 
-// StatusBadge component inline
+interface Cause {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  targetAmount: number;
+  currentAmount: number;
+  imageUrl: string;
+}
+interface Sponsorship {
+  _id: string;
+  status: string;
+  logoStatus?: string;
+  cause: Cause;
+  organizationName: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  logoUrl: string;
+  toteDetails?: {
+    quantity?: number;
+    numberOfTotes?: number;
+    unitPrice?: number;
+    totalAmount?: number;
+  };
+  distributionDetails?: {
+    type?: string;
+    cities?: string[];
+    startDate?: string;
+    endDate?: string;
+    locations?: Array<{
+      name?: string;
+      address?: string;
+      contactPerson?: string;
+      phone?: string;
+      totesCount?: number;
+    }>;
+  };
+  documents: Array<{
+    name: string;
+    type: string;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ApiResponse<T> {
+  data: T;
+  status: number;
+  message?: string;
+}
+
+interface Organization {
+  _id?: string;
+  name?: string;
+  contactName?: string;
+  email?: string;
+  phone?: string;
+  logoUrl?: string;
+}
+
+// StatusBadge component
 const StatusBadge = ({ status }: { status: string }) => {
   const getStatusStyles = (status: string) => {
     switch (status.toLowerCase()) {
@@ -205,7 +109,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-// ExpandableSection component inline
+// ExpandableSection component
 interface ExpandableSectionProps {
   title: string;
   isExpanded: boolean;
@@ -238,50 +142,13 @@ const ExpandableSection = ({ title, isExpanded, onToggle, children }: Expandable
   );
 };
 
-// Campaign interface and CampaignCard component inline
-interface Campaign {
-  id: number;
-  title: string;
-  status: string;
-  submittedBy: string;
-  submittedDate: string;
-  description: string;
-  category: string;
-  goalAmount: number;
-  organizationInfo: {
-    name: string;
-    contactName: string;
-    email: string;
-    phone: string;
-    logo: string;
-  };
-  toteDetails: {
-    quantity: number;
-    numberOfTotes: number;
-    unitPrice: number;
-    totalAmount: number;
-  };
-  distributionDetails: {
-    type: string;
-    cities: string[];
-    startDate: string;
-    endDate: string;
-    locations: Array<{
-      name: string;
-      address: string;
-      contactPerson: string;
-      phone: string;
-      totesCount: number;
-    }>;
-  };
-  documents: Array<{
-    name: string;
-    type: string;
-  }>;
-}
-
-const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
+const CampaignCard = ({ sponsorship, onApprove, onReject }: { 
+  sponsorship: Sponsorship;
+  onApprove: (id: string) => void;
+  onReject: (id: string, reason: string) => void;
+}) => {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  const [rejectionReason, setRejectionReason] = useState('');
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev =>
@@ -291,43 +158,40 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
     );
   };
 
-  const handleApprove = () => {
-    console.log('Approving campaign:', campaign.id);
-  };
-
-  const handleReject = () => {
-    console.log('Rejecting campaign:', campaign.id);
-  };
-
-  const handleReviewDetails = () => {
-    console.log('Reviewing details for campaign:', campaign.id);
-  };
-
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">{campaign.title}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">{sponsorship.cause.title}</h3>
           <p className="text-sm text-gray-600">
-            Submitted by: <span className="font-medium">{campaign.submittedBy}</span>
+            Submitted by: <span className="font-medium">{sponsorship.organizationName || 'Unknown Organization'}</span>
           </p>
-          <p className="text-sm text-gray-500">Submitted: {campaign.submittedDate}</p>
+          <p className="text-sm text-gray-500">
+            Submitted: {new Date(sponsorship.createdAt).toLocaleDateString()}
+          </p>
         </div>
-        <StatusBadge status={campaign.status} />
+        <div className="flex flex-col items-end gap-2">
+          <StatusBadge status={sponsorship.status} />
+          {sponsorship.logoStatus && (
+            <StatusBadge status={sponsorship.logoStatus} />
+          )}
+        </div>
       </div>
 
       {/* Description & Basic Info */}
       <div className="mb-4">
-        <p className="text-gray-700 mb-3">{campaign.description}</p>
+        <p className="text-gray-700 mb-3">{sponsorship.cause.description}</p>
         <div className="flex justify-between items-center">
           <div>
             <span className="text-sm text-gray-500">Category: </span>
-            <span className="text-sm font-medium text-gray-900">{campaign.category}</span>
+            <span className="text-sm font-medium text-gray-900">{sponsorship.cause.category}</span>
           </div>
           <div className="text-right">
             <span className="text-sm text-gray-500">Goal Amount: </span>
-            <span className="text-lg font-bold text-gray-900">${campaign.goalAmount.toLocaleString()}</span>
+            {/* <span className="text-sm font-medium text-gray-900">{sponsorship.cause.targetAmount}</span> */}
+            <span className="text-lg font-bold text-gray-900">{sponsorship.cause.targetAmount}
+            </span>
           </div>
         </div>
       </div>
@@ -343,29 +207,36 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
             <div className="space-y-2">
               <div>
                 <span className="text-sm font-medium text-gray-700">Organization: </span>
-                <span className="text-sm text-gray-600">{campaign.organizationInfo.name}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Contact: </span>
-                <span className="text-sm text-gray-600">{campaign.organizationInfo.contactName}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Email: </span>
-                <span className="text-sm text-gray-600">{campaign.organizationInfo.email}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Phone: </span>
-                <span className="text-sm text-gray-600">{campaign.organizationInfo.phone}</span>
+                <span className="text-sm text-gray-600">{sponsorship.organizationName || 'Unknown'}</span>
               </div>
             </div>
             <div className="flex justify-center md:justify-end">
               <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
-                <span className="text-xs text-gray-500">Logo</span>
+                {sponsorship.logoUrl ? (
+                  <img 
+                    src={sponsorship.logoUrl} 
+                    alt="Organization Logo" 
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <span className="text-xs text-gray-500">No Logo</span>
+                )}
               </div>
             </div>
+             <div>
+                <span className="text-sm font-medium text-gray-700">Contact Name: </span>
+                <span className="text-sm text-gray-600">{sponsorship.contactName || 'Unknown'}</span>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Email: </span>
+                <span className="text-sm text-gray-600">{sponsorship.contactName || 'Unknown'}</span>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Phone: </span>
+                <span className="text-sm text-gray-600">{sponsorship.contactName || 'Unknown'}</span>
+              </div>
           </div>
         </ExpandableSection>
-
         <ExpandableSection
           title="Tote Details"
           isExpanded={expandedSections.includes('tote')}
@@ -374,23 +245,22 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <span className="text-sm font-medium text-gray-700">Quantity: </span>
-              <span className="text-sm text-gray-600">{campaign.toteDetails.quantity}</span>
+              <span className="text-sm text-gray-600">{sponsorship.toteDetails?.quantity ?? 'N/A'}</span>
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">Number of Totes: </span>
-              <span className="text-sm text-gray-600">{campaign.toteDetails.numberOfTotes}</span>
+              <span className="text-sm text-gray-600">{sponsorship.toteDetails?.numberOfTotes ?? 'N/A'}</span>
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">Unit Price: </span>
-              <span className="text-sm text-gray-600">${campaign.toteDetails.unitPrice}</span>
+              <span className="text-sm text-gray-600">{typeof sponsorship.toteDetails?.unitPrice === 'number' ? `$${sponsorship.toteDetails.unitPrice}` : 'N/A'}</span>
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">Total: </span>
-              <span className="text-sm font-semibold text-gray-900">${campaign.toteDetails.totalAmount.toLocaleString()}</span>
+              <span className="text-sm font-semibold text-gray-900">{typeof sponsorship.toteDetails?.totalAmount === 'number' ? `$${sponsorship.toteDetails.totalAmount.toLocaleString()}` : 'N/A'}</span>
             </div>
           </div>
         </ExpandableSection>
-
         <ExpandableSection
           title="Distribution Details"
           isExpanded={expandedSections.includes('distribution')}
@@ -400,238 +270,207 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <span className="text-sm font-medium text-gray-700">Type: </span>
-                <span className="text-sm text-gray-600">{campaign.distributionDetails.type}</span>
+                <span className="text-sm text-gray-600">{sponsorship.distributionDetails?.type ?? 'N/A'}</span>
               </div>
               <div>
                 <span className="text-sm font-medium text-gray-700">Duration: </span>
                 <span className="text-sm text-gray-600">
-                  {campaign.distributionDetails.startDate} — {campaign.distributionDetails.endDate}
+                  {sponsorship.distributionDetails?.startDate && sponsorship.distributionDetails?.endDate
+                    ? `${new Date(sponsorship.distributionDetails.startDate).toLocaleDateString()} — ${new Date(sponsorship.distributionDetails.endDate).toLocaleDateString()}`
+                    : 'N/A'}
                 </span>
               </div>
             </div>
-            
             <div>
               <span className="text-sm font-medium text-gray-700">Cities: </span>
               <span className="text-sm text-gray-600">
-                {campaign.distributionDetails.cities.join(', ')}
+                {Array.isArray(sponsorship.distributionDetails?.cities)
+                  ? sponsorship.distributionDetails.cities.join(', ')
+                  : 'N/A'}
               </span>
             </div>
-
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-2">Distribution Locations:</h4>
               <div className="space-y-3">
-                {campaign.distributionDetails.locations.map((location, index) => (
-                  <div key={index} className="bg-gray-50 p-3 rounded-md">
-                    <div className="grid md:grid-cols-2 gap-2">
-                      <div>
-                        <div className="font-medium text-sm text-gray-900">{location.name}</div>
-                        <div className="text-sm text-gray-600">{location.address}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-600">
-                          Contact: {location.contactPerson}
+                {Array.isArray(sponsorship.distributionDetails?.locations)
+                  ? sponsorship.distributionDetails.locations.map((location, index) => (
+                      <div key={index} className="bg-gray-50 p-3 rounded-md">
+                        <div className="grid md:grid-cols-2 gap-2">
+                          <div>
+                            <div className="font-medium text-sm text-gray-900">{location.name}</div>
+                            <div className="text-sm text-gray-600">{location.address}</div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-600">
+                              Contact: {location.contactPerson}
+                            </div>
+                            <div className="text-sm text-gray-600">Phone: {location.phone}</div>
+                            <div className="text-sm font-medium text-gray-900">
+                              Totes: {location.totesCount}
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-600">Phone: {location.phone}</div>
-                        <div className="text-sm font-medium text-gray-900">
-                          Totes: {location.totesCount}
-                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    ))
+                  : <span className="text-xs text-gray-500">No Locations</span>}
               </div>
             </div>
           </div>
         </ExpandableSection>
       </div>
-
-      {/* Documents */}
-      <div className="mb-6">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Documents:</h4>
-        <div className="flex flex-wrap gap-2">
-          {campaign.documents.map((doc, index) => (
-            <button
-              key={index}
-              className="inline-flex items-center px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-            >
-              <Download className="w-3 h-3 mr-1" />
-              {doc.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4 border-t border-gray-100">
         <button
-          onClick={handleApprove}
+          onClick={() => onApprove(sponsorship._id)}
           className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
         >
           <Check className="w-4 h-4 mr-1" />
           Approve
         </button>
         <button
-          onClick={handleReject}
+          onClick={() => onReject(sponsorship._id, rejectionReason)}
           className="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 transition-colors"
         >
           <X className="w-4 h-4 mr-1" />
           Reject
         </button>
-        <button
-          onClick={handleReviewDetails}
-          className="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-md hover:bg-gray-700 transition-colors"
-        >
-          <Eye className="w-4 h-4 mr-1" />
-          Review Details
-        </button>
+        <input
+          type="text"
+          placeholder="Rejection reason..."
+          value={rejectionReason}
+          onChange={(e) => setRejectionReason(e.target.value)}
+          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
     </div>
   );
 };
 
-// Sample campaign data
-const campaigns = [
-  {
-    id: 1,
-    title: "Tech for Good Initiative",
-    status: "pending",
-    submittedBy: "TechCorp Inc.",
-    submittedDate: "3/20/2025",
-    description: "Providing technology solutions for non-profit organizations.",
-    category: "Technology",
-    goalAmount: 10000,
-    organizationInfo: {
-      name: "TechCorp Inc.",
-      contactName: "John Smith",
-      email: "john@techcorp.com",
-      phone: "+1 (555) 123-4567",
-      logo: "/placeholder-logo.png"
-    },
-    toteDetails: {
-      quantity: 500,
-      numberOfTotes: 500,
-      unitPrice: 20,
-      totalAmount: 10000
-    },
-    distributionDetails: {
-      type: "Physical",
-      cities: ["New York", "Los Angeles", "Chicago"],
-      startDate: "4/1/2025",
-      endDate: "6/30/2025",
-      locations: [
-        {
-          name: "NYC Community Center",
-          address: "123 Main St, New York, NY 10001",
-          contactPerson: "Sarah Johnson",
-          phone: "+1 (555) 987-6543",
-          totesCount: 200
-        },
-        {
-          name: "LA Distribution Hub",
-          address: "456 Oak Ave, Los Angeles, CA 90210",
-          contactPerson: "Mike Davis",
-          phone: "+1 (555) 456-7890",
-          totesCount: 300
-        }
-      ]
-    },
-    documents: [
-      { name: "business-plan.pdf", type: "pdf" },
-      { name: "financial-overview.xlsx", type: "xlsx" }
-    ]
-  },
-  {
-    id: 2,
-    title: "Green Energy Project",
-    status: "under-review",
-    submittedBy: "GreenFuture Ltd.",
-    submittedDate: "3/18/2025",
-    description: "Installing solar panels in rural communities.",
-    category: "Environment",
-    goalAmount: 15000,
-    organizationInfo: {
-      name: "GreenFuture Ltd.",
-      contactName: "Emma Wilson",
-      email: "emma@greenfuture.org",
-      phone: "+1 (555) 234-5678",
-      logo: "/placeholder-logo.png"
-    },
-    toteDetails: {
-      quantity: 750,
-      numberOfTotes: 750,
-      unitPrice: 20,
-      totalAmount: 15000
-    },
-    distributionDetails: {
-      type: "Physical",
-      cities: ["Austin", "Denver", "Portland"],
-      startDate: "4/15/2025",
-      endDate: "7/15/2025",
-      locations: [
-        {
-          name: "Austin Green Center",
-          address: "789 Pine St, Austin, TX 78701",
-          contactPerson: "David Brown",
-          phone: "+1 (555) 345-6789",
-          totesCount: 300
-        },
-        {
-          name: "Denver Eco Hub",
-          address: "321 Elm St, Denver, CO 80202",
-          contactPerson: "Lisa Garcia",
-          phone: "+1 (555) 678-9012",
-          totesCount: 450
-        }
-      ]
-    },
-    documents: [
-      { name: "project-proposal.pdf", type: "pdf" },
-      { name: "environmental-impact.pdf", type: "pdf" }
-    ]
-  }
-];
-
-const Index = () => {
+const CampaignApprovals = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [sponsorships, setSponsorships] = useState<Sponsorship[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const filteredCampaigns = campaigns.filter(campaign =>
-    campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    campaign.submittedBy.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    fetchSponsorships();
+  }, []);
+
+  const fetchSponsorships = async () => {
+    try {
+      setLoading(true);
+      const response = await authAxios.get<Sponsorship[]>('/api/sponsorships/pending');
+      setSponsorships(response.data);
+    } catch (error) {
+      console.error('Error fetching sponsorships:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch pending sponsorships",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApprove = async (id: string) => {
+    try {
+      await authAxios.post(`/api/sponsorships/${id}/approve`);
+      toast({
+        title: "Success",
+        description: "Sponsorship approved successfully"
+      });
+      fetchSponsorships(); // Refresh the list
+    } catch (error) {
+      console.error('Error approving sponsorship:', error);
+      toast({
+        title: "Error",
+        description: "Failed to approve sponsorship",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleReject = async (id: string, reason: string) => {
+    if (!reason.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide a reason for rejection",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      await authAxios.post(`/api/sponsorships/${id}/reject`, { reason });
+      toast({
+        title: "Success",
+        description: "Sponsorship rejected successfully"
+      });
+      fetchSponsorships(); // Refresh the list
+    } catch (error) {
+      console.error('Error rejecting sponsorship:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reject sponsorship",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const filteredSponsorships = sponsorships.filter(sponsorship =>
+    sponsorship.cause.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    sponsorship.organizationName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <AdminLayout title="Causes Management" subtitle="Manage and monitor all causes">
-      
-      <div className="flex-1 p-6">
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <h1 className="text-2xl font-semibold text-gray-800">Campaign Approvals</h1>
-            <span className="text-sm text-gray-500">Admin (Admin)</span>
+      <AdminLayout title="Campaign Approvals" subtitle="Manage and monitor all causes">
+        <div className="flex-1 p-6">
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <h1 className="text-2xl font-semibold text-gray-800">Campaign Approvals</h1>
+              <span className="text-sm text-gray-500">Admin (Admin)</span>
+            </div>
+            <p className="text-gray-600 mb-4">Review and approve new campaign submissions</p>
+            
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search campaigns..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
           </div>
-          <p className="text-gray-600 mb-4">Review and approve new campaign submissions</p>
-          
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search campaigns..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-        </div>
 
-        <div className="space-y-6">
-          {filteredCampaigns.map((campaign) => (
-            <CampaignCard key={campaign.id} campaign={campaign} />
-          ))}
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+          ) : filteredSponsorships.length > 0 ? (
+            <div className="space-y-6">
+              {filteredSponsorships.map((sponsorship) => (
+                <CampaignCard
+                  key={sponsorship._id}
+                  sponsorship={sponsorship}
+                  onApprove={handleApprove}
+                  onReject={handleReject}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">No pending campaigns</h3>
+              <p className="text-gray-500">All campaigns have been reviewed</p>
+            </div>
+          )}
         </div>
-      </div>
       </AdminLayout>
     </div>
   );
 };
 
-export default Index;
+export default CampaignApprovals;

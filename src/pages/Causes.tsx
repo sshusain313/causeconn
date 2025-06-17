@@ -135,26 +135,18 @@ const CausesPage = () => {
   
   // Get the details/claim button based on sponsorship status
   const getDetailsOrClaimButton = (cause: Cause) => {
-    const isSponsored = hasApprovedSponsorship(cause);
-    
-    // Always show Claim a Tote button if sponsored
-    if (isSponsored) {
-      return (
-        <Button 
-          onClick={() => handleClaimAction(cause)} 
-          className="w-full bg-black text-white"
-        >
-          Claim a Tote
-        </Button>
-      );
-    }
-    
-    // Show See Details button only if not sponsored
-    return (
+    return hasApprovedSponsorship(cause) ? (
+      <Button 
+        onClick={() => navigate(`/claim/${cause._id}`)} 
+        className="w-full bg-black text-white"
+      >
+        Claim a Tote
+      </Button>
+    ) : (
       <Button 
         onClick={() => navigate(`/cause/${cause._id}`)} 
-        variant="outline" 
         className="w-full"
+        variant="outline"
       >
         See Details
       </Button>
@@ -360,7 +352,23 @@ const CausesPage = () => {
                   </div>
                   
                   <div className="space-y-3">
-                    {getDetailsOrClaimButton(cause)}
+                    {/* {getDetailsOrClaimButton(cause)} */}
+                    {hasApprovedSponsorship(cause) ? (
+                                          <Button 
+                                            onClick={() => navigate(`/claim/${cause._id}`)} 
+                                            className="w-full bg-black text-white"
+                                          >
+                                            Claim a Tote
+                                          </Button>
+                                        ) : (
+                                          <Button 
+                                            onClick={() => navigate(`/cause/${cause._id}`)} 
+                                            className="w-full"
+                                            variant="outline"
+                                          >
+                                            See Details
+                                          </Button>
+                                        )}
                     {getSponsorButton(cause)}
                   </div>
                 </CardContent>
