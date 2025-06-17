@@ -41,7 +41,7 @@ const SponsorFormContainer: React.FC<SponsorFormContainerProps> = ({ causeId }) 
       
       // Send data to the server using config.apiUrl to ensure consistency
       // This will properly handle both development and production environments
-      const apiEndpoint = `${config.apiUrl}/api/sponsorships`;
+      const apiEndpoint = `${config.apiUrl}/sponsorships`;
       console.log('Sending sponsorship to endpoint:', apiEndpoint);
       
       // Add additional debugging for API URL
@@ -195,7 +195,7 @@ const SponsorFormContainer: React.FC<SponsorFormContainerProps> = ({ causeId }) 
           console.log('Received 405 error, trying alternative endpoint format...');
           
           // Try with a different endpoint format (without /api prefix)
-          const altEndpoint = apiEndpoint.replace('/api/sponsorships', '/sponsorships');
+          const altEndpoint = apiEndpoint.replace('/sponsorships', '/sponsorships');
           console.log('Trying alternative endpoint:', altEndpoint);
           
           try {
