@@ -211,4 +211,53 @@ export const getSponsorshipById = async (req: Request, res: Response): Promise<v
     console.error('Error fetching sponsorship:', error);
     res.status(500).json({ message: 'Error fetching sponsorship' });
   }
+};
+
+/**
+ * Handle logo reupload for a rejected sponsorship
+ */
+export const reuploadLogo = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { sponsorshipId } = req.params;
+    const { logoUrl } = req.body;
+
+    if (!logoUrl) {
+      res.status(400).json({ message: 'Logo URL is required' });
+      return;
+    }
+
+    const sponsorship = await Sponsorship.findById(sponsorshipId);
+    if (!sponsorship) {
+      res.status(404).json({ message: 'Sponsorship not found' });
+      return;
+    }
+
+    // Store the previous logo URL for reference
+    const previousLogoUrl = sponsorship.logoUrl;
+
+    // Update the sponsorship with the new logo URL
+    sponsorship.logoUrl = logoUrl;
+    
+    // Change status back to pending for review
+    sponsorship.status = SponsorshipStatus.PENDING;
+    
+    // Clear any previous rejection reason
+    sponsorship.rejectionReason = undefined;
+    
+    await sponsorship.save();
+
+    // Log the reupload activity
+    console.log(`Logo reuploaded for sponsorship ${sponsorshipId}. Previous URL: ${previousLogoUrl}, New URL: ${logoUrl}`);
+
+    res.status(200).json({ 
+      message: 'Logo updated successfully and pending review',
+      sponsorship
+    });
+  } catch (error) {
+    console.error('Error reuploading logo:', error);
+    res.status(500).json({ 
+      message: 'Error updating logo', 
+      error: error.message 
+    });
+  }
 }; 

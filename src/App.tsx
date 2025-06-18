@@ -22,6 +22,7 @@ import CreateCausePage from "./pages/CreateCause";
 // Public Pages
 import WhySponsorPage from "./pages/WhySponsor";
 import WhyClaimPage from "./pages/WhyClaim";
+import LogoReuploadPage from "./pages/sponsor/LogoReupload";
 
 // Claimer Journey Pages
 import ClaimFormPage from "./pages/claimer/ClaimForm";
@@ -77,6 +78,7 @@ const App: React.FC = () => {
                 {/* Public Information Pages */}
                 <Route path="/why-sponsor" element={<WhySponsorPage />} />
                 <Route path="/why-claim" element={<WhyClaimPage />} />
+                <Route path="/sponsor/logo-reupload/:sponsorshipId" element={<LogoReuploadPage />} />
                 
                 {/* Claimer Journey Routes */}
                 {/* Fix route ordering - more specific routes must come before dynamic routes */}

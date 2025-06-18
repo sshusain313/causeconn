@@ -5,43 +5,124 @@ import Cause, { CauseStatus } from '../models/Cause';
 // Get all causes
 export const getAllCauses = async (req: Request, res: Response) => {
   try {
-    const { status, category, search, include } = req.query;
+    const { category, search, include } = req.query;
     
-    let query: any = {};
+    // Build the aggregation pipeline
+    const pipeline = [];
     
-    // Filter by status if provided
-    if (status) {
-      query.status = status;
-    }
+    // First stage: Lookup sponsorships
+    pipeline.push({
+      $lookup: {
+        from: 'sponsorships',
+        localField: '_id',
+        foreignField: 'cause',
+        as: 'sponsorships'
+      }
+    });
+    
+    // Add filter for approved sponsorships
+    pipeline.push({
+      $addFields: {
+        hasApprovedSponsorship: {
+          $gt: [
+            {
+              $size: {
+                $filter: {
+                  input: '$sponsorships',
+                  as: 'sponsorship',
+                  cond: { $eq: ['$$sponsorship.status', 'approved'] }
+                }
+              }
+            },
+            0
+          ]
+        }
+      }
+    });
+    
+    // Match stage for filtering
+    const matchStage: any = {};
     
     // Filter by category if provided
     if (category) {
-      query.category = category;
+      matchStage.category = category;
     }
     
     // Search in title or description if search term provided
     if (search) {
-      query.$or = [
+      matchStage.$or = [
         { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } }
       ];
     }
     
-    let causesQuery = Cause.find(query)
-      .populate('creator', 'name email');
-
-    // Include sponsorships if requested
-    if (include === 'sponsorships' || include === 'all') {
-      causesQuery = causesQuery.populate({
-        path: 'sponsorships',
-        select: '_id status'
-      });
+    // Add match stage if there are any filters
+    if (Object.keys(matchStage).length > 0) {
+      pipeline.push({ $match: matchStage });
     }
     
-    // We'll handle claims calculation after fetching the causes
-    // Don't try to populate claims directly as it might cause issues
+    // Add creator lookup
+    pipeline.push({
+      $lookup: {
+        from: 'users',
+        localField: 'creator',
+        foreignField: '_id',
+        as: 'creator'
+      }
+    });
     
-    const causes = await causesQuery.sort({ createdAt: -1 });
+    // Unwind creator array to object
+    pipeline.push({
+      $unwind: {
+        path: '$creator',
+        preserveNullAndEmptyArrays: true
+      }
+    });
+    
+    // Project stage to shape the output
+    pipeline.push({
+      $project: {
+        _id: 1,
+        title: 1,
+        description: 1,
+        imageUrl: 1,
+        targetAmount: 1,
+        currentAmount: 1,
+        category: 1,
+        status: 1,
+        location: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        hasApprovedSponsorship: 1,
+        'creator._id': 1,
+        'creator.name': 1,
+        'creator.email': 1,
+        sponsorships: {
+          $map: {
+            input: '$sponsorships',
+            as: 'sponsorship',
+            in: {
+              _id: '$$sponsorship._id',
+              status: '$$sponsorship.status',
+              organizationName: '$$sponsorship.organizationName',
+              toteQuantity: '$$sponsorship.toteQuantity',
+              totalAmount: '$$sponsorship.totalAmount',
+              createdAt: '$$sponsorship.createdAt',
+              updatedAt: '$$sponsorship.updatedAt'
+            }
+          }
+        }
+      }
+    });
+    
+    // Sort by creation date
+    pipeline.push({ $sort: { createdAt: -1 } });
+    
+    console.log('Executing aggregation pipeline:', JSON.stringify(pipeline, null, 2));
+    
+    const causes = await Cause.aggregate(pipeline);
+    
+    console.log(`Found ${causes.length} causes`);
     
     res.json(causes);
   } catch (error) {

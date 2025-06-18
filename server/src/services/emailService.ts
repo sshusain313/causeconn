@@ -153,7 +153,7 @@ export const sendLogoRejectionEmail = async (
     console.log(`SENDING REJECTION EMAIL: Preparing to send email to ${email}`);
     
     // Create a secure reupload link
-    const reuploadLink = `https://changebag.org/reupload-logo?sponsorshipId=${data.sponsorshipId}`;
+    const reuploadLink = `https://changebag.org/sponsor/logo-reupload/${data.sponsorshipId}`;
     
     const mailOptions = {
       from: '"CauseBags" <noreply@causebags.com>',
@@ -174,7 +174,16 @@ export const sendLogoRejectionEmail = async (
           </div>
           
           <p><strong>What to do next:</strong></p>
-          <p>Please contact our support team to submit a revised logo that addresses the issues mentioned above.</p>
+          <p>Please upload a revised logo that addresses the issues mentioned above using the button below:</p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a 
+              href="${reuploadLink}"
+              style="background-color: #0070f3; color: white; padding: 12px 24px; border-radius: 4px; text-decoration: none; font-weight: bold; display: inline-block;"
+            >
+              Upload New Logo
+            </a>
+          </div>
           
           <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
           

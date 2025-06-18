@@ -3,7 +3,8 @@ import {
   getPendingSponsorships,
   approveSponsorship,
   rejectSponsorship,
-  getSponsorshipById
+  getSponsorshipById,
+  reuploadLogo
 } from '../controllers/sponsorshipController';
 import { authenticateToken } from '../middleware/auth';
 import { adminGuard } from '../middleware/authGuard';
@@ -13,6 +14,7 @@ const router = createRouter();
 
 // Public routes
 router.post('/', createSponsorship);
+router.patch('/:sponsorshipId/reupload', reuploadLogo); // Public route for sponsors to reupload logos
 
 // Admin-only routes
 router.get('/pending', authenticateToken, adminGuard, getPendingSponsorships);

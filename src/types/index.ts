@@ -1,4 +1,3 @@
-
 export type UserRole = "sponsor" | "claimer" | "admin" | "user";
 
 export interface User {
@@ -11,30 +10,35 @@ export interface User {
   updatedAt: Date;
 }
 
+export interface Sponsorship {
+  _id: string;
+  status: 'pending' | 'approved' | 'rejected' | 'completed' | 'failed';
+  organizationName: string;
+  toteQuantity: number;
+  totalAmount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Cause {
-  _id?: string;
+  _id: string;
   title: string;
   description: string;
-  story: string;
   imageUrl: string;
-  category: string;
   targetAmount: number;
   currentAmount: number;
-  status: "open" | "sponsored" | "waitlist" | "completed" | "approved";
-  claimedBy?: string;
-  sponsors: Sponsor[];
-  // Add sponsorships field to match API response format
-  sponsorships?: Array<{
+  category: string;
+  status: string;
+  location: string;
+  creator: {
     _id: string;
-    status: string;
-    amount?: number;
-  }>;
-  claims?: ToteClaim[];
-  totalTotes?: number;
-  claimedTotes?: number;
-  availableTotes?: number;
-  createdAt: Date | string;
-  updatedAt: Date | string;
+    name: string;
+    email: string;
+  };
+  hasApprovedSponsorship: boolean;
+  sponsorships: Sponsorship[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Sponsor {
