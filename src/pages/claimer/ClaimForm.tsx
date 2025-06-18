@@ -22,6 +22,14 @@ import { toast } from '@/components/ui/use-toast';
 import config from '@/config';
 import { Loader2 } from 'lucide-react';
 
+enum ClaimStatus {
+  PENDING = 'pending',
+  VERIFIED = 'verified',
+  SHIPPED = 'shipped',
+  DELIVERED = 'delivered',
+  CANCELLED = 'cancelled'
+}
+
 const claimFormSchema = z.object({
   fullName: z.string().min(2, 'Full name is required'),
   email: z.string().email('Valid email is required'),
@@ -147,12 +155,18 @@ const ClaimFormPage = () => {
     if (!cause) return;
 
     try {
-      // Prepare the claim data
+      // Prepare the claim data to match server model
       const claimData = {
-        ...data,
         causeId: id,
         causeTitle: cause.title,
-        status: 'pending',
+        fullName: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        purpose: data.purpose,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zipCode: data.zipCode,
         emailVerified: false
       };
       
@@ -160,31 +174,13 @@ const ClaimFormPage = () => {
       sessionStorage.setItem('claimFormData', JSON.stringify(claimData));
       
       // Send data to the server
-      console.log(`Submitting claim to ${config.apiUrl}/claims`);
-      const response = await fetch(`${config.apiUrl}/claims`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(claimData)
-      });
+      console.log('Submitting claim data:', claimData);
+      const response = await axios.post(`${config.apiUrl}/claims`, claimData);
       
-      console.log('Claim submission response status:', response.status);
+      console.log('Claim submission response:', response.data);
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        
-        // Check if this is a duplicate claim error
-        if (response.status === 400 && errorData.message && errorData.message.includes('already claimed')) {
-          toast({
-            title: "Already Claimed",
-            description: errorData.message || "You have already claimed a tote for this cause.",
-            variant: "destructive",
-          });
-        } else {
-          throw new Error(errorData.message || 'Failed to submit claim');
-        }
-        return;
+      if (response.status !== 201) {
+        throw new Error(response.data.message || 'Failed to submit claim');
       }
       
       // Navigate to verification page
@@ -193,7 +189,7 @@ const ClaimFormPage = () => {
       console.error('Error submitting claim:', error);
       toast({
         title: "Error",
-        description: error.message || "There was a problem submitting your claim. Please try again.",
+        description: error.response?.data?.message || error.message || "There was a problem submitting your claim. Please try again.",
         variant: "destructive",
       });
     }

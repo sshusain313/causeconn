@@ -132,7 +132,7 @@ export const getPendingSponsorships = async (req: Request, res: Response): Promi
 
 export const approveSponsorship = async (req: Request, res: Response): Promise<void> => {
   try {
-    const sponsorship = await Sponsorship.findById(req.params.id);
+    const sponsorship = await Sponsorship.findById(req.params.id).populate('cause', 'title');
     if (!sponsorship) {
       res.status(404).json({ message: 'Sponsorship not found' });
       return;
@@ -143,6 +143,19 @@ export const approveSponsorship = async (req: Request, res: Response): Promise<v
     sponsorship.approvedAt = new Date();
     await sponsorship.save();
 
+    // Send approval email to the sponsor
+    try {
+      const { sendLogoApprovalEmail } = require('../services/emailService');
+      await sendLogoApprovalEmail(sponsorship.email, {
+        organizationName: sponsorship.organizationName,
+        causeTitle: sponsorship.cause.title || 'Campaign'
+      });
+      console.log(`Approval email sent to ${sponsorship.email}`);
+    } catch (emailError) {
+      console.error('Error sending approval email:', emailError);
+      // Continue with the response even if email fails
+    }
+
     res.json(sponsorship);
   } catch (error) {
     console.error('Error approving sponsorship:', error);
@@ -152,7 +165,7 @@ export const approveSponsorship = async (req: Request, res: Response): Promise<v
 
 export const rejectSponsorship = async (req: Request, res: Response): Promise<void> => {
   try {
-    const sponsorship = await Sponsorship.findById(req.params.id);
+    const sponsorship = await Sponsorship.findById(req.params.id).populate('cause', 'title');
     if (!sponsorship) {
       res.status(404).json({ message: 'Sponsorship not found' });
       return;
@@ -161,6 +174,21 @@ export const rejectSponsorship = async (req: Request, res: Response): Promise<vo
     sponsorship.status = SponsorshipStatus.REJECTED;
     sponsorship.rejectionReason = req.body.reason;
     await sponsorship.save();
+
+    // Send rejection email to the sponsor
+    try {
+      const { sendLogoRejectionEmail } = require('../services/emailService');
+      await sendLogoRejectionEmail(sponsorship.email, {
+        sponsorshipId: sponsorship._id.toString(),
+        organizationName: sponsorship.organizationName,
+        causeTitle: sponsorship.cause.title || 'Campaign',
+        rejectionReason: sponsorship.rejectionReason || 'Logo does not meet our guidelines'
+      });
+      console.log(`Rejection email sent to ${sponsorship.email}`);
+    } catch (emailError) {
+      console.error('Error sending rejection email:', emailError);
+      // Continue with the response even if email fails
+    }
 
     res.json(sponsorship);
   } catch (error) {

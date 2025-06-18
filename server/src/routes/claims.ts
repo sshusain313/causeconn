@@ -8,7 +8,7 @@ const router = createRouter();
 router.post('/', createClaim);
 
 // Protected routes (require authentication)
-router.get('/', authenticateToken, getRecentClaims);
+router.get('/recent', authenticateToken, getRecentClaims);
 router.get('/stats', authenticateToken, getClaimsStats);
 router.get('/:id', authenticateToken, getClaimById);
 router.patch('/:id/status', authenticateToken, updateClaimStatus);

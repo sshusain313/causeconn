@@ -9,6 +9,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 import config from '@/config';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 // Interface for sponsorship data
 interface Sponsorship {
@@ -36,6 +46,9 @@ const LogoReview = () => {
   const queryClient = useQueryClient();
   const { token } = useAuth();
   const [previewCanvasSize] = useState({ width: 400, height: 400 });
+  const [rejectionDialogOpen, setRejectionDialogOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('Logo does not meet our guidelines');
+  const [selectedSponsorshipId, setSelectedSponsorshipId] = useState<string | null>(null);
 
   // Create axios instance with auth headers
   const authAxios = axios.create({
@@ -139,9 +152,20 @@ const LogoReview = () => {
   };
 
   const handleReject = (sponsorshipId: string) => {
-    // In a real implementation, you might want to show a dialog to collect rejection reason
-    const reason = 'Logo does not meet our guidelines';
-    rejectMutation.mutate({ sponsorshipId, reason });
+    // Open the rejection dialog to collect the reason
+    setSelectedSponsorshipId(sponsorshipId);
+    setRejectionReason('Logo does not meet our guidelines'); // Reset to default
+    setRejectionDialogOpen(true);
+  };
+  
+  const confirmReject = () => {
+    if (selectedSponsorshipId) {
+      rejectMutation.mutate({ 
+        sponsorshipId: selectedSponsorshipId, 
+        reason: rejectionReason 
+      });
+      setRejectionDialogOpen(false);
+    }
   };
 
   // Function to draw logo preview on canvas
@@ -375,6 +399,49 @@ const LogoReview = () => {
           </div>
         )}
       </div>
+
+      {/* Rejection Reason Dialog */}
+      <Dialog open={rejectionDialogOpen} onOpenChange={setRejectionDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Reject Logo</DialogTitle>
+            <DialogDescription>
+              Please provide a reason for rejecting this logo. This will be included in the email sent to the sponsor.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="rejection-reason">Rejection Reason</Label>
+              <Textarea
+                id="rejection-reason"
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Explain why the logo is being rejected..."
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectionDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmReject}
+              disabled={!rejectionReason.trim() || rejectMutation.isPending}
+            >
+              {rejectMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Rejecting...
+                </>
+              ) : (
+                'Reject Logo'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };

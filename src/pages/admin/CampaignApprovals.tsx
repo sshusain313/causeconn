@@ -25,27 +25,27 @@ interface Sponsorship {
   phone: string;
   toteQuantity: number;
   unitPrice: number;
+  totalAmount: number;
   logoUrl: string;
   toteDetails?: {
-    // quantity?: number;
-    // numberOfTotes?: number;
-    // unitPrice?: number;
     totalAmount?: number;
   };
   selectedCities?: string[];
   distributionType: 'physical' | 'online';
-  distributionLocations?: string[];
+  distributionLocations?: Array<{
+    name: {
+      name: string;
+      address: string;
+      contactPerson: string;
+      phone: string;
+      location: string;
+      totesCount: number;
+    };
+    type: string;
+    totesCount: number;
+  }>;
   distributionStartDate?: string;
   distributionEndDate?: string;
-  distributionDetails?: {
-    locations?: Array<{
-      name?: string;
-      address?: string;
-      contactPerson?: string;
-      phone?: string;
-      totesCount?: number;
-    }>;
-  };
   documents: Array<{
     name: string;
     type: string;
@@ -260,7 +260,7 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">Total: </span>
-              <span className="text-sm font-semibold text-gray-900">{typeof sponsorship.toteDetails?.totalAmount === 'number' ? `$${sponsorship.toteDetails.totalAmount.toLocaleString()}` : 'N/A'}</span>
+              <span className="text-sm font-semibold text-gray-900">{sponsorship.totalAmount ?? 'N/A'}</span>
             </div>
           </div>
         </ExpandableSection>
@@ -292,21 +292,21 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-2">Distribution Locations:</h4>
               <div className="space-y-3">
-                {Array.isArray(sponsorship.distributionDetails?.locations)
-                  ? sponsorship.distributionDetails.locations.map((location, index) => (
+                {Array.isArray(sponsorship.distributionLocations)
+                  ? sponsorship.distributionLocations.map((location, index) => (
                       <div key={index} className="bg-gray-50 p-3 rounded-md">
                         <div className="grid md:grid-cols-2 gap-2">
                           <div>
-                            <div className="font-medium text-sm text-gray-900">{location.name || 'N/A'}</div>
-                            <div className="text-sm text-gray-600">{location.address || 'N/A'}</div>
+                            <div className="font-medium text-sm text-gray-900">{location.name.name}</div>
+                            <div className="text-sm text-gray-600">{location.name.address}</div>
                           </div>
                           <div>
                             <div className="text-sm text-gray-600">
-                              Contact: {location.contactPerson || 'N/A'}
+                              Contact: {location.name.contactPerson}
                             </div>
-                            <div className="text-sm text-gray-600">Phone: {location.phone || 'N/A'}</div>
+                            <div className="text-sm text-gray-600">Phone: {location.name.phone}</div>
                             <div className="text-sm font-medium text-gray-900">
-                              Totes: {location.totesCount ?? 'N/A'}
+                              Totes: {location.name.totesCount}
                             </div>
                           </div>
                         </div>

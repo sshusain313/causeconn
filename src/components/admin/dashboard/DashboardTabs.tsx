@@ -272,7 +272,7 @@ const DashboardTabs = () => {
 
       try {
         setLoadingClaims(true);
-        const response = await authAxios.get('/claims', {
+        const response = await authAxios.get('/claims/recent', {
           params: { limit: 5 } // Only get 5 most recent claims for dashboard
         });
         console.log('Recent claims response:', response.data);

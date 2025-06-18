@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,20 +10,29 @@ import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 import config from '@/config';
 
-// Define the Claim interface
+// Define the ClaimStatus enum to match backend
+enum ClaimStatus {
+  PENDING = 'pending',
+  VERIFIED = 'verified',
+  SHIPPED = 'shipped',
+  DELIVERED = 'delivered',
+  CANCELLED = 'cancelled'
+}
+
+// Define the Claim interface to match backend model
 interface Claim {
   _id: string;
   causeId: string;
   causeTitle: string;
   fullName: string;
   email: string;
-  phone: number;
+  phone: string;
   purpose: string;
   address: string;
   city: string;
   state: string;
-  zipCode: number;
-  status: string;
+  zipCode: string;
+  status: ClaimStatus;
   emailVerified: boolean;
   createdAt: string;
   updatedAt: string;
@@ -52,8 +60,8 @@ const ClaimsManagement = () => {
       
       try {
         setLoading(true);
-        console.log(`Fetching claims from ${config.apiUrl}/claims`);
-        const response = await axios.get(`${config.apiUrl}/claims`, {
+        console.log(`Fetching claims from ${config.apiUrl}/claims/recent`);
+        const response = await axios.get(`${config.apiUrl}/claims/recent`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -85,13 +93,13 @@ const ClaimsManagement = () => {
     try {
       console.log(`Approving claim at ${config.apiUrl}/claims/${claimId}/status`);
       const response = await axios.patch(`${config.apiUrl}/claims/${claimId}/status`, 
-        { status: 'verified' },
+        { status: ClaimStatus.VERIFIED },
         { headers: { Authorization: `Bearer ${token}` }}
       );
       
       // Update local state
       setClaims(prev => prev.map(claim => 
-        claim._id === claimId ? { ...claim, status: 'verified' } : claim
+        claim._id === claimId ? { ...claim, status: ClaimStatus.VERIFIED } : claim
       ));
       
       toast({
@@ -112,13 +120,13 @@ const ClaimsManagement = () => {
     try {
       console.log(`Rejecting claim at ${config.apiUrl}/claims/${claimId}/status`);
       const response = await axios.patch(`${config.apiUrl}/claims/${claimId}/status`, 
-        { status: 'cancelled' },
+        { status: ClaimStatus.CANCELLED },
         { headers: { Authorization: `Bearer ${token}` }}
       );
       
       // Update local state
       setClaims(prev => prev.map(claim => 
-        claim._id === claimId ? { ...claim, status: 'cancelled' } : claim
+        claim._id === claimId ? { ...claim, status: ClaimStatus.CANCELLED } : claim
       ));
       
       toast({
@@ -136,14 +144,15 @@ const ClaimsManagement = () => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: ClaimStatus) => {
     const statusColors = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      verified: 'bg-green-100 text-green-800',
-      shipped: 'bg-blue-100 text-blue-800',
-      rejected: 'bg-red-100 text-red-800'
+      [ClaimStatus.PENDING]: 'bg-yellow-100 text-yellow-800',
+      [ClaimStatus.VERIFIED]: 'bg-green-100 text-green-800',
+      [ClaimStatus.SHIPPED]: 'bg-blue-100 text-blue-800',
+      [ClaimStatus.DELIVERED]: 'bg-emerald-100 text-emerald-800',
+      [ClaimStatus.CANCELLED]: 'bg-red-100 text-red-800'
     };
-    return statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800';
+    return statusColors[status] || 'bg-gray-100 text-gray-800';
   };
 
   const filteredClaims = claims.filter(claim =>
@@ -163,6 +172,10 @@ const ClaimsManagement = () => {
     }
   });
 
+  const handleSort = (newSortBy: 'date' | 'status' | 'name') => {
+    setSortBy(newSortBy);
+  };
+
   return (
     <AdminLayout title="Claims Management" subtitle="Review and manage all tote bag claims">
       <div className="mb-6 flex flex-col md:flex-row gap-4 justify-between">
@@ -177,11 +190,14 @@ const ClaimsManagement = () => {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline" className="flex items-center gap-1">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-1"
+            onClick={() => handleSort(sortBy === 'date' ? 'status' : sortBy === 'status' ? 'name' : 'date')}
+          >
             <ArrowUpDown className="h-4 w-4" />
             Sort by {sortBy}
           </Button>
-          <Button variant="outline">Export Claims</Button>
         </div>
       </div>
 
@@ -222,8 +238,8 @@ const ClaimsManagement = () => {
                         <p className="font-medium">{claim.phone}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">Email Verified</p>
-                        <p className="font-medium">{claim.emailVerified ? 'Yes' : 'No'}</p>
+                        <p className="text-sm text-gray-500">Purpose</p>
+                        <p className="font-medium">{claim.purpose}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Claim Date</p>
@@ -235,37 +251,38 @@ const ClaimsManagement = () => {
                       <p className="font-medium">{claim.address}, {claim.city}, {claim.state} {claim.zipCode}</p>
                     </div>
                   </div>
-                <div className="flex flex-row lg:flex-col gap-2">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1 flex items-center gap-1"
-                  >
-                    <Eye className="h-4 w-4" />
-                    View Details
-                  </Button>
-                  {claim.status === 'pending' && (
-                    <>
-                      <Button 
-                        onClick={() => handleApprove(claim._id)}
-                        className="flex-1 flex items-center gap-1"
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                        Approve
-                      </Button>
-                      <Button 
-                        onClick={() => handleReject(claim._id)}
-                        variant="outline"
-                        className="flex-1 flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
-                      >
-                        <XCircle className="h-4 w-4" />
-                        Reject
-                      </Button>
-                    </>
-                  )}
+                  <div className="flex flex-row lg:flex-col gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1 flex items-center gap-1"
+                      onClick={() => navigate(`/admin/claims/${claim._id}`)}
+                    >
+                      <Eye className="h-4 w-4" />
+                      View Details
+                    </Button>
+                    {claim.status === ClaimStatus.PENDING && (
+                      <>
+                        <Button 
+                          onClick={() => handleApprove(claim._id)}
+                          className="flex-1 flex items-center gap-1"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                          Approve
+                        </Button>
+                        <Button 
+                          onClick={() => handleReject(claim._id)}
+                          variant="outline"
+                          className="flex-1 flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                        >
+                          <XCircle className="h-4 w-4" />
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
           ))}
           
           {sortedClaims.length === 0 && (

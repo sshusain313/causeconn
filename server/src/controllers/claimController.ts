@@ -5,12 +5,24 @@ import Claim, { ClaimStatus } from '../models/claims';
 // Create a new claim
 export const createClaim = async (req: Request, res: Response): Promise<void> => {
   try {
-    const claimData = req.body;
-    
+    const {
+      causeId,
+      causeTitle,
+      fullName,
+      email,
+      phone,
+      purpose,
+      address,
+      city,
+      state,
+      zipCode,
+      emailVerified = false
+    } = req.body;
+
     // Check if user has already claimed a tote for this cause
     const existingClaim = await Claim.findOne({
-      email: claimData.email,
-      causeId: claimData.causeId
+      email: email,
+      causeId: causeId
     });
     
     if (existingClaim) {
@@ -22,7 +34,7 @@ export const createClaim = async (req: Request, res: Response): Promise<void> =>
     
     // Check if there are available totes for this cause
     const Cause = mongoose.model('Cause');
-    const cause = await Cause.findById(claimData.causeId);
+    const cause = await Cause.findById(causeId);
     
     if (!cause) {
       res.status(404).json({ message: 'Cause not found' });
@@ -35,17 +47,32 @@ export const createClaim = async (req: Request, res: Response): Promise<void> =>
     }
     
     // Create the claim
-    const claim = await Claim.create(claimData);
+    const claim = new Claim({
+      causeId,
+      causeTitle,
+      fullName,
+      email,
+      phone,
+      purpose,
+      address,
+      city,
+      state,
+      zipCode,
+      status: ClaimStatus.PENDING,
+      emailVerified
+    });
+
+    await claim.save();
     
     // Update the cause's available totes count
-    await Cause.findByIdAndUpdate(claimData.causeId, {
+    await Cause.findByIdAndUpdate(causeId, {
       $inc: { claimedTotes: 1, availableTotes: -1 }
     });
     
     res.status(201).json(claim);
   } catch (error) {
     console.error('Error creating claim:', error);
-    res.status(500).json({ message: 'Error creating claim' });
+    res.status(500).json({ message: 'Error creating claim', error: error.message });
   }
 };
 
@@ -60,7 +87,8 @@ export const getRecentClaims = async (req: Request, res: Response): Promise<void
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .select('causeTitle fullName email status createdAt');
+      .populate('causeId', 'title')
+      .select('causeId causeTitle fullName email phone purpose address city state zipCode status emailVerified createdAt updatedAt shippingDate deliveryDate');
 
     const total = await Claim.countDocuments();
 
@@ -74,7 +102,7 @@ export const getRecentClaims = async (req: Request, res: Response): Promise<void
     });
   } catch (error) {
     console.error('Error fetching recent claims:', error);
-    res.status(500).json({ message: 'Error fetching recent claims' });
+    res.status(500).json({ message: 'Error fetching recent claims', error: error.message });
   }
 };
 
@@ -174,4 +202,4 @@ export const getClaimsStats = async (req: Request, res: Response): Promise<void>
     console.error('Error fetching claims statistics:', error);
     res.status(500).json({ message: 'Error fetching claims statistics' });
   }
-}; 
+};
