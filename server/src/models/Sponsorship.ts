@@ -23,16 +23,16 @@ interface ILogoPosition {
 }
 
 interface IDistributionLocation {
-  name: {
+  // name: {
     name: string;
     address: string;
     contactPerson: string;
     phone: string;
     location: string;
     totesCount: number;
-  };
-  type: string;
-  totesCount: number;
+  // };
+  // type: string;
+  // totesCount: number;
 }
 
 interface IDemographics {

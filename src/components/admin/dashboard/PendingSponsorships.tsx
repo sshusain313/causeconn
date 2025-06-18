@@ -45,7 +45,7 @@ const PendingSponsorships = ({
             <TableHead>Tote Quantity</TableHead>
             <TableHead>Distribution Period</TableHead>
             <TableHead>Submitted</TableHead>
-            <TableHead>Actions</TableHead>
+            {/* <TableHead>Actions</TableHead> */}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -72,7 +72,7 @@ const PendingSponsorships = ({
                 )}
               </TableCell>
               <TableCell>{formatDate(sponsorship.createdAt)}</TableCell>
-              <TableCell>
+              {/* <TableCell>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -96,7 +96,7 @@ const PendingSponsorships = ({
                     Reject
                   </Button>
                 </div>
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           ))}
           {sponsorships.length === 0 && (

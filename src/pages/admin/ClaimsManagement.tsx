@@ -18,12 +18,12 @@ interface Claim {
   causeTitle: string;
   fullName: string;
   email: string;
-  phone: string;
+  phone: number;
   purpose: string;
   address: string;
   city: string;
   state: string;
-  zipCode: string;
+  zipCode: number;
   status: string;
   emailVerified: boolean;
   createdAt: string;

@@ -23,18 +23,21 @@ interface Sponsorship {
   contactName: string;
   email: string;
   phone: string;
+  toteQuantity: number;
+  unitPrice: number;
   logoUrl: string;
   toteDetails?: {
-    quantity?: number;
-    numberOfTotes?: number;
-    unitPrice?: number;
+    // quantity?: number;
+    // numberOfTotes?: number;
+    // unitPrice?: number;
     totalAmount?: number;
   };
+  selectedCities?: string[];
+  distributionType: 'physical' | 'online';
+  distributionLocations?: string[];
+  distributionStartDate?: string;
+  distributionEndDate?: string;
   distributionDetails?: {
-    type?: string;
-    cities?: string[];
-    startDate?: string;
-    endDate?: string;
     locations?: Array<{
       name?: string;
       address?: string;
@@ -245,15 +248,15 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <span className="text-sm font-medium text-gray-700">Quantity: </span>
-              <span className="text-sm text-gray-600">{sponsorship.toteDetails?.quantity ?? 'N/A'}</span>
+              <span className="text-sm text-gray-600">{sponsorship.toteQuantity ?? 'N/A'}</span>
             </div>
-            <div>
+            {/* <div>
               <span className="text-sm font-medium text-gray-700">Number of Totes: </span>
               <span className="text-sm text-gray-600">{sponsorship.toteDetails?.numberOfTotes ?? 'N/A'}</span>
-            </div>
+            </div> */}
             <div>
               <span className="text-sm font-medium text-gray-700">Unit Price: </span>
-              <span className="text-sm text-gray-600">{typeof sponsorship.toteDetails?.unitPrice === 'number' ? `$${sponsorship.toteDetails.unitPrice}` : 'N/A'}</span>
+              <span className="text-sm text-gray-600">{sponsorship.unitPrice ?? 'N/A'}</span>
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">Total: </span>
@@ -266,17 +269,14 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
           isExpanded={expandedSections.includes('distribution')}
           onToggle={() => toggleSection('distribution')}
         >
+          {sponsorship.distributionType=='physical' ? ( 
           <div className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <span className="text-sm font-medium text-gray-700">Type: </span>
-                <span className="text-sm text-gray-600">{sponsorship.distributionDetails?.type ?? 'N/A'}</span>
-              </div>
-              <div>
                 <span className="text-sm font-medium text-gray-700">Duration: </span>
                 <span className="text-sm text-gray-600">
-                  {sponsorship.distributionDetails?.startDate && sponsorship.distributionDetails?.endDate
-                    ? `${new Date(sponsorship.distributionDetails.startDate).toLocaleDateString()} — ${new Date(sponsorship.distributionDetails.endDate).toLocaleDateString()}`
+                  {sponsorship.distributionStartDate && sponsorship.distributionEndDate
+                    ? `${new Date(sponsorship.distributionStartDate).toLocaleDateString()} — ${new Date(sponsorship.distributionEndDate).toLocaleDateString()}`
                     : 'N/A'}
                 </span>
               </div>
@@ -284,8 +284,8 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
             <div>
               <span className="text-sm font-medium text-gray-700">Cities: </span>
               <span className="text-sm text-gray-600">
-                {Array.isArray(sponsorship.distributionDetails?.cities)
-                  ? sponsorship.distributionDetails.cities.join(', ')
+                {Array.isArray(sponsorship.selectedCities)
+                  ? sponsorship.selectedCities.join(', ')
                   : 'N/A'}
               </span>
             </div>
@@ -297,16 +297,16 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
                       <div key={index} className="bg-gray-50 p-3 rounded-md">
                         <div className="grid md:grid-cols-2 gap-2">
                           <div>
-                            <div className="font-medium text-sm text-gray-900">{location.name}</div>
-                            <div className="text-sm text-gray-600">{location.address}</div>
+                            <div className="font-medium text-sm text-gray-900">{location.name || 'N/A'}</div>
+                            <div className="text-sm text-gray-600">{location.address || 'N/A'}</div>
                           </div>
                           <div>
                             <div className="text-sm text-gray-600">
-                              Contact: {location.contactPerson}
+                              Contact: {location.contactPerson || 'N/A'}
                             </div>
-                            <div className="text-sm text-gray-600">Phone: {location.phone}</div>
+                            <div className="text-sm text-gray-600">Phone: {location.phone || 'N/A'}</div>
                             <div className="text-sm font-medium text-gray-900">
-                              Totes: {location.totesCount}
+                              Totes: {location.totesCount ?? 'N/A'}
                             </div>
                           </div>
                         </div>
@@ -316,6 +316,22 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
               </div>
             </div>
           </div>
+          ):(
+            <div className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <span className="text-sm font-medium text-gray-700">Duration: </span>
+                <span className="text-sm text-gray-600">
+                  {sponsorship.distributionStartDate && sponsorship.distributionEndDate
+                    ? `${new Date(sponsorship.distributionStartDate).toLocaleDateString()} — ${new Date(sponsorship.distributionEndDate).toLocaleDateString()}`
+                    : 'N/A'}
+                </span>
+              </div>
+            </div>
+            </div>
+            )}
+        
+
         </ExpandableSection>
       </div>
       {/* Action Buttons */}

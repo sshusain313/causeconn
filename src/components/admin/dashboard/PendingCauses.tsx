@@ -138,9 +138,9 @@ const PendingCauses: React.FC<PendingCausesProps> = ({ pendingCauses, loading = 
     }
   };
   
-  const handleViewDetails = (causeId: string) => {
-    navigate(`/admin/cause/${causeId}`);
-  };
+  // const handleViewDetails = (causeId: string) => {
+  //   navigate(`/admin/cause/${causeId}`);
+  // };
 
   return (
     <div className="space-y-4">
@@ -217,13 +217,13 @@ const PendingCauses: React.FC<PendingCausesProps> = ({ pendingCauses, loading = 
                       </>
                     ) : 'Reject'}
                   </Button>
-                  <Button 
+                  {/* <Button 
                     onClick={() => handleViewDetails(cause._id)}
                     variant="ghost" 
                     className="flex-1 md:flex-grow-0"
                   >
                     View Details
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             </CardContent>

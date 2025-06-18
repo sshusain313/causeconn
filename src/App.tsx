@@ -48,7 +48,7 @@ import Shipping from "./pages/admin/Shipping";
 import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
 import QrScanner from "./pages/admin/QrScanner";
-import ClaimDetails from '@/pages/admin/claims/ClaimDetails';
+// import ClaimDetails from '@/pages/admin/claims/ClaimDetails';
 import DistributionSettings from './pages/admin/DistributionSettings';
 import EditCause from './pages/admin/EditCause';
 
@@ -154,11 +154,11 @@ const App: React.FC = () => {
                     <QrScanner />
                   </ProtectedRoute>
                 } />
-                <Route path="/admin/claims/:id" element={
+                {/* <Route path="/admin/claims/:id" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <ClaimDetails />
                   </ProtectedRoute>
-                } />
+                } /> */}
                 <Route path="/admin/causes/:id/upload-image" element={
                     <CauseImageUpload />
                 } />

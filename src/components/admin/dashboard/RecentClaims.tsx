@@ -59,13 +59,13 @@ interface RecentClaimsProps {
 const RecentClaims = ({ claims, isLoading, error }: RecentClaimsProps) => {
   const navigate = useNavigate();
 
-  const handleViewDetails = (claimId: string) => {
-    navigate(`/admin/claims/${claimId}`);
-  };
+  // const handleViewDetails = (claimId: string) => {
+  //   navigate(`/admin/claims/${claimId}`);
+  // };
 
-  const handleViewAllClaims = () => {
-    navigate('/admin/claims');
-  };
+  // const handleViewAllClaims = () => {
+  //   navigate('/admin/claims');
+  // };
 
   if (isLoading) {
     return (
@@ -87,9 +87,9 @@ const RecentClaims = ({ claims, isLoading, error }: RecentClaimsProps) => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Recent Claims</h2>
-        <Button variant="outline" size="sm" onClick={handleViewAllClaims}>
+        {/* <Button variant="outline" size="sm" onClick={handleViewAllClaims}>
           View All Claims
-        </Button>
+        </Button> */}
       </div>
 
       <div className="border rounded-lg">
@@ -101,7 +101,7 @@ const RecentClaims = ({ claims, isLoading, error }: RecentClaimsProps) => {
               <TableHead>Claimer</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              {/* <TableHead className="text-right">Action</TableHead> */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -118,7 +118,7 @@ const RecentClaims = ({ claims, isLoading, error }: RecentClaimsProps) => {
                     {claim.status}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">
+                {/* <TableCell className="text-right">
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -128,7 +128,7 @@ const RecentClaims = ({ claims, isLoading, error }: RecentClaimsProps) => {
                     View Details
                     <ExternalLink className="h-4 w-4" />
                   </Button>
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             ))}
           </TableBody>
