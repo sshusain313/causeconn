@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
@@ -8,44 +7,58 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Download, Award, QrCode } from 'lucide-react';
+import { Download, Award, QrCode, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { getImageUrl, handleImageError } from '@/utils/imageUtils';
+import config from '@/config';
+import axios from 'axios';
 
 const SponsorDashboard = () => {
+  const [sponsorships, setSponsorships] = useState<Sponsorship[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Fetch user sponsorships on component mount
+  useEffect(() => {
+    const fetchSponsorships = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setError('Authentication required');
+          return;
+        }
+
+        const response = await axios.get(`${config.apiUrl}/sponsorships/user`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        console.log('Fetched sponsorships:', response.data);
+        setSponsorships(response.data);
+      } catch (err: any) {
+        console.error('Error fetching sponsorships:', err);
+        setError(err.response?.data?.message || 'Failed to load sponsorships');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSponsorships();
+  }, []);
+
+  // Calculate dashboard metrics from real data
+  const totalContributed = sponsorships.reduce((sum, sponsorship) => sum + (sponsorship.totalAmount || 0), 0);
+  const approvedSponsorships = sponsorships.filter(s => s.status === 'approved').length;
+  const totalTotes = sponsorships.reduce((sum, sponsorship) => sum + (sponsorship.toteQuantity || 0), 0);
   
-  // Mock data for sponsored causes
-  const sponsoredCauses = [
-    {
-      id: '1',
-      title: 'Clean Water Initiative',
-      description: 'Providing clean drinking water to communities in need.',
-      imageUrl: 'https://images.unsplash.com/photo-1541252260730-0412e8e2d5d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-      amount: 5000,
-      status: 'approved',
-      date: '2025-03-15',
-      toteQuantity: 250,
-      claimedTotes: 78,
-      qrCode: 'https://causeconnect.org/claim/1'
-    },
-    {
-      id: '2',
-      title: "Children's Education Fund",
-      description: 'Supporting education for underprivileged children worldwide.',
-      imageUrl: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-      amount: 3500,
-      status: 'pending',
-      date: '2025-04-02',
-      toteQuantity: 150,
-      claimedTotes: 0,
-      qrCode: 'https://causeconnect.org/claim/2'
-    }
-  ];
-  
-  // Analytics data
+  // Analytics data - you can enhance this with real claim data later
   const claimAnalytics = [
     { date: '2025-03-20', claims: 12 },
     { date: '2025-03-21', claims: 8 },
@@ -71,6 +84,64 @@ const SponsorDashboard = () => {
     }
   ];
 
+// Real data fetch from cause database
+  interface Cause {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  targetAmount: number;
+  currentAmount: number;
+  category: string;
+  status: string;
+  location: string;
+  creator: any;
+  createdAt: string;
+  updatedAt: string;
+  sponsorships?: Sponsorship[];
+}
+
+interface Sponsorship {
+  _id: string;
+  status: string;
+  logoStatus?: string;
+  cause: Cause;
+  organizationName: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  toteQuantity: number;
+  unitPrice: number;
+  totalAmount: number;
+  logoUrl: string;
+  toteDetails?: {
+    totalAmount?: number;
+  };
+  selectedCities?: string[];
+  distributionType: 'physical' | 'online';
+  distributionLocations?: Array<{
+    name: {
+      name: string;
+      address: string;
+      contactPerson: string;
+      phone: string;
+      location: string;
+      totesCount: number;
+    };
+    type: string;
+    totesCount: number;
+  }>;
+  distributionStartDate?: string;
+  distributionEndDate?: string;
+  documents: Array<{
+    name: string;
+    type: string;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+
   // Earned badges data
   const earnedBadges = [
     { id: '1', title: 'First Sponsorship', description: 'Completed your first cause sponsorship', icon: '🏆' },
@@ -78,7 +149,7 @@ const SponsorDashboard = () => {
     { id: '3', title: 'Clean Water Champion', description: 'Sponsored a water-related cause', icon: '💧' },
   ];
   
-  const handleDownloadCSV = (causeId: string) => {
+  const handleDownloadCSV = (sponsorshipId: string) => {
     // In a real app, this would generate and download a CSV file
     toast({
       title: "CSV Downloaded",
@@ -86,13 +157,44 @@ const SponsorDashboard = () => {
     });
   };
   
-  const handleViewQRCode = (causeId: string) => {
+  const handleViewQRCode = (sponsorshipId: string) => {
     // This would normally show a QR code modal
     toast({
       title: "QR Code Ready",
       description: "You can now view or download your custom QR code."
     });
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <DashboardLayout 
+        title="Sponsor Dashboard" 
+        subtitle={`Welcome back, ${user?.name}`}
+      >
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2">Loading your sponsorships...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <DashboardLayout 
+        title="Sponsor Dashboard" 
+        subtitle={`Welcome back, ${user?.name}`}
+      >
+        <div className="text-center py-12">
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">Error</h3>
+          <p className="text-gray-500 mb-6">{error}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout 
@@ -107,7 +209,7 @@ const SponsorDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">$8,500</div>
+            <div className="text-3xl font-bold">${totalContributed.toLocaleString()}</div>
           </CardContent>
         </Card>
         
@@ -118,18 +220,18 @@ const SponsorDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">1</div>
+            <div className="text-3xl font-bold">{approvedSponsorships}</div>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">
-              Total Claimed Totes
+              Total Totes
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">78</div>
+            <div className="text-3xl font-bold">{totalTotes}</div>
           </CardContent>
         </Card>
       </div>
@@ -144,110 +246,128 @@ const SponsorDashboard = () => {
         
         <TabsContent value="sponsorships">
           <div className="space-y-6">
-            {sponsoredCauses.map((cause) => (
-              <Card key={cause.id}>
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="md:w-1/4">
-                      <img 
-                        src={cause.imageUrl} 
-                        alt={cause.title} 
-                        className="w-full h-32 object-cover rounded-md" 
-                      />
-                    </div>
-                    <div className="md:w-3/4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-xl font-semibold">{cause.title}</h3>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          cause.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {cause.status === 'approved' ? 'approved' : 'Pending Approval'}
-                        </span>
+            {sponsorships.length > 0 ? (
+              sponsorships.map((sponsorship) => (
+                <Card key={sponsorship._id}>
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row gap-6">
+                      <div className="md:w-1/4">
+                        <img 
+                          src={getImageUrl(sponsorship.cause?.imageUrl)} 
+                          alt={sponsorship.cause?.title || 'Cause image'} 
+                          className="w-full h-32 object-cover rounded-md"
+                          onError={(e) => handleImageError(e)}
+                        />
                       </div>
-                      <p className="text-gray-600 mb-4">{cause.description}</p>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div>
-                          <p className="text-sm text-gray-500">Contribution</p>
-                          <p className="font-semibold">${cause.amount.toLocaleString()}</p>
+                      <div className="md:w-3/4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-xl font-semibold">{sponsorship.cause?.title || 'Unknown Cause'}</h3>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            sponsorship.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                            sponsorship.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {sponsorship.status === 'approved' ? 'Approved' : 
+                             sponsorship.status === 'pending' ? 'Pending Approval' :
+                             'Rejected'}
+                          </span>
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Totes</p>
-                          <p className="font-semibold">{cause.toteQuantity}</p>
+                        <p className="text-gray-600 mb-4">{sponsorship.cause?.description || 'No description available'}</p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                          <div>
+                            <p className="text-sm text-gray-500">Contribution</p>
+                            <p className="font-semibold">${sponsorship.totalAmount?.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Totes</p>
+                            <p className="font-semibold">{sponsorship.toteQuantity}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Organization</p>
+                            <p className="font-semibold">{sponsorship.organizationName}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Date</p>
+                            <p className="font-semibold">{new Date(sponsorship.createdAt).toLocaleDateString()}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Claimed</p>
-                          <p className="font-semibold">{cause.claimedTotes} ({Math.round((cause.claimedTotes / cause.toteQuantity) * 100)}%)</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Date</p>
-                          <p className="font-semibold">{new Date(cause.date).toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-3">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => navigate(`/cause/${cause.id}`)}
-                        >
-                          View Cause
-                        </Button>
-                        <Sheet>
-                          <SheetTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="gap-1"
-                            >
-                              <QrCode className="h-4 w-4" />
-                              <span>QR Code</span>
-                            </Button>
-                          </SheetTrigger>
-                          <SheetContent>
-                            <SheetHeader>
-                              <SheetTitle>Your QR Code</SheetTitle>
-                              <SheetDescription>
-                                This QR code is printed on your totes and links to your cause.
-                              </SheetDescription>
-                            </SheetHeader>
-                            <div className="flex flex-col items-center justify-center py-8">
-                              <div className="bg-white p-6 rounded-lg shadow-sm mb-4">
-                                <img 
-                                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://causeconnect.org/claim/example" 
-                                  alt="QR Code"
-                                  className="w-48 h-48"
-                                />
-                              </div>
-                              <p className="text-center text-sm text-gray-600 mb-4">
-                                When scanned, this QR code will direct users to your sponsored cause page.
-                              </p>
-                              <Button variant="outline" size="sm" className="gap-1">
-                                <Download className="h-4 w-4" />
-                                <span>Download QR Code</span>
+                        <div className="flex flex-wrap gap-3">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => sponsorship.cause?._id ? navigate(`/cause/${sponsorship.cause._id}`) : null}
+                            disabled={!sponsorship.cause?._id}
+                          >
+                            View Cause
+                          </Button>
+                          <Sheet>
+                            <SheetTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="gap-1"
+                              >
+                                <QrCode className="h-4 w-4" />
+                                <span>QR Code</span>
                               </Button>
-                            </div>
-                          </SheetContent>
-                        </Sheet>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="gap-1"
-                          onClick={() => handleDownloadCSV(cause.id)}
-                        >
-                          <Download className="h-4 w-4" />
-                          <span>Download Claims CSV</span>
-                        </Button>
+                            </SheetTrigger>
+                            <SheetContent>
+                              <SheetHeader>
+                                <SheetTitle>Your QR Code</SheetTitle>
+                                <SheetDescription>
+                                  This QR code is printed on your totes and links to your cause.
+                                </SheetDescription>
+                              </SheetHeader>
+                              <div className="flex flex-col items-center justify-center py-8">
+                                <div className="bg-white p-6 rounded-lg shadow-sm mb-4">
+                                  <img 
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${window.location.origin}/claim/${sponsorship.cause?._id || 'unknown'}`)}`}
+                                    alt="QR Code"
+                                    className="w-48 h-48"
+                                  />
+                                </div>
+                                <p className="text-center text-sm text-gray-600 mb-4">
+                                  When scanned, this QR code will direct users to your sponsored cause page.
+                                </p>
+                                <Button variant="outline" size="sm" className="gap-1">
+                                  <Download className="h-4 w-4" />
+                                  <span>Download QR Code</span>
+                                </Button>
+                              </div>
+                            </SheetContent>
+                          </Sheet>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="gap-1"
+                            onClick={() => handleDownloadCSV(sponsorship._id)}
+                          >
+                            <Download className="h-4 w-4" />
+                            <span>Download Claims CSV</span>
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No sponsorships yet</h3>
+                <p className="text-gray-500 mb-6">Start making an impact by sponsoring your first cause.</p>
+                <Button onClick={() => navigate('/causes')}>
+                  Browse Causes
+                </Button>
+              </div>
+            )}
             
-            <div className="text-center pt-6">
-              <Button onClick={() => navigate('/causes')}>
-                Browse More Causes
-              </Button>
-            </div>
+            {sponsorships.length > 0 && (
+              <div className="text-center pt-6">
+                <Button onClick={() => navigate('/causes')}>
+                  Browse More Causes
+                </Button>
+              </div>
+            )}
           </div>
         </TabsContent>
         

@@ -46,7 +46,8 @@ const Index = () => {
             status: 'approved',
             include: 'sponsorships',
             limit: 3,
-            featured: true
+            featured: true,
+            isOnline: true
           }
         });
         

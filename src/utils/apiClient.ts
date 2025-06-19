@@ -11,7 +11,7 @@ import { API_BASE_URL, isProduction } from './apiConfig';
 
 // Create an axios instance with default configuration
 const apiClient = axios.create({
-  baseURL: isProduction ? 'https://api.changebag.org' : API_BASE_URL,
+  baseURL: isProduction ? 'https://api.changebag.org' : 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -26,6 +26,9 @@ apiClient.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('Authorization header set:', `Bearer ${token.substring(0, 20)}...`);
+    } else {
+      console.log('No token found or no headers config');
     }
     return config;
   },

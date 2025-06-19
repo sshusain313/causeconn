@@ -4,6 +4,7 @@ import {
   approveSponsorship,
   rejectSponsorship,
   getSponsorshipById,
+  getUserSponsorships,
   reuploadLogo
 } from '../controllers/sponsorshipController';
 import { authenticateToken } from '../middleware/auth';
@@ -13,15 +14,16 @@ import { createRouter } from '../utils/routerHelper';
 const router = createRouter();
 
 // Public routes
-router.post('/', createSponsorship);
+router.post('/', createSponsorship); // Can work with or without authentication
 router.patch('/:sponsorshipId/reupload', reuploadLogo); // Public route for sponsors to reupload logos
+
+// Protected routes (require authentication)
+router.get('/user', authenticateToken, getUserSponsorships); // Get sponsorships for authenticated user
+router.get('/:id', authenticateToken, getSponsorshipById);
 
 // Admin-only routes
 router.get('/pending', authenticateToken, adminGuard, getPendingSponsorships);
 router.patch('/:id/approve', authenticateToken, adminGuard, approveSponsorship);
 router.patch('/:id/reject', authenticateToken, adminGuard, rejectSponsorship);
-
-// Protected routes (require authentication)
-router.get('/:id', authenticateToken, getSponsorshipById);
 
 export default router; 

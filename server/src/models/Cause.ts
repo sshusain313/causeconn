@@ -94,7 +94,7 @@ const causeSchema = new Schema<ICause>(
     },
     isOnline: {
       type: Boolean,
-      default: false
+      default: true
     },
     images: {
       type: [String],

@@ -4,7 +4,7 @@
   */
   [import express from 'express';
 import multer from 'multer';
-import { createClaim, getRecentClaims, getClaimById, updateClaimStatus, getClaimsStats, checkExistingClaim } from '../controllers/claimController';
+import { createClaim, getRecentClaims, getClaimById, updateClaimStatus, getClaimsStats, checkExistingClaim, getClaimerDashboardData } from '../controllers/claimController';
 import { authenticateToken } from '../middleware/auth';
 import { createRouter } from '../utils/routerHelper';
 import { uploadCauseImage } from '../controllers/causeController';
@@ -15,6 +15,9 @@ const upload = multer({ dest: 'uploads/' });
 // Public routes
 router.post('/', createClaim);
 router.get('/check', checkExistingClaim); // New route to check for existing claims
+
+// Protected routes (require authentication)
+router.get('/dashboard/claimer', authenticateToken, getClaimerDashboardData); // Get claimer dashboard data
 
 // Protected routes (admin only)
 router.get('/recent', authenticateToken, getRecentClaims);

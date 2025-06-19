@@ -15,8 +15,7 @@ import {
 } from "@/components/ui/select";
 import { getImageUrl, handleImageError } from '@/utils/imageUtils';
 import config from '@/config';
-import api from '@/utils/apiClient';
-import { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 
 
@@ -66,10 +65,11 @@ const CausesPage = () => {
         setLoading(true);
         // Fetch causes with their sponsorships
         console.log('Fetching causes using API client');
-        const response: AxiosResponse<Cause[]> = await api.get('/causes', { 
+        const response: AxiosResponse<Cause[]> = await axios.get(`${config.apiUrl}/causes`, { 
           params: {
             status: 'approved',
-            include: 'sponsorships'
+            include: 'sponsorships',
+            isOnline: true
           }
         });
         
@@ -101,7 +101,7 @@ const CausesPage = () => {
   // Filter causes based on search and filters
   const filteredCauses = causes.filter(cause => {
     // Hide causes that have achieved their target amount
-    if (isTargetAchieved(cause)) return false;
+    // if (isTargetAchieved(cause)) return false;
 
     const matchesSearch = cause.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          cause.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -111,13 +111,14 @@ const CausesPage = () => {
     let matchesStatus = true;
     if (statusFilter !== 'all') {
       const hasApprovedSponsorship = cause.sponsorships?.some(s => s.status === 'approved');
+      const isFullyFunded = (cause.currentAmount || 0) >= cause.targetAmount;
       
       switch (statusFilter) {
         case 'open':
-          matchesStatus = !hasApprovedSponsorship && cause.status === 'open';
+          matchesStatus = hasApprovedSponsorship && !isFullyFunded;
           break;
         case 'sponsored':
-          matchesStatus = hasApprovedSponsorship;
+          matchesStatus = hasApprovedSponsorship && isFullyFunded;
           break;
       }
     }

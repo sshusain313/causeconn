@@ -43,6 +43,7 @@ interface IDemographics {
 }
 
 export interface ISponsorship extends Document {
+  sponsor?: mongoose.Types.ObjectId | IUser;
   cause: mongoose.Types.ObjectId | ICause;
   selectedCause?: string;
   organizationName: string;
@@ -73,6 +74,11 @@ export interface ISponsorship extends Document {
 
 const sponsorshipSchema = new Schema<ISponsorship>(
   {
+    sponsor: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: false
+    },
     cause: {
       type: Schema.Types.ObjectId,
       ref: 'Cause',
@@ -188,6 +194,7 @@ const sponsorshipSchema = new Schema<ISponsorship>(
 );
 
 // Create indexes for better query performance
+sponsorshipSchema.index({ sponsor: 1 });
 sponsorshipSchema.index({ cause: 1 });
 sponsorshipSchema.index({ status: 1 });
 sponsorshipSchema.index({ organizationName: 1 });

@@ -5,7 +5,7 @@ import Cause, { CauseStatus } from '../models/Cause';
 // Get all causes
 export const getAllCauses = async (req: Request, res: Response) => {
   try {
-    const { category, search, include } = req.query;
+    const { category, search, include, status, isOnline } = req.query;
     
     // Build the aggregation pipeline
     const pipeline = [];
@@ -42,6 +42,16 @@ export const getAllCauses = async (req: Request, res: Response) => {
     
     // Match stage for filtering
     const matchStage: any = {};
+    
+    // Filter by status if provided
+    if (status) {
+      matchStage.status = status;
+    }
+    
+    // Filter by isOnline if provided
+    if (isOnline !== undefined) {
+      matchStage.isOnline = isOnline === 'true';
+    }
     
     // Filter by category if provided
     if (category) {
@@ -93,6 +103,7 @@ export const getAllCauses = async (req: Request, res: Response) => {
         location: 1,
         createdAt: 1,
         updatedAt: 1,
+        isOnline: 1,
         hasApprovedSponsorship: 1,
         'creator._id': 1,
         'creator.name': 1,
@@ -119,6 +130,7 @@ export const getAllCauses = async (req: Request, res: Response) => {
     pipeline.push({ $sort: { createdAt: -1 } });
     
     console.log('Executing aggregation pipeline:', JSON.stringify(pipeline, null, 2));
+    console.log('Query parameters:', { category, search, include, status, isOnline });
     
     const causes = await Cause.aggregate(pipeline);
     

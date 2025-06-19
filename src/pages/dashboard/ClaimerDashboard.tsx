@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
@@ -7,36 +6,90 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Loader2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { getImageUrl, handleImageError } from '@/utils/imageUtils';
+import config from '@/config';
+import axios from 'axios';
 
 const ClaimerDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
-  // Mock data for claimed causes
-  const claimedCauses = [
-    {
-      id: '1',
-      title: 'Clean Water Initiative',
-      description: 'Providing clean drinking water to communities in need.',
-      imageUrl: 'https://images.unsplash.com/photo-1541252260730-0412e8e2d5d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-      currentAmount: 5000,
-      targetAmount: 25000,
-      status: 'active',
-      sponsors: 1
-    }
-  ];
-  
-  // Mock data for totes claimed
-  const totesData = [
-    {
-      id: '1',
-      cause: 'Clean Water Initiative',
-      sponsor: 'EcoSolutions Inc.',
-      status: 'shipped',
-      trackingNumber: 'TRK12345678',
-      shippingDate: '2025-03-20'
-    }
-  ];
+  const { toast } = useToast();
+  const [userCauses, setUserCauses] = useState<Cause[]>([]);
+  const [userClaims, setUserClaims] = useState<Claim[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Fetch user's causes and claims on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setError('Authentication required');
+          return;
+        }
+
+        const headers = {
+          'Authorization': `Bearer ${token}`
+        };
+
+        // Fetch claimer dashboard data from the new endpoint
+        const response = await axios.get(`${config.apiUrl}/claims/dashboard/claimer`, { headers });
+
+        console.log('Fetched claimer dashboard data:', response.data);
+        
+        setUserCauses(response.data.myCauses || []);
+        setUserClaims(response.data.claimedTotes || []);
+      } catch (err: any) {
+        console.error('Error fetching data:', err);
+        setError(err.response?.data?.message || 'Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Calculate dashboard metrics from real data
+  const activeCauses = userCauses.filter(cause => cause.status === 'approved' && cause.isOnline).length;
+  const totalRaised = userCauses.reduce((sum, cause) => sum + (cause.currentAmount || 0), 0);
+  const totalClaims = userClaims.length;
+
+  // Loading state
+  if (loading) {
+    return (
+      <DashboardLayout 
+        title="Claimer Dashboard" 
+        subtitle={`Welcome back, ${user?.name}`}
+      >
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2">Loading your dashboard...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <DashboardLayout 
+        title="Claimer Dashboard" 
+        subtitle={`Welcome back, ${user?.name}`}
+      >
+        <div className="text-center py-12">
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">Error</h3>
+          <p className="text-gray-500 mb-6">{error}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout 
@@ -51,7 +104,7 @@ const ClaimerDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">1</div>
+            <div className="text-3xl font-bold">{activeCauses}</div>
           </CardContent>
         </Card>
         
@@ -62,7 +115,7 @@ const ClaimerDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">$5,000</div>
+            <div className="text-3xl font-bold">${totalRaised.toLocaleString()}</div>
           </CardContent>
         </Card>
         
@@ -73,7 +126,7 @@ const ClaimerDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">1</div>
+            <div className="text-3xl font-bold">{totalClaims}</div>
           </CardContent>
         </Card>
       </div>
@@ -86,105 +139,143 @@ const ClaimerDashboard = () => {
         
         <TabsContent value="causes">
           <div className="space-y-6">
-            {claimedCauses.map((cause) => (
-              <Card key={cause.id}>
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="md:w-1/4">
-                      <img 
-                        src={cause.imageUrl} 
-                        alt={cause.title} 
-                        className="w-full h-32 object-cover rounded-md" 
-                      />
+            {userCauses.length > 0 ? (
+              userCauses.map((cause) => (
+                <Card key={cause._id}>
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row gap-6">
+                      <div className="md:w-1/4">
+                        <img 
+                          src={getImageUrl(cause.imageUrl)} 
+                          alt={cause.title} 
+                          className="w-full h-32 object-cover rounded-md"
+                          onError={(e) => handleImageError(e)}
+                        />
+                      </div>
+                      <div className="md:w-3/4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-xl font-semibold">{cause.title}</h3>
+                          <Badge variant="outline" className={
+                            cause.status === 'approved' && cause.isOnline ? 'bg-green-100 text-green-800 hover:bg-green-100' :
+                            cause.status === 'pending' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' :
+                            'bg-red-100 text-red-800 hover:bg-red-100'
+                          }>
+                            {cause.status === 'approved' && cause.isOnline ? 'Active' : 
+                             cause.status === 'pending' ? 'Pending Approval' :
+                             cause.status === 'rejected' ? 'Rejected' : 'Inactive'}
+                          </Badge>
+                        </div>
+                        <p className="text-gray-600 mb-4">{cause.description}</p>
+                        
+                        <div className="mb-4">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div 
+                              className="bg-primary-600 h-2.5 rounded-full" 
+                              style={{ width: `${Math.min(((cause.currentAmount || 0) / cause.targetAmount) * 100, 100)}%` }}
+                            ></div>
+                          </div>
+                          <div className="flex justify-between mt-2">
+                            <span className="text-sm text-gray-500">
+                              ${(cause.currentAmount || 0).toLocaleString()} raised
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              ${cause.targetAmount.toLocaleString()} goal
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-6 items-center">
+                          <div>
+                            <p className="text-sm text-gray-500">Sponsors</p>
+                            <p className="font-semibold">{cause.sponsorships?.length || 0}</p>
+                          </div>
+                          <div className="flex-grow"></div>
+                          <Button 
+                            onClick={() => navigate(`/cause/${cause._id}`)}
+                          >
+                            Manage Cause
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="md:w-3/4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-xl font-semibold">{cause.title}</h3>
-                        <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
-                          Active
-                        </Badge>
-                      </div>
-                      <p className="text-gray-600 mb-4">{cause.description}</p>
-                      
-                      <div className="mb-4">
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
-                          <div 
-                            className="bg-primary-600 h-2.5 rounded-full" 
-                            style={{ width: `${(cause.currentAmount / cause.targetAmount) * 100}%` }}
-                          ></div>
-                        </div>
-                        <div className="flex justify-between mt-2">
-                          <span className="text-sm text-gray-500">
-                            ${cause.currentAmount.toLocaleString()} raised
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            ${cause.targetAmount.toLocaleString()} goal
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-6 items-center">
-                        <div>
-                          <p className="text-sm text-gray-500">Sponsors</p>
-                          <p className="font-semibold">{cause.sponsors}</p>
-                        </div>
-                        <div className="flex-grow"></div>
-                        <Button 
-                          onClick={() => navigate(`/cause/${cause.id}`)}
-                        >
-                          Manage Cause
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No causes created yet</h3>
+                <p className="text-gray-500 mb-6">Start making an impact by creating your first cause.</p>
+                <Button onClick={() => navigate('/create-cause')}>
+                  Create New Cause
+                </Button>
+              </div>
+            )}
             
-            <div className="text-center pt-6">
-              <Button onClick={() => navigate('/create-cause')}>
-                Create New Cause
-              </Button>
-            </div>
+            {userCauses.length > 0 && (
+              <div className="text-center pt-6">
+                <Button onClick={() => navigate('/create-cause')}>
+                  Create New Cause
+                </Button>
+              </div>
+            )}
           </div>
         </TabsContent>
         
         <TabsContent value="totes">
-          {totesData.length > 0 ? (
+          {userClaims.length > 0 ? (
             <div className="space-y-6">
-              {totesData.map((tote) => (
-                <Card key={tote.id}>
+              {userClaims.map((claim) => (
+                <Card key={claim._id}>
                   <CardHeader>
                     <div className="flex justify-between">
-                      <CardTitle>{tote.cause} Tote</CardTitle>
+                      <CardTitle>{claim.causeTitle} Tote</CardTitle>
                       <Badge className={
-                        tote.status === 'shipped' ? 'bg-blue-100 text-blue-800 hover:bg-blue-100' :
-                        tote.status === 'delivered' ? 'bg-green-100 text-green-800 hover:bg-green-100' :
-                        'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+                        claim.status === 'shipped' ? 'bg-blue-100 text-blue-800 hover:bg-blue-100' :
+                        claim.status === 'delivered' ? 'bg-green-100 text-green-800 hover:bg-green-100' :
+                        claim.status === 'verified' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' :
+                        'bg-gray-100 text-gray-800 hover:bg-gray-100'
                       }>
-                        {tote.status === 'shipped' ? 'Shipped' : 
-                         tote.status === 'delivered' ? 'Delivered' : 'Processing'}
+                        {claim.status === 'shipped' ? 'Shipped' : 
+                         claim.status === 'delivered' ? 'Delivered' : 
+                         claim.status === 'verified' ? 'Verified' : 
+                         claim.status === 'pending' ? 'Pending' : 'Cancelled'}
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-500">
-                      Sponsored by {tote.sponsor}
+                      Claimed on {new Date(claim.createdAt).toLocaleDateString()}
                     </p>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm text-gray-500">Tracking Number</p>
-                        <p className="font-medium">{tote.trackingNumber}</p>
+                        <p className="text-sm text-gray-500">Purpose</p>
+                        <p className="font-medium">{claim.purpose}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">Shipping Date</p>
-                        <p className="font-medium">{new Date(tote.shippingDate).toLocaleDateString()}</p>
+                        <p className="text-sm text-gray-500">Address</p>
+                        <p className="font-medium">{claim.address}, {claim.city}, {claim.state} {claim.zipCode}</p>
                       </div>
+                      {claim.shippingDate && (
+                        <div>
+                          <p className="text-sm text-gray-500">Shipping Date</p>
+                          <p className="font-medium">{new Date(claim.shippingDate).toLocaleDateString()}</p>
+                        </div>
+                      )}
+                      {claim.deliveryDate && (
+                        <div>
+                          <p className="text-sm text-gray-500">Delivery Date</p>
+                          <p className="font-medium">{new Date(claim.deliveryDate).toLocaleDateString()}</p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button variant="outline" className="w-full">
-                      Track Shipment
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => navigate(`/cause/${claim.causeId}`)}
+                    >
+                      View Cause
                     </Button>
                   </CardFooter>
                 </Card>
@@ -193,7 +284,10 @@ const ClaimerDashboard = () => {
           ) : (
             <div className="text-center py-12">
               <h3 className="text-xl font-semibold text-gray-700 mb-2">No totes claimed yet</h3>
-              <p className="text-gray-500 mb-6">Totes can be claimed once your cause receives sponsorship.</p>
+              <p className="text-gray-500 mb-6">Totes can be claimed once you find a sponsored cause you want to support.</p>
+              <Button onClick={() => navigate('/causes')}>
+                Browse Causes
+              </Button>
             </div>
           )}
         </TabsContent>
@@ -201,5 +295,46 @@ const ClaimerDashboard = () => {
     </DashboardLayout>
   );
 };
+
+// TypeScript interfaces
+interface Cause {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  targetAmount: number;
+  currentAmount: number;
+  category: string;
+  status: string;
+  location: string;
+  creator: any;
+  createdAt: string;
+  updatedAt: string;
+  isOnline: boolean;
+  sponsorships?: Array<{
+    _id: string;
+    status: string;
+  }>;
+}
+
+interface Claim {
+  _id: string;
+  causeId: string;
+  causeTitle: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  purpose: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  status: string;
+  emailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+  shippingDate?: string;
+  deliveryDate?: string;
+}
 
 export default ClaimerDashboard;

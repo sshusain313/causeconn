@@ -225,8 +225,8 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
                   <span className="text-xs text-gray-500">No Logo</span>
                 )}
               </div>
-            </div>
-             <div>
+              </div>
+              <div>
                 <span className="text-sm font-medium text-gray-700">Contact Name: </span>
                 <span className="text-sm text-gray-600">{sponsorship.contactName || 'Unknown'}</span>
               </div>
@@ -237,7 +237,7 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
               <div>
                 <span className="text-sm font-medium text-gray-700">Phone: </span>
                 <span className="text-sm text-gray-600">{sponsorship.contactName || 'Unknown'}</span>
-              </div>
+            </div>
           </div>
         </ExpandableSection>
         <ExpandableSection
@@ -294,23 +294,23 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
               <div className="space-y-3">
                 {Array.isArray(sponsorship.distributionLocations)
                   ? sponsorship.distributionLocations.map((location, index) => (
-                      <div key={index} className="bg-gray-50 p-3 rounded-md">
-                        <div className="grid md:grid-cols-2 gap-2">
-                          <div>
+                  <div key={index} className="bg-gray-50 p-3 rounded-md">
+                    <div className="grid md:grid-cols-2 gap-2">
+                      <div>
                             <div className="font-medium text-sm text-gray-900">{location.name.name}</div>
                             <div className="text-sm text-gray-600">{location.name.address}</div>
-                          </div>
-                          <div>
-                            <div className="text-sm text-gray-600">
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-600">
                               Contact: {location.name.contactPerson}
-                            </div>
+                        </div>
                             <div className="text-sm text-gray-600">Phone: {location.name.phone}</div>
-                            <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-gray-900">
                               Totes: {location.name.totesCount}
-                            </div>
-                          </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
                     ))
                   : <span className="text-xs text-gray-500">No Locations</span>}
               </div>
@@ -442,32 +442,32 @@ const CampaignApprovals = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <AdminLayout title="Campaign Approvals" subtitle="Manage and monitor all causes">
-        <div className="flex-1 p-6">
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <h1 className="text-2xl font-semibold text-gray-800">Campaign Approvals</h1>
-              <span className="text-sm text-gray-500">Admin (Admin)</span>
-            </div>
-            <p className="text-gray-600 mb-4">Review and approve new campaign submissions</p>
-            
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search campaigns..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+      <div className="flex-1 p-6">
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-2xl font-semibold text-gray-800">Campaign Approvals</h1>
+            <span className="text-sm text-gray-500">Admin (Admin)</span>
           </div>
+          <p className="text-gray-600 mb-4">Review and approve new campaign submissions</p>
+          
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search campaigns..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        </div>
 
           {loading ? (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
             </div>
           ) : filteredSponsorships.length > 0 ? (
-            <div className="space-y-6">
+        <div className="space-y-6">
               {filteredSponsorships.map((sponsorship) => (
                 <CampaignCard
                   key={sponsorship._id}
@@ -483,7 +483,7 @@ const CampaignApprovals = () => {
               <p className="text-gray-500">All campaigns have been reviewed</p>
             </div>
           )}
-        </div>
+      </div>
       </AdminLayout>
     </div>
   );

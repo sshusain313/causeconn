@@ -20,13 +20,24 @@ interface Cause {
   status: string;
   createdAt: string;
   updatedAt: string;
-  isOnline?: boolean;
+  isOnline: boolean;
   imageUrl?: string;
   adminImageUrl?: string;
   story?: string;
   location?: string;
-  creator?: any;
-  sponsors?: any[];
+  creator?: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  sponsorships?: Array<{
+    _id: string;
+    status: string;
+    amount: number;
+    toteQuantity: number;
+    createdAt: string;
+  }>;
+  totalTotes?: number;
 }
 
 const CausesManagement = () => {
@@ -56,12 +67,7 @@ const CausesManagement = () => {
         }
 
         const data = await response.json();
-        // Set isOnline property based on status for each cause
-        const causesWithOnlineStatus = data.map((cause: Cause) => ({
-          ...cause,
-          isOnline: cause.status === 'approved' || cause.status === 'completed'
-        }));
-        setCauses(causesWithOnlineStatus);
+        setCauses(data);
       } catch (err) {
         console.error('Error fetching causes:', err);
         setError('Failed to load causes. Please try again later.');
@@ -86,20 +92,20 @@ const CausesManagement = () => {
       const cause = causes.find(c => c._id === causeId);
       if (!cause) return;
       
-      const newStatus = cause.status === 'approved' ? 'pending' : 'approved';
+      const newIsOnline = !cause.isOnline;
       
       // Send update to the server
-      const response = await fetch(getApiUrl(`/causes/${causeId}/status`), {
+      const response = await fetch(getApiUrl(`/causes/${causeId}`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ isOnline: newIsOnline })
       });
       
       if (!response.ok) {
-        throw new Error('Failed to update cause status');
+        throw new Error('Failed to update cause visibility');
       }
       
       // Update local state
@@ -107,23 +113,22 @@ const CausesManagement = () => {
         if (c._id === causeId) {
           return { 
             ...c, 
-            status: newStatus,
-            isOnline: newStatus === 'approved'
+            isOnline: newIsOnline
           };
         }
         return c;
       }));
       
       toast({
-        title: 'Status Updated',
-        description: `Cause is now ${newStatus}`,
+        title: 'Visibility Updated',
+        description: `Cause is now ${newIsOnline ? 'online' : 'offline'}`,
         duration: 3000
       });
     } catch (err) {
       console.error('Error:', err);
       toast({
         title: 'Error',
-        description: 'Failed to update status',
+        description: 'Failed to update visibility',
         variant: 'destructive'
       });
     }
@@ -309,8 +314,8 @@ const CausesManagement = () => {
                       onClick={() => handleToggleStatus(cause._id)}
                       className="flex-1 sm:flex-none"
                     >
-                      {cause.status === 'approved' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      <span className="ml-2 text-xs sm:text-sm">{cause.status === 'approved' ? 'Take Offline' : 'Put Online'}</span>
+                      {cause.isOnline ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      <span className="ml-2 text-xs sm:text-sm">{cause.isOnline ? 'Take Offline' : 'Put Online'}</span>
                     </Button>
                     <Button
                       variant="outline"

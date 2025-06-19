@@ -203,3 +203,32 @@ export const getClaimsStats = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: 'Error fetching claims statistics' });
   }
 };
+
+// Get claimer dashboard data
+export const getClaimerDashboardData = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('Fetching claimer dashboard data for user:', req.user?._id);
+    
+    // Step 1: Fetch causes created by the logged-in user (claimer)
+    const Cause = mongoose.model('Cause');
+    const myCauses = await Cause.find({ creator: req.user?._id })
+      .sort({ createdAt: -1 });
+    
+    // Step 2: Fetch claimed totes made by this user
+    const claimedTotes = await Claim.find({ email: req.user?.email })
+      .sort({ createdAt: -1 })
+      .populate('causeId', 'title imageUrl'); // for contextual display
+    
+    console.log('Found causes for user:', myCauses.length);
+    console.log('Found claims for user:', claimedTotes.length);
+    
+    // Step 3: Return JSON response
+    res.json({
+      myCauses,
+      claimedTotes
+    });
+  } catch (error) {
+    console.error('Error fetching claimer dashboard data:', error);
+    res.status(500).json({ message: 'Error fetching claimer dashboard data' });
+  }
+};

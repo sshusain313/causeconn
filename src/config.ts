@@ -88,7 +88,7 @@ export function getFullImageUrl(path: string): string {
 
   // Clean the path to prevent directory traversal
   const cleanPath = path.replace(/\.\./g, '').replace(/^\/+/, '');
-  
+
   // Otherwise, assume it's a relative path and prepend the API URL
   return `${config.apiUrl}/${cleanPath}`;
 }
@@ -115,11 +115,11 @@ export function validateFileUpload(file: File): { valid: boolean; error?: string
 // Debug function to log configuration (only in development)
 export function debugConfig() {
   if (!isProduction) {
-    console.log('App config:', {
-      isProduction,
-      apiUrl: config.apiUrl,
-      uploadsUrl: config.uploadsUrl,
-      hostname: window.location.hostname,
+console.log('App config:', { 
+  isProduction, 
+  apiUrl: config.apiUrl, 
+  uploadsUrl: config.uploadsUrl,
+  hostname: window.location.hostname,
       apiDomain,
       email: {
         host: config.email.host,

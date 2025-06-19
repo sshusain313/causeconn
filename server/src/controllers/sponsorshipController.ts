@@ -57,6 +57,7 @@ export const createSponsorship = async (req: Request, res: Response): Promise<vo
     // Create the sponsorship with required fields and defaults
     const sponsorshipData = {
       ...req.body,
+      sponsor: req.user?._id || null,
       status: SponsorshipStatus.PENDING,
       // Set default demographics if not provided
       demographics: req.body.demographics || {
@@ -210,6 +211,29 @@ export const getSponsorshipById = async (req: Request, res: Response): Promise<v
   } catch (error) {
     console.error('Error fetching sponsorship:', error);
     res.status(500).json({ message: 'Error fetching sponsorship' });
+  }
+};
+
+export const getUserSponsorships = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('Fetching sponsorships for user:', req.user?._id);
+    
+    // Find sponsorships by sponsor field OR by email (for backward compatibility)
+    const sponsorships = await Sponsorship.find({
+      $or: [
+        { sponsor: req.user?._id },
+        { email: req.user?.email }
+      ]
+    })
+      .populate('cause', 'title description imageUrl targetAmount currentAmount category status')
+      .sort({ createdAt: -1 });
+    
+    console.log('Found sponsorships for user:', sponsorships.length);
+    
+    res.json(sponsorships);
+  } catch (error) {
+    console.error('Error fetching user sponsorships:', error);
+    res.status(500).json({ message: 'Error fetching user sponsorships' });
   }
 };
 
