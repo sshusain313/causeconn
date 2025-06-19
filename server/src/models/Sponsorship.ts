@@ -153,15 +153,11 @@ const sponsorshipSchema = new Schema<ISponsorship>(
       required: true
     },
     distributionLocations: [{
-      name: {
-        name: { type: String, required: true },
-        address: { type: String, required: true },
-        contactPerson: { type: String, required: true },
-        phone: { type: String, required: true },
-        location: { type: String, required: true },
-        totesCount: { type: Number, required: true }
-      },
-      type: { type: String, required: true },
+      name: { type: String, required: true },
+      address: { type: String, required: true },
+      contactPerson: { type: String, required: true },
+      phone: { type: String, required: true },
+      location: { type: String, required: true },
       totesCount: { type: Number, required: true }
     }],
     demographics: {

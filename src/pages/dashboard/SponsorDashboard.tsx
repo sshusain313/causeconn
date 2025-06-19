@@ -575,18 +575,14 @@ interface Sponsorship {
                     </div>
                     
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <span className="text-green-800 font-medium">
+                      <p className="text-green-800 font-medium">
                         { cause.claimedTotes > 0 ? (
-                        <p className="text-green-800 font-medium">
                         <span role="img" aria-label="celebration">🎉 {cause.claimedTotes} people have claimed your totes!</span>
-                        </p>
                         ):(
-                        <p className="text-red-400">
                         <span>No totes claimed yet. Share your cause to get more claims!</span>
-                        </p>
                         )
                       }
-                      </span>
+                      </p>
                       {cause.shippedClaims > 0 && (
                         <p className="text-green-700 text-sm mt-1">
                           {cause.shippedClaims} totes have been shipped and are making an impact.

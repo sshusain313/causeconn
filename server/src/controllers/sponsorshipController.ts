@@ -116,18 +116,47 @@ export const createSponsorship = async (req: Request, res: Response): Promise<vo
 
 export const getPendingSponsorships = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('=== getPendingSponsorships START ===');
     console.log('Fetching pending sponsorships, authenticated as:', req.user);
+    console.log('SponsorshipStatus.PENDING value:', SponsorshipStatus.PENDING);
     
+    // First, let's check if the Sponsorship model is working by trying to count all sponsorships
+    const totalSponsorships = await Sponsorship.countDocuments();
+    console.log('Total sponsorships in database:', totalSponsorships);
+    
+    // Check if there are any sponsorships with any status
+    const allSponsorships = await Sponsorship.find({}).limit(5);
+    console.log('Sample sponsorships:', allSponsorships.map(s => ({ id: s._id, status: s.status, organizationName: s.organizationName })));
+    
+    console.log('About to query pending sponsorships...');
     const sponsorships = await Sponsorship.find({ status: SponsorshipStatus.PENDING })
       .populate('cause', 'title') // Populate cause with just the title field
       .sort({ createdAt: -1 });
     
     console.log('Found pending sponsorships:', sponsorships.length);
+    console.log('About to send response...');
     
     res.json(sponsorships);
+    console.log('=== getPendingSponsorships SUCCESS ===');
   } catch (error) {
+    console.error('=== getPendingSponsorships ERROR ===');
     console.error('Error fetching pending sponsorships:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error constructor:', error.constructor.name);
+    
+    // Check if it's a specific type of error
+    if (error.name === 'CastError') {
+      console.error('This is a CastError - likely invalid ObjectId');
+    } else if (error.name === 'ValidationError') {
+      console.error('This is a ValidationError');
+    } else if (error.name === 'MongoError') {
+      console.error('This is a MongoError');
+    }
+    
     res.status(500).json({ message: 'Error fetching pending sponsorships' });
+    console.error('=== getPendingSponsorships ERROR END ===');
   }
 };
 
@@ -282,6 +311,138 @@ export const reuploadLogo = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ 
       message: 'Error updating logo', 
       error: error.message 
+    });
+  }
+};
+
+export const testSponsorshipModel = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('Testing Sponsorship model...');
+    
+    // Test 1: Check if the model is loaded
+    console.log('Sponsorship model exists:', !!Sponsorship);
+    console.log('Sponsorship model name:', Sponsorship.modelName);
+    
+    // Test 2: Check database connection
+    const dbState = Sponsorship.db.readyState;
+    console.log('Database ready state:', dbState);
+    console.log('Database name:', Sponsorship.db.name);
+    
+    // Test 3: Try a simple count without any filters
+    const count = await Sponsorship.countDocuments();
+    console.log('Total sponsorships count:', count);
+    
+    // Test 4: Try to get one sponsorship without any filters
+    const oneSponsorship = await Sponsorship.findOne();
+    console.log('One sponsorship found:', !!oneSponsorship);
+    if (oneSponsorship) {
+      console.log('Sponsorship fields:', Object.keys(oneSponsorship.toObject()));
+      console.log('Sponsorship status:', oneSponsorship.status);
+      console.log('Sponsorship status type:', typeof oneSponsorship.status);
+    }
+    
+    // Test 5: Check all unique status values
+    const uniqueStatuses = await Sponsorship.distinct('status');
+    console.log('Unique statuses in database:', uniqueStatuses);
+    
+    // Test 6: Count by status
+    const statusCounts = await Sponsorship.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+    console.log('Status counts:', statusCounts);
+    
+    // Test 7: Check what SponsorshipStatus.PENDING equals
+    console.log('SponsorshipStatus.PENDING value:', SponsorshipStatus.PENDING);
+    console.log('SponsorshipStatus.PENDING type:', typeof SponsorshipStatus.PENDING);
+    
+    res.json({
+      modelExists: !!Sponsorship,
+      modelName: Sponsorship.modelName,
+      dbReadyState: dbState,
+      dbName: Sponsorship.db.name,
+      totalCount: count,
+      hasOneSponsorship: !!oneSponsorship,
+      sampleStatus: oneSponsorship?.status,
+      sampleStatusType: typeof oneSponsorship?.status,
+      uniqueStatuses: uniqueStatuses,
+      statusCounts: statusCounts,
+      pendingEnumValue: SponsorshipStatus.PENDING,
+      pendingEnumType: typeof SponsorshipStatus.PENDING
+    });
+  } catch (error) {
+    console.error('Test error:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      message: 'Test failed', 
+      error: error.message,
+      stack: error.stack 
+    });
+  }
+};
+
+export const testPendingSponsorships = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('Testing pending sponsorships step by step...');
+    
+    // Step 1: Find pending sponsorships without populate
+    console.log('Step 1: Finding pending sponsorships without populate...');
+    const pendingWithoutPopulate = await Sponsorship.find({ status: SponsorshipStatus.PENDING });
+    console.log('Found pending sponsorships without populate:', pendingWithoutPopulate.length);
+    
+    if (pendingWithoutPopulate.length > 0) {
+      console.log('Sample sponsorship without populate:', {
+        id: pendingWithoutPopulate[0]._id,
+        status: pendingWithoutPopulate[0].status,
+        cause: pendingWithoutPopulate[0].cause,
+        causeType: typeof pendingWithoutPopulate[0].cause
+      });
+    }
+    
+    // Step 2: Try populate on one sponsorship
+    if (pendingWithoutPopulate.length > 0) {
+      console.log('Step 2: Testing populate on one sponsorship...');
+      try {
+        const populatedOne = await Sponsorship.findById(pendingWithoutPopulate[0]._id).populate('cause', 'title');
+        console.log('Successfully populated one sponsorship:', {
+          id: populatedOne._id,
+          cause: populatedOne.cause,
+          causeTitle: populatedOne.cause?.title
+        });
+      } catch (populateError) {
+        console.error('Error populating one sponsorship:', populateError);
+        throw populateError;
+      }
+    }
+    
+    // Step 3: Try the full query
+    console.log('Step 3: Testing full query with populate...');
+    const pendingWithPopulate = await Sponsorship.find({ status: SponsorshipStatus.PENDING })
+      .populate('cause', 'title')
+      .sort({ createdAt: -1 });
+    
+    console.log('Successfully found pending sponsorships with populate:', pendingWithPopulate.length);
+    
+    res.json({
+      withoutPopulate: pendingWithoutPopulate.length,
+      withPopulate: pendingWithPopulate.length,
+      sampleWithoutPopulate: pendingWithoutPopulate.length > 0 ? {
+        id: pendingWithoutPopulate[0]._id,
+        status: pendingWithoutPopulate[0].status,
+        cause: pendingWithoutPopulate[0].cause
+      } : null,
+      sampleWithPopulate: pendingWithPopulate.length > 0 ? {
+        id: pendingWithPopulate[0]._id,
+        status: pendingWithPopulate[0].status,
+        cause: pendingWithPopulate[0].cause
+      } : null
+    });
+  } catch (error) {
+    console.error('Test pending sponsorships error:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      message: 'Test failed', 
+      error: error.message,
+      stack: error.stack 
     });
   }
 }; 

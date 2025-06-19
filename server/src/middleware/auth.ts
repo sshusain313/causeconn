@@ -22,6 +22,22 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     console.log('Auth middleware - Token:', token ? token.substring(0, 20) + '...' : 'No token');
     console.log('Auth middleware - JWT_SECRET exists:', !!process.env.JWT_SECRET);
 
+    // In development mode, allow requests without a token
+    if (process.env.NODE_ENV === 'development' && !token) {
+      console.log('Auth middleware - No token found but allowing in development mode');
+      const mockUser = {
+        _id: '123456789012345678901234',
+        email: 'shabahatsyed101@gmail.com',
+        name: 'Development User',
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      req.user = mockUser as any;
+      return next();
+    }
+    
     if (!token) {
       console.log('Auth middleware - No token found');
       return res.status(401).json({ message: 'Authentication required' });
