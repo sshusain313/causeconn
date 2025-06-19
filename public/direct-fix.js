@@ -9,9 +9,9 @@
   console.log('Direct API Fix: Initializing...');
   
   // Only apply in production or on changebag.org
-  if (window.location.hostname !== 'changebag.org' && 
-      window.location.hostname !== 'www.changebag.org' &&
-      window.location.hostname !== 'localhost') {
+  if (window.location.hostname === 'localhost' || 
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname.includes('localhost')) {
     console.log('Direct API Fix: Not running on target domain, skipping');
     return;
   }

@@ -68,6 +68,13 @@ export interface ISponsorship extends Document {
   approvedBy?: mongoose.Types.ObjectId | IUser;
   approvedAt?: Date;
   rejectionReason?: string;
+  // Payment fields
+  paymentId?: string;
+  paymentStatus?: 'pending' | 'completed' | 'failed';
+  paymentOrderId?: string;
+  paymentAmount?: number;
+  paymentCurrency?: string;
+  paymentDate?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -182,7 +189,34 @@ const sponsorshipSchema = new Schema<ISponsorship>(
       ref: 'User'
     },
     approvedAt: Date,
-    rejectionReason: String
+    rejectionReason: String,
+    // Payment fields
+    paymentId: {
+      type: String,
+      required: false
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'completed', 'failed'],
+      default: 'pending'
+    },
+    paymentOrderId: {
+      type: String,
+      required: false
+    },
+    paymentAmount: {
+      type: Number,
+      required: false
+    },
+    paymentCurrency: {
+      type: String,
+      required: false,
+      default: 'INR'
+    },
+    paymentDate: {
+      type: Date,
+      required: false
+    }
   },
   {
     timestamps: true

@@ -30,6 +30,7 @@ const OnboardingWizard = ({
     email: '',
     phone: '',
     selectedCause: initialCauseId || '',
+    causeTitle: '',
     toteQuantity: 50,
     distributionType: 'online' as 'online' | 'physical', // Default to online distribution
     numberOfTotes: 50,
@@ -147,6 +148,11 @@ const OnboardingWizard = ({
       const response = await axios.get(`/api/causes/${causeId}`);
       setCauseData(response.data);
       setClaimedTotes(response.data.claimedTotes || 0);
+      // Update formData with the cause title
+      setFormData(prev => ({
+        ...prev,
+        causeTitle: response.data.title || response.data.name || 'Selected Cause'
+      }));
     } catch (error) {
       console.error('Error fetching cause data:', error);
     }
@@ -350,6 +356,54 @@ const OnboardingWizard = ({
     });
   };
 
+  // Handle payment completion from ConfirmationStep
+  const handlePaymentComplete = (paymentId?: string) => {
+    // Calculate pricing information
+    const { unitPrice, totalAmount, toteQuantity } = calculatePricing();
+    
+    // Transform distributionPoints from array to the expected format for the API
+    let transformedDistributionPoints = [];
+    
+    // If using physical distribution, transform the distribution points data structure
+    if (formData.distributionType === 'physical' && formData.distributionPoints) {
+      // Convert the complex city-based structure to a flat array of distribution points
+      // as expected by the Sponsorship model
+      if (Array.isArray(formData.distributionPoints)) {
+        // If it's already an array, use it directly
+        transformedDistributionPoints = formData.distributionPoints;
+      } else {
+        // If it's the city-based object structure from DistributionInfoStep
+        // Extract distribution locations and convert to the format expected by the API
+        Object.entries(formData.distributionPoints).forEach(([city, locations]) => {
+          Object.entries(locations).forEach(([locationType, points]) => {
+            points.forEach(point => {
+              if (point.selected) {
+                transformedDistributionPoints.push({
+                  name: point.name,
+                  address: `${city}, India`,
+                  contactPerson: formData.contactName,
+                  phone: formData.phone,
+                  location: city,
+                  totesCount: point.totes
+                });
+              }
+            });
+          });
+        });
+      }
+    }
+    
+    // Use the calculated values in the form submission with payment ID
+    onComplete({
+      ...formData,
+      toteQuantity,
+      unitPrice,
+      totalAmount,
+      distributionPoints: transformedDistributionPoints,
+      paymentId: paymentId
+    });
+  };
+
   return (
     <div>
       <div className="mb-8">
@@ -434,6 +488,8 @@ const OnboardingWizard = ({
               return points;
             })()
           }}
+          causeData={causeData}
+          onComplete={handlePaymentComplete}
         />
       )}
 
@@ -446,16 +502,9 @@ const OnboardingWizard = ({
           Back
         </Button>
 
-        {currentStep < totalSteps ? (
+        {currentStep < totalSteps && (
           <Button onClick={nextStep}>
             Continue
-          </Button>
-        ) : (
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Submitting...' : 'Complete Sponsorship'}
           </Button>
         )}
       </div>

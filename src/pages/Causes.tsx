@@ -57,7 +57,7 @@ const CausesPage = () => {
   const hasApprovedSponsorship = (cause: Cause) => {
     return cause.sponsorships?.some(s => s.status === 'approved') || false;
   };
-
+  
   // Fetch causes from the API
   useEffect(() => {
     const fetchCauses = async () => {
@@ -125,7 +125,7 @@ const CausesPage = () => {
     
     return matchesSearch && matchesCategory && matchesStatus;
   });
-
+  
   // Handle claim button click
   const handleClaimAction = (cause: Cause) => {
     navigate(`/claim/${cause._id}`);
@@ -139,21 +139,21 @@ const CausesPage = () => {
   // Get the details/claim button based on sponsorship status
   const getDetailsOrClaimButton = (cause: Cause) => {
     return hasApprovedSponsorship(cause) ? (
-      <Button 
+        <Button 
         onClick={() => navigate(`/claim/${cause._id}`)} 
-        className="w-full bg-black text-white"
-      >
-        Claim a Tote
-      </Button>
+          className="w-full bg-black text-white"
+        >
+          Claim a Tote
+        </Button>
     ) : (
-      <Button 
-        onClick={() => navigate(`/cause/${cause._id}`)} 
+        <Button 
+          onClick={() => navigate(`/cause/${cause._id}`)} 
         className="w-full"
-        variant="outline"
-      >
-        See Details
-      </Button>
-    );
+          variant="outline" 
+        >
+          See Details
+        </Button>
+      );
   };
   
   // Get the sponsor button if target not achieved

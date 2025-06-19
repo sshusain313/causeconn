@@ -1,11 +1,13 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Check } from 'lucide-react';
+import { Check, CreditCard, Loader2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import config from '@/config';
+import axios from 'axios';
 
 interface ConfirmationStepProps {
   formData: {
@@ -32,19 +34,19 @@ interface ConfirmationStepProps {
     };
     availableTotes?: number;
     claimedTotes?: number;
+    causeTitle?: string;
   };
+  causeData?: any;
+  onComplete?: (paymentId?: string) => void;
 }
 
-const ConfirmationStep = ({ formData }: ConfirmationStepProps) => {
-  // Mock causes data
-  const causes = [
-    { id: '1', title: 'Clean Water Initiative' },
-    { id: '2', title: "Children's Education Fund" },
-    { id: '3', title: 'Women Entrepreneurs' },
-    { id: '4', title: 'Wildlife Conservation' },
-  ];
+const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepProps) => {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'processing' | 'completed' | 'failed'>('pending');
 
-  const selectedCause = causes.find(cause => cause.id === formData.selectedCause)?.title || '';
+  // Use the actual cause title from form data or fallback to a default
+  const selectedCause = formData.causeTitle || causeData?.title || causeData?.name || 'Selected Cause';
   
   // Use the pricing information from the form data
   const unitPrice = formData.unitPrice || 10; // Default to $10 per tote if not provided
@@ -64,6 +66,160 @@ const ConfirmationStep = ({ formData }: ConfirmationStepProps) => {
     if (demo.education) parts.push(`Education: ${demo.education.replace('-', ' ').replace(/^\w/, c => c.toUpperCase())}`);
     
     return parts.length > 0 ? parts.join(' • ') : 'Not specified';
+  };
+
+  // Initialize Razorpay
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const handlePayment = async () => {
+    setIsLoading(true);
+    setPaymentStatus('processing');
+
+    try {
+      // Create Razorpay order
+      const token = localStorage.getItem('token');
+      const orderResponse = await axios.post(
+        `${config.apiUrl}/payments/create-order`,
+        {
+          amount: Math.round(totalCost * 100), // Convert to paise (smallest currency unit)
+          currency: 'INR',
+          email: formData.email,
+          organizationName: formData.organizationName,
+          causeTitle: selectedCause,
+          toteQuantity: formData.toteQuantity,
+          totalAmount: totalCost
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : 'Bearer mock_token_test',
+          },
+        }
+      );
+
+      const { order } = orderResponse.data;
+      const { id: orderId, amount, currency, key } = order;
+
+      // Initialize Razorpay payment
+      const options = {
+        key: key,
+        amount: amount,
+        currency: currency,
+        name: 'CauseConnect',
+        description: `Sponsorship for ${selectedCause} - ${formData.toteQuantity} totes`,
+        order_id: orderId,
+        handler: async function (response: any) {
+          try {
+            // Verify payment on backend
+            const verifyResponse = await axios.post(
+              `${config.apiUrl}/payments/confirm-payment`,
+              {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              },
+              {
+                headers: {
+                  'Authorization': token ? `Bearer ${token}` : 'Bearer mock_token_test',
+                },
+              }
+            );
+
+            setPaymentStatus('completed');
+            toast({
+              title: "Payment Successful!",
+              description: "Your sponsorship has been confirmed.",
+              variant: "default",
+            });
+
+            // Call onComplete with payment ID
+            if (onComplete) {
+              onComplete(response.razorpay_payment_id);
+            }
+          } catch (error: any) {
+            console.error('Payment verification failed:', error);
+            setPaymentStatus('failed');
+            toast({
+              title: "Payment Verification Failed",
+              description: error.response?.data?.message || "Please contact support.",
+              variant: "destructive",
+            });
+          }
+        },
+        prefill: {
+          name: formData.contactName,
+          email: formData.email,
+          contact: formData.phone || ''
+        },
+        theme: {
+          color: "#10b981"
+        },
+        modal: {
+          ondismiss: function() {
+            setPaymentStatus('pending');
+            setIsLoading(false);
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+
+    } catch (error: any) {
+      console.error('Payment initiation failed:', error);
+      console.error('Error response data:', error.response?.data);
+      console.error('Error response status:', error.response?.status);
+      console.error('Error response headers:', error.response?.headers);
+      console.error('Request data sent:', {
+        amount: Math.round(totalCost * 100),
+        currency: 'INR',
+        email: formData.email,
+        organizationName: formData.organizationName,
+        causeTitle: selectedCause,
+        toteQuantity: formData.toteQuantity,
+        totalAmount: totalCost
+      });
+      setPaymentStatus('failed');
+      setIsLoading(false);
+      toast({
+        title: "Payment Failed",
+        description: error.response?.data?.message || "Failed to initiate payment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getPaymentButtonText = () => {
+    switch (paymentStatus) {
+      case 'processing':
+        return 'Processing Payment...';
+      case 'completed':
+        return 'Payment Completed ✓';
+      case 'failed':
+        return 'Retry Payment';
+      default:
+        return 'Complete Payment';
+    }
+  };
+
+  const getPaymentButtonVariant = () => {
+    switch (paymentStatus) {
+      case 'completed':
+        return 'default';
+      case 'failed':
+        return 'destructive';
+      default:
+        return 'default';
+    }
   };
 
   return (
@@ -127,12 +283,12 @@ const ConfirmationStep = ({ formData }: ConfirmationStepProps) => {
                 )}
                 <li className="flex justify-between">
                   <span className="text-gray-600">Price per tote:</span>
-                  <span className="font-medium">${unitPrice.toFixed(2)}</span>
+                  <span className="font-medium">₹{unitPrice.toFixed(2)}</span>
                 </li>
                 <Separator className="my-2" />
                 <li className="flex justify-between text-lg">
                   <span className="font-semibold">Total:</span>
-                  <span className="font-bold">${totalCost.toLocaleString()}</span>
+                  <span className="font-bold">₹{totalCost.toLocaleString()}</span>
                 </li>
               </ul>
             </CardContent>
@@ -203,6 +359,47 @@ const ConfirmationStep = ({ formData }: ConfirmationStepProps) => {
               </ul>
             </CardContent>
           </Card>
+
+          {/* Payment Section */}
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Payment
+              </h3>
+              <div className="space-y-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600">Total Amount:</span>
+                    <span className="text-xl font-bold text-green-600">₹{totalCost.toLocaleString()}</span>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Secure payment powered by Razorpay
+                  </p>
+                </div>
+                
+                <Button
+                  onClick={handlePayment}
+                  disabled={isLoading || paymentStatus === 'completed'}
+                  variant={getPaymentButtonVariant()}
+                  className="w-full"
+                  size="lg"
+                >
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {getPaymentButtonText()}
+                </Button>
+                
+                {paymentStatus === 'completed' && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2 text-green-700">
+                      <Check className="h-4 w-4" />
+                      <span className="font-medium">Payment completed successfully!</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
           
           <div className="bg-green-50 border border-green-100 rounded-lg p-4">
             <div className="flex items-start gap-3">
@@ -212,7 +409,10 @@ const ConfirmationStep = ({ formData }: ConfirmationStepProps) => {
               <div>
                 <h4 className="font-semibold text-green-800">Ready to Complete!</h4>
                 <p className="text-sm text-green-700">
-                  Your sponsorship details are ready for submission. Click "Complete Sponsorship" to finalize.
+                  {paymentStatus === 'completed' 
+                    ? "Your sponsorship has been confirmed and payment processed successfully."
+                    : "Review your sponsorship details and complete payment to finalize."
+                  }
                 </p>
               </div>
             </div>

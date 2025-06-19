@@ -6,6 +6,12 @@
  */
 
 (function() {
+  // Only run in production environments
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    console.log('API Interceptor: Skipping in development environment');
+    return;
+  }
+  
   console.log('API Interceptor: Initializing');
   
   // Store the original fetch and XHR open methods

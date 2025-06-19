@@ -53,6 +53,9 @@ import QrScanner from "./pages/admin/QrScanner";
 import DistributionSettings from './pages/admin/DistributionSettings';
 import EditCause from './pages/admin/EditCause';
 
+// Test Components
+import PaymentTest from "./components/PaymentTest";
+
 // Create QueryClient once, outside of component
 const queryClient = new QueryClient();
 
@@ -74,6 +77,9 @@ const App: React.FC = () => {
                 <Route path="/sponsor/new" element={<SponsorFormPage />} />
                 <Route path="/sponsorship/confirmation" element={<SponsorshipConfirmation />} />
                 <Route path="/login" element={<LoginPage />} />
+                
+                {/* Test Routes */}
+                <Route path="/test/payment" element={<PaymentTest />} />
                 
                 {/* Public Information Pages */}
                 <Route path="/why-sponsor" element={<WhySponsorPage />} />

@@ -25,6 +25,7 @@ const SponsorFormContainer: React.FC<SponsorFormContainerProps> = ({ causeId }) 
       console.log('Unit price:', formData.unitPrice);
       console.log('Total amount:', formData.totalAmount);
       console.log('Distribution type selected:', formData.distributionType);
+      console.log('Payment ID:', formData.paymentId);
       
       // Create a copy of the data without the large logo URL to reduce payload size
       const logoUrl = formData.logoUrl;
@@ -63,6 +64,9 @@ const SponsorFormContainer: React.FC<SponsorFormContainerProps> = ({ causeId }) 
         cause: causeId,
         // Explicitly set the distribution type based on the form selection
         distributionType: isPhysicalDistribution ? 'physical' : 'online',
+        // Include payment information if available
+        paymentId: submissionData.paymentId,
+        paymentStatus: submissionData.paymentId ? 'completed' : 'pending',
         // Set distribution points based on type
         distributionPoints: isPhysicalDistribution
           ? [{ 

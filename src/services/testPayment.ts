@@ -11,7 +11,7 @@ export const testCreateOrder = async () => {
     
     // First, test the connection with a simple GET request
     try {
-      const testResponse = await axios.get(`${config.apiUrl}/api/payments/test`);
+      const testResponse = await axios.get(`${config.apiUrl}/payments/test`);
       console.log('Test endpoint response:', testResponse.data);
     } catch (error) {
       console.error('Error connecting to test endpoint:', error);
@@ -20,7 +20,7 @@ export const testCreateOrder = async () => {
     // Now try to create an order
     const token = localStorage.getItem('token');
     const response = await axios.post(
-      `${config.apiUrl}/api/payments/create-order`,
+      `${config.apiUrl}/payments/create-order`,
       {
         amount: 100, // 100 rupees
         currency: 'INR',
@@ -31,7 +31,7 @@ export const testCreateOrder = async () => {
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : '',
+          'Authorization': token ? `Bearer ${token}` : 'Bearer mock_token_test',
         },
       }
     );
@@ -42,6 +42,32 @@ export const testCreateOrder = async () => {
     console.error('Error in test payment:', error);
     console.error('Error response:', error.response?.data);
     throw new Error(error.response?.data?.message || 'Failed to test payment order');
+  }
+};
+
+/**
+ * Test function to get payment status
+ */
+export const testGetPaymentStatus = async (orderId: string) => {
+  try {
+    console.log('Testing payment status for order:', orderId);
+    
+    const token = localStorage.getItem('token');
+    const response = await axios.get(
+      `${config.apiUrl}/payments/status/${orderId}`,
+      {
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : 'Bearer mock_token_test',
+        },
+      }
+    );
+    
+    console.log('Payment status retrieved:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error getting payment status:', error);
+    console.error('Error response:', error.response?.data);
+    throw new Error(error.response?.data?.message || 'Failed to get payment status');
   }
 };
 

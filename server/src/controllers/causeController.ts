@@ -80,7 +80,7 @@ export const getAllCauses = async (req: Request, res: Response) => {
         as: 'creator'
       }
     });
-    
+
     // Unwind creator array to object
     pipeline.push({
       $unwind: {

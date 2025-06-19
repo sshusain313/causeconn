@@ -14,8 +14,9 @@
         console.log('Inline API Fix: Initializing...');
         
         // Only apply in production or on changebag.org
-        if (window.location.hostname === 'changebag.org' || 
-            window.location.hostname === 'www.changebag.org') {
+        if (window.location.hostname !== 'localhost' && 
+            window.location.hostname !== '127.0.0.1' &&
+            !window.location.hostname.includes('localhost')) {
           console.log('Inline API Fix: Running on production domain, applying fixes');
           
           // Override fetch and XHR
