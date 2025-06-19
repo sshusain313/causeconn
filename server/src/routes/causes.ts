@@ -8,9 +8,11 @@ const router: Router = createRouter();
 
 // Public routes
 router.get('/', causeController.getAllCauses);
-router.get('/:id', causeController.getCauseById);
 
 // Protected routes (require authentication)
+// Route for getting sponsor causes with claim statistics (must come before /:id)
+router.get('/sponsor-causes-with-claims', authGuard, causeController.getSponsorCausesWithClaimStats);
+
 // Add image compression middleware to reduce file sizes
 router.post('/', authGuard, upload.single('image'), compressImage, causeController.createCause);
 router.put('/:id', authGuard, causeController.updateCause);
@@ -18,6 +20,9 @@ router.delete('/:id', authGuard, causeController.deleteCause);
 // Route for getting causes by user ID (current user if no ID provided)
 router.get('/user/:userId', authGuard, causeController.getCausesByUser);
 router.get('/user', authGuard, causeController.getCausesByUser);
+
+// Public route for getting a single cause (must come after specific routes)
+router.get('/:id', causeController.getCauseById);
 
 // Admin routes
 router.patch('/:id/status', authGuard, adminGuard, causeController.updateCauseStatus);

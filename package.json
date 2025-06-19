@@ -58,6 +58,7 @@
     "next-themes": "^0.3.0",
     "postcss": "^8.4.47",
     "qrcode.react": "^4.2.0",
+    "razorpay": "^2.9.6",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",

@@ -394,7 +394,7 @@ const OnboardingWizard = ({
         <DistributionInfoStep
           formData={formData}
           updateFormData={updateFormData}
-          validationError={validationError}
+          // validationError={validationError}
           goToStep={(step) => setCurrentStep(step)}
         />
       )}

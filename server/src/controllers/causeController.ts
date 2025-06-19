@@ -400,13 +400,152 @@ export const getCausesByUser = async (req: Request, res: Response) => {
   try {
     const userId = req.params.userId || req.user?._id;
     
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+    
     const causes = await Cause.find({ creator: userId })
+      .populate('creator', 'name email')
       .sort({ createdAt: -1 });
     
     res.json(causes);
   } catch (error) {
     console.error('Error fetching user causes:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get sponsor causes with claim statistics
+export const getSponsorCausesWithClaimStats = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?._id;
+    
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+    
+    console.log('Fetching sponsor causes with claims for user:', userId);
+    
+    // Build aggregation pipeline to get causes with claim statistics
+    const pipeline = [
+      // Match causes created by the current user
+      {
+        $match: {
+          creator: mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId
+        }
+      },
+      // Lookup sponsorships to calculate total totes
+      {
+        $lookup: {
+          from: 'sponsorships',
+          localField: '_id',
+          foreignField: 'cause',
+          as: 'sponsorships'
+        }
+      },
+      // Lookup claims to count claimed totes
+      {
+        $lookup: {
+          from: 'claims',
+          localField: '_id',
+          foreignField: 'causeId',
+          as: 'claims'
+        }
+      },
+      // Add fields for calculations
+      {
+        $addFields: {
+          // Calculate total totes from approved sponsorships
+          totalTotes: {
+            $sum: {
+              $map: {
+                input: {
+                  $filter: {
+                    input: '$sponsorships',
+                    as: 'sponsorship',
+                    cond: { $eq: ['$$sponsorship.status', 'approved'] }
+                  }
+                },
+                as: 'approvedSponsorship',
+                in: { $ifNull: ['$$approvedSponsorship.toteQuantity', 0] }
+              }
+            }
+          },
+          // Count total claims
+          claimedTotes: { $size: '$claims' },
+          // Count shipped/delivered claims
+          shippedClaims: {
+            $size: {
+              $filter: {
+                input: '$claims',
+                as: 'claim',
+                cond: { $in: ['$$claim.status', ['shipped', 'delivered']] }
+              }
+            }
+          }
+        }
+      },
+      // Project the final output
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          description: 1,
+          imageUrl: 1,
+          targetAmount: 1,
+          currentAmount: 1,
+          category: 1,
+          status: 1,
+          location: 1,
+          isOnline: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          distributionStartDate: 1,
+          distributionEndDate: 1,
+          totalTotes: 1,
+          claimedTotes: 1,
+          shippedClaims: 1,
+          // Include claim details for shipped/delivered claims
+          claimDetails: {
+            $map: {
+              input: {
+                $filter: {
+                  input: '$claims',
+                  as: 'claim',
+                  cond: { $in: ['$$claim.status', ['shipped', 'delivered']] }
+                }
+              },
+              as: 'claim',
+              in: {
+                _id: '$$claim._id',
+                status: '$$claim.status',
+                fullName: '$$claim.fullName',
+                city: '$$claim.city',
+                state: '$$claim.state',
+                createdAt: '$$claim.createdAt',
+                shippingDate: '$$claim.shippingDate',
+                deliveryDate: '$$claim.deliveryDate'
+              }
+            }
+          }
+        }
+      },
+      // Sort by creation date
+      {
+        $sort: { createdAt: -1 }
+      }
+    ];
+    
+    console.log('Executing sponsor causes aggregation pipeline');
+    
+    const causes = await Cause.aggregate(pipeline);
+    
+    console.log(`Found ${causes.length} sponsor causes with claim stats`);
+    
+    res.json(causes);
+  } catch (error) {
+    console.error('Error fetching sponsor causes with claims:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -529,6 +668,7 @@ export default {
   updateCause,
   deleteCause,
   getCausesByUser,
+  getSponsorCausesWithClaimStats,
   updateCauseStatus,
   updateCauseTotePreviewImage,
   uploadCauseImage

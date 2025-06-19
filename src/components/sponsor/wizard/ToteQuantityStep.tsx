@@ -55,7 +55,7 @@
         )}
         
         <p className="text-gray-600 mb-6">
-          Select the quantity of totes you'd like to sponsor. The minimum quantity is 50 totes and the maximum is 10,000 totes. The unit price decreases as quantity increases.
+          Select the quantity of totes you'd like to sponsor. The minimum quantity is 50 totes and the maximum is 10,0000 totes. The unit price decreases as quantity increases.
         </p>
       
         <div className="space-y-6">
@@ -73,8 +73,8 @@
                   <Slider 
                     id="toteSlider"
                     value={[formData.toteQuantity]} 
-                    min={50} 
-                    max={10000} 
+                    min={100} 
+                    max={100000} 
                     step={50}
                     onValueChange={handleSliderChange}
                   />
@@ -95,8 +95,8 @@
                   <Input
                     id="toteQuantity"
                     type="number"
-                    min={50}
-                    max={10000}
+                    min={100}
+                    max={100000}
                     value={formData.toteQuantity}
                     onChange={handleInputChange}
                     className="text-right"

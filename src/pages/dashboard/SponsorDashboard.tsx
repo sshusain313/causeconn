@@ -16,15 +16,16 @@ import axios from 'axios';
 
 const SponsorDashboard = () => {
   const [sponsorships, setSponsorships] = useState<Sponsorship[]>([]);
+  const [sponsorCauses, setSponsorCauses] = useState<SponsorCause[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Fetch user sponsorships on component mount
+  // Fetch user sponsorships and sponsor causes on component mount
   useEffect(() => {
-    const fetchSponsorships = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
@@ -34,23 +35,30 @@ const SponsorDashboard = () => {
           return;
         }
 
-        const response = await axios.get(`${config.apiUrl}/sponsorships/user`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const headers = {
+          'Authorization': `Bearer ${token}`
+        };
 
-        console.log('Fetched sponsorships:', response.data);
-        setSponsorships(response.data);
+        // Fetch both sponsorships and sponsor causes in parallel
+        const [sponsorshipsResponse, sponsorCausesResponse] = await Promise.all([
+          axios.get(`${config.apiUrl}/sponsorships/user`, { headers }),
+          axios.get(`${config.apiUrl}/causes/sponsor-causes-with-claims`, { headers })
+        ]);
+
+        console.log('Fetched sponsorships:', sponsorshipsResponse.data);
+        console.log('Fetched sponsor causes:', sponsorCausesResponse.data);
+        
+        setSponsorships(sponsorshipsResponse.data);
+        setSponsorCauses(sponsorCausesResponse.data);
       } catch (err: any) {
-        console.error('Error fetching sponsorships:', err);
-        setError(err.response?.data?.message || 'Failed to load sponsorships');
+        console.error('Error fetching data:', err);
+        setError(err.response?.data?.message || 'Failed to load dashboard data');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSponsorships();
+    fetchData();
   }, []);
 
   // Calculate dashboard metrics from real data
@@ -59,30 +67,30 @@ const SponsorDashboard = () => {
   const totalTotes = sponsorships.reduce((sum, sponsorship) => sum + (sponsorship.toteQuantity || 0), 0);
   
   // Analytics data - you can enhance this with real claim data later
-  const claimAnalytics = [
-    { date: '2025-03-20', claims: 12 },
-    { date: '2025-03-21', claims: 8 },
-    { date: '2025-03-22', claims: 15 },
-    { date: '2025-03-23', claims: 7 },
-    { date: '2025-03-24', claims: 10 },
-    { date: '2025-03-25', claims: 14 },
-    { date: '2025-03-26', claims: 12 },
-  ];
+  // const claimAnalytics = [
+  //   { date: '2025-03-20', claims: 12 },
+  //   { date: '2025-03-21', claims: 8 },
+  //   { date: '2025-03-22', claims: 15 },
+  //   { date: '2025-03-23', claims: 7 },
+  //   { date: '2025-03-24', claims: 10 },
+  //   { date: '2025-03-25', claims: 14 },
+  //   { date: '2025-03-26', claims: 12 },
+  // ];
 
   // Mock data for impact reports
-  const impactReports = [
-    {
-      id: '1',
-      title: 'Q1 2025 Impact Report - Clean Water Initiative',
-      causeTitle: 'Clean Water Initiative',
-      date: 'March 31, 2025',
-      highlights: [
-        '3 water filtration systems installed',
-        '1,200 people now have access to clean water',
-        '2 training sessions conducted with local technicians'
-      ]
-    }
-  ];
+  // const impactReports = [
+  //   {
+  //     id: '1',
+  //     title: 'Q1 2025 Impact Report - Clean Water Initiative',
+  //     causeTitle: 'Clean Water Initiative',
+  //     date: 'March 31, 2025',
+  //     highlights: [
+  //       '3 water filtration systems installed',
+  //       '1,200 people now have access to clean water',
+  //       '2 training sessions conducted with local technicians'
+  //     ]
+  //   }
+  // ];
 
 // Real data fetch from cause database
   interface Cause {
@@ -99,6 +107,36 @@ const SponsorDashboard = () => {
   createdAt: string;
   updatedAt: string;
   sponsorships?: Sponsorship[];
+}
+
+interface SponsorCause {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  targetAmount: number;
+  currentAmount: number;
+  category: string;
+  status: string;
+  location: string;
+  isOnline: boolean;
+  createdAt: string;
+  updatedAt: string;
+  distributionStartDate?: string;
+  distributionEndDate?: string;
+  totalTotes: number;
+  claimedTotes: number;
+  shippedClaims: number;
+  claimDetails: Array<{
+    _id: string;
+    status: string;
+    fullName: string;
+    city: string;
+    state: string;
+    createdAt: string;
+    shippingDate?: string;
+    deliveryDate?: string;
+  }>;
 }
 
 interface Sponsorship {
@@ -141,13 +179,12 @@ interface Sponsorship {
   updatedAt: string;
 }
 
-
   // Earned badges data
-  const earnedBadges = [
-    { id: '1', title: 'First Sponsorship', description: 'Completed your first cause sponsorship', icon: '🏆' },
-    { id: '2', title: '50+ Totes Distributed', description: 'Your totes are making an impact', icon: '🌱' },
-    { id: '3', title: 'Clean Water Champion', description: 'Sponsored a water-related cause', icon: '💧' },
-  ];
+  // const earnedBadges = [
+  //   { id: '1', title: 'First Sponsorship', description: 'Completed your first cause sponsorship', icon: '🏆' },
+  //   { id: '2', title: '50+ Totes Distributed', description: 'Your totes are making an impact', icon: '🌱' },
+  //   { id: '3', title: 'Clean Water Champion', description: 'Sponsored a water-related cause', icon: '💧' },
+  // ];
   
   const handleDownloadCSV = (sponsorshipId: string) => {
     // In a real app, this would generate and download a CSV file
@@ -239,9 +276,11 @@ interface Sponsorship {
       <Tabs defaultValue="sponsorships">
         <TabsList className="mb-6">
           <TabsTrigger value="sponsorships">My Sponsorships</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="my-causes">My Causes</TabsTrigger>
+          <TabsTrigger value="totes-claimed">Totes Claimed</TabsTrigger>
+          {/* <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="impact">Impact Reports</TabsTrigger>
-          <TabsTrigger value="badges">Earned Badges</TabsTrigger>
+          <TabsTrigger value="badges">Earned Badges</TabsTrigger> */}
         </TabsList>
         
         <TabsContent value="sponsorships">
@@ -371,7 +410,233 @@ interface Sponsorship {
           </div>
         </TabsContent>
         
-        <TabsContent value="analytics">
+        <TabsContent value="my-causes">
+          <div className="space-y-6">
+            {sponsorCauses.length > 0 ? (
+              sponsorCauses.map((cause) => (
+                <Card key={cause._id}>
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row gap-6">
+                      <div className="md:w-1/4">
+                        <img 
+                          src={getImageUrl(cause.imageUrl)} 
+                          alt={cause.title} 
+                          className="w-full h-32 object-cover rounded-md"
+                          onError={(e) => handleImageError(e)}
+                        />
+                      </div>
+                      <div className="md:w-3/4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-xl font-semibold">{cause.title}</h3>
+                          <div className="flex gap-2">
+                            <Badge variant="outline" className={
+                              cause.status === 'approved' && cause.isOnline ? 'bg-green-100 text-green-800 hover:bg-green-100' :
+                              cause.status === 'pending' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' :
+                              'bg-red-100 text-red-800 hover:bg-red-100'
+                            }>
+                              {cause.status === 'approved' && cause.isOnline ? 'Active' : 
+                               cause.status === 'pending' ? 'Pending Approval' :
+                               cause.status === 'rejected' ? 'Rejected' : 'Inactive'}
+                            </Badge>
+                            {cause.claimedTotes === cause.totalTotes && cause.totalTotes > 0 && (
+                              <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                                All Totes Claimed
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-gray-600 mb-4">{cause.description}</p>
+                        
+                        <div className="mb-4">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div 
+                              className="bg-primary-600 h-2.5 rounded-full" 
+                              style={{ width: `${Math.min(((cause.currentAmount || 0) / cause.targetAmount) * 100, 100)}%` }}
+                            ></div>
+                          </div>
+                          <div className="flex justify-between mt-2">
+                            <span className="text-sm text-gray-500">
+                              ${(cause.currentAmount || 0).toLocaleString()} raised
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              ${cause.targetAmount.toLocaleString()} goal
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                          <div>
+                            <p className="text-sm text-gray-500">Total Totes</p>
+                            <p className="font-semibold">{cause.totalTotes}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Claimed Totes</p>
+                            <p className="font-semibold">{cause.claimedTotes}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Shipped/Delivered</p>
+                            <p className="font-semibold">{cause.shippedClaims}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Category</p>
+                            <p className="font-semibold">{cause.category}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-3">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => navigate(`/cause/${cause._id}`)}
+                          >
+                            View Cause
+                          </Button>
+                          {cause.distributionStartDate && cause.distributionEndDate && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => navigate(`/admin/distribution/${cause._id}`)}
+                            >
+                              Manage Distribution
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No causes created yet</h3>
+                <p className="text-gray-500 mb-6">Start making an impact by creating your first cause.</p>
+                <Button onClick={() => navigate('/create-cause')}>
+                  Create New Cause
+                </Button>
+              </div>
+            )}
+            
+            {sponsorCauses.length > 0 && (
+              <div className="text-center pt-6">
+                <Button onClick={() => navigate('/create-cause')}>
+                  Create New Cause
+                </Button>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="totes-claimed">
+          <div className="space-y-6">
+            {sponsorCauses.length > 0 ? (
+              sponsorCauses.map((cause) => (
+                <Card key={cause._id}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle>{cause.title}</CardTitle>
+                        <p className="text-sm text-gray-500 mt-1">{cause.category}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        {cause.claimedTotes === cause.totalTotes && cause.totalTotes > 0 && (
+                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                            All Totes Claimed
+                          </Badge>
+                        )}
+                        <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                          {cause.claimedTotes} / {cause.totalTotes} Claimed
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4">
+                      <div className="w-full bg-gray-200 rounded-full h-3">
+                        <div 
+                          className="bg-primary-600 h-3 rounded-full transition-all duration-300" 
+                          style={{ width: `${cause.totalTotes > 0 ? (cause.claimedTotes / cause.totalTotes) * 100 : 0}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-primary">{cause.claimedTotes}</p>
+                        <p className="text-sm text-gray-500">People Claimed</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-green-600">{cause.shippedClaims}</p>
+                        <p className="text-sm text-gray-500">Totes Shipped</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-blue-600">{cause.totalTotes - cause.claimedTotes}</p>
+                        <p className="text-sm text-gray-500">Still Available</p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <span className="text-green-800 font-medium">
+                        { cause.claimedTotes > 0 ? (
+                        <p className="text-green-800 font-medium">
+                        <span role="img" aria-label="celebration">🎉 {cause.claimedTotes} people have claimed your totes!</span>
+                        </p>
+                        ):(
+                        <p className="text-red-400">
+                        <span>No totes claimed yet. Share your cause to get more claims!</span>
+                        </p>
+                        )
+                      }
+                      </span>
+                      {cause.shippedClaims > 0 && (
+                        <p className="text-green-700 text-sm mt-1">
+                          {cause.shippedClaims} totes have been shipped and are making an impact.
+                        </p>
+                      )}
+                    </div>
+                    
+                    {cause.claimDetails.length > 0 && (
+                      <div className="mt-4">
+                        <h4 className="font-medium mb-2">Recent Claims:</h4>
+                        <div className="space-y-2">
+                          {cause.claimDetails.slice(0, 3).map((claim) => (
+                            <div key={claim._id} className="flex justify-between items-center text-sm">
+                              <span>{claim.fullName} - {claim.city}, {claim.state}</span>
+                              <Badge variant="outline" className={
+                                claim.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                                'bg-blue-100 text-blue-800'
+                              }>
+                                {claim.status === 'delivered' ? 'Delivered' : 'Shipped'}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => navigate(`/cause/${cause._id}`)}
+                    >
+                      View Full Cause Details
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No causes with claims yet</h3>
+                <p className="text-gray-500 mb-6">Once you create causes and people start claiming totes, you'll see the impact here.</p>
+                <Button onClick={() => navigate('/create-cause')}>
+                  Create Your First Cause
+                </Button>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+        
+        {/* <TabsContent value="analytics">
           <Card>
             <CardHeader>
               <CardTitle>Tote Claims Analytics</CardTitle>
@@ -419,9 +684,9 @@ interface Sponsorship {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
         
-        <TabsContent value="impact">
+        {/* <TabsContent value="impact">
           {impactReports.length > 0 ? (
             <div className="space-y-6">
               {impactReports.map((report) => (
@@ -454,9 +719,9 @@ interface Sponsorship {
               <p className="text-gray-500 mb-6">Impact reports will be available once your sponsored causes begin implementation.</p>
             </div>
           )}
-        </TabsContent>
+        </TabsContent> */}
 
-        <TabsContent value="badges">
+        {/* <TabsContent value="badges">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {earnedBadges.map((badge) => (
               <Card key={badge.id} className="overflow-hidden">
@@ -496,7 +761,7 @@ interface Sponsorship {
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </DashboardLayout>
   );
