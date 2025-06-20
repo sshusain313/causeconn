@@ -907,8 +907,8 @@ export const endCampaign = async (req: Request, res: Response): Promise<void> =>
     
     const sponsorshipId = req.params.id;
     
-    // Find the sponsorship
-    const sponsorship = await Sponsorship.findById(sponsorshipId);
+    // Find the sponsorship and populate the cause
+    const sponsorship = await Sponsorship.findById(sponsorshipId).populate('cause', 'title');
     
     if (!sponsorship) {
       console.log('Sponsorship not found');
@@ -926,8 +926,8 @@ export const endCampaign = async (req: Request, res: Response): Promise<void> =>
       return;
     }
     
-    // Update the sponsorship status to 'ended'
-    sponsorship.status = 'ended';
+    // Update the sponsorship status to 'completed'
+    sponsorship.status = SponsorshipStatus.COMPLETED;
     sponsorship.isOnline = false; // Take it offline when ending
     sponsorship.endedAt = new Date();
     sponsorship.endedBy = req.user?._id;
@@ -944,6 +944,23 @@ export const endCampaign = async (req: Request, res: Response): Promise<void> =>
         endedAt: sponsorship.endedAt
       }
     });
+    
+    // Send completion email to the sponsor
+    try {
+      const { sendCampaignCompletionEmail } = require('../services/emailService');
+      await sendCampaignCompletionEmail(sponsorship.email, {
+        organizationName: sponsorship.organizationName,
+        causeTitle: sponsorship.cause.title || 'Campaign',
+        totalAmount: sponsorship.totalAmount,
+        toteQuantity: sponsorship.toteQuantity,
+        distributionStartDate: sponsorship.distributionStartDate,
+        distributionEndDate: sponsorship.distributionEndDate
+      });
+      console.log(`Campaign completion email sent to ${sponsorship.email}`);
+    } catch (emailError) {
+      console.error('Error sending campaign completion email:', emailError);
+      // Continue with the response even if email fails
+    }
     
     console.log('=== endCampaign SUCCESS ===');
   } catch (error) {

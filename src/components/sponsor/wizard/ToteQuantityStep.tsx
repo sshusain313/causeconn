@@ -69,14 +69,14 @@ const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQua
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg">Pricing Summary</h3>
               <div className="text-right">
-                <div className="text-2xl font-bold text-primary-700">${totalPrice.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-primary-700">₹{totalPrice.toLocaleString()}</div>
                 <div className="text-sm text-gray-600">Total Amount</div>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white rounded-lg p-4">
                 <div className="text-sm text-gray-600">Unit Price</div>
-                <div className="text-xl font-semibold text-gray-900">${unitPrice}/tote</div>
+                <div className="text-xl font-semibold text-gray-900">₹{unitPrice}/tote</div>
               </div>
               <div className="bg-white rounded-lg p-4">
                 <div className="text-sm text-gray-600">Quantity</div>
@@ -85,7 +85,7 @@ const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQua
             </div>
             <div className="mt-4 text-xs text-gray-500">
               <div className="font-medium mb-1">Price Tiers:</div>
-              <div>50-499: $10, 500-999: $9, 1000-4999: $8, 5000-6999: $7, 7000+: $5</div>
+              <div>50-499: ₹10, 500-999: ₹9, 1000-4999: ₹8, 5000-6999: ₹7, 7000+: ₹5</div>
             </div>
           </CardContent>
         </Card>

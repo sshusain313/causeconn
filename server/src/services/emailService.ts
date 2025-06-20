@@ -199,4 +199,86 @@ export const sendLogoRejectionEmail = async (
     console.error(`ERROR SENDING REJECTION EMAIL to ${email}:`, error);
     throw error;
   }
+};
+
+/**
+ * Send a campaign completion email to the sponsor
+ * @param email Sponsor's email address
+ * @param data Sponsorship data including organization name, cause title, etc.
+ */
+export const sendCampaignCompletionEmail = async (
+  email: string, 
+  data: {
+    organizationName: string;
+    causeTitle: string;
+    totalAmount: number;
+    toteQuantity: number;
+    distributionStartDate: Date;
+    distributionEndDate: Date;
+  }
+) => {
+  try {
+    // Check for duplicate emails
+    if (preventDuplicateEmails(email)) {
+      return true;
+    }
+    
+    console.log(`SENDING CAMPAIGN COMPLETION EMAIL: Preparing to send email to ${email}`);
+    
+    // Format dates
+    const startDate = new Date(data.distributionStartDate).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+    
+    const endDate = new Date(data.distributionEndDate).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+    
+    // Format currency
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(data.totalAmount);
+    
+    const mailOptions = {
+      from: '"CauseBags" <noreply@causebags.com>',
+      to: email,
+      subject: 'Campaign Completed: Thank You for Your Support',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Campaign Successfully Completed</h2>
+          <p>Dear ${data.organizationName},</p>
+          
+          <p>We're pleased to inform you that your sponsorship campaign for <strong>${data.causeTitle}</strong> has been successfully completed!</p>
+          
+          <div style="background-color: #f4f4f4; padding: 20px; margin: 20px 0; border-radius: 5px;">
+            <p style="margin-top: 0;"><strong>Campaign Summary:</strong></p>
+            <ul>
+              <li>Campaign: <strong>${data.causeTitle}</strong></li>
+              <li>Total Contribution: <strong>${formattedAmount}</strong></li>
+              <li>Number of Totes: <strong>${data.toteQuantity}</strong></li>
+              <li>Distribution Period: <strong>${startDate}</strong> to <strong>${endDate}</strong></li>
+            </ul>
+          </div>
+          
+          <p>Your support has made a significant impact on this cause. The tote bags featuring your logo have been distributed as planned, raising awareness for both your organization and the cause you've supported.</p>
+          
+          <p>We hope this partnership has been valuable for your organization, and we look forward to potential future collaborations.</p>
+          
+          <p>If you'd like to receive a detailed impact report or have any questions about your completed campaign, please contact our support team.</p>
+          
+          <p>Thank you again for your generous support!</p>
+          
+          <p>Best regards,<br>The CauseBags Team</p>
+        </div>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`CAMPAIGN COMPLETION EMAIL SENT SUCCESSFULLY: MessageID ${info.messageId} to ${email}`);
+    return true;
+  } catch (error) {
+    console.error(`ERROR SENDING CAMPAIGN COMPLETION EMAIL to ${email}:`, error);
+    throw error;
+  }
 }; 

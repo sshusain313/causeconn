@@ -58,9 +58,9 @@ const Layout = ({ children }: LayoutProps) => {
                   <DropdownMenuItem onClick={() => navigate(`/dashboard/${user.role}`)}>
                     Dashboard
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  {/* <DropdownMenuItem onClick={() => navigate('/profile')}>
                     Profile
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuItem onClick={logout}>
                     Logout
                   </DropdownMenuItem>

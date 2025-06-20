@@ -65,6 +65,8 @@ export interface ISponsorship extends Document {
   approvedAt?: Date;
   rejectionReason?: string;
   isOnline?: boolean;
+  endedAt?: Date;
+  endedBy?: mongoose.Types.ObjectId | IUser;
   // Payment fields
   paymentId?: string;
   paymentStatus?: 'pending' | 'completed' | 'failed';
@@ -188,6 +190,11 @@ const sponsorshipSchema = new Schema<ISponsorship>(
     approvedAt: Date,
     rejectionReason: String,
     isOnline: Boolean,
+    endedAt: Date,
+    endedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    },
     // Payment fields
     paymentId: {
       type: String,

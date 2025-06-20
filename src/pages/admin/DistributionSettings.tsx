@@ -57,9 +57,9 @@ const DistributionSettings = () => {
   const [activeTab, setActiveTab] = useState('countries');
   
   // Filter states
-  const [selectedCountryId, setSelectedCountryId] = useState('');
-  const [selectedCityId, setSelectedCityId] = useState('');
-  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [selectedCountryId, setSelectedCountryId] = useState('all');
+  const [selectedCityId, setSelectedCityId] = useState('all');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('all');
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['distribution-settings'],
@@ -196,13 +196,13 @@ const DistributionSettings = () => {
 
   // Filter cities by selected country
   const filteredCities = settings?.cities.filter(city => 
-    selectedCountryId && selectedCountryId !== '' ? city.countryId === selectedCountryId : true
+    selectedCountryId && selectedCountryId !== 'all' ? city.countryId === selectedCountryId : true
   ) || [];
 
   // Filter distribution points by selected city and category
   const filteredPoints = settings?.points.filter(point => {
-    if (selectedCityId && selectedCityId !== '' && point.cityId !== selectedCityId) return false;
-    if (selectedCategoryId && selectedCategoryId !== '' && point.categoryId !== selectedCategoryId) return false;
+    if (selectedCityId && selectedCityId !== 'all' && point.cityId !== selectedCityId) return false;
+    if (selectedCategoryId && selectedCategoryId !== 'all' && point.categoryId !== selectedCategoryId) return false;
     return true;
   }) || [];
 
@@ -267,7 +267,7 @@ const DistributionSettings = () => {
                 <SelectValue placeholder="All countries" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All countries</SelectItem>
+                <SelectItem value="all">All countries</SelectItem>
                 {settings?.countries.map((country) => (
                   <SelectItem key={country._id} value={country._id || ''}>
                     {country.name}
@@ -400,7 +400,7 @@ const DistributionSettings = () => {
                 <SelectValue placeholder="All cities" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All cities</SelectItem>
+                <SelectItem value="all">All cities</SelectItem>
                 {settings?.cities.slice(0, 50).map((city) => (
                   <SelectItem key={city._id} value={city._id || ''}>
                     {city.name}
@@ -416,7 +416,7 @@ const DistributionSettings = () => {
                 <SelectValue placeholder="All categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All categories</SelectItem>
+                <SelectItem value="all">All categories</SelectItem>
                 {settings?.categories.map((category) => (
                   <SelectItem key={category._id} value={category._id || ''}>
                     {category.name}
