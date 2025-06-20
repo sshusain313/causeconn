@@ -196,13 +196,13 @@ const DistributionSettings = () => {
 
   // Filter cities by selected country
   const filteredCities = settings?.cities.filter(city => 
-    selectedCountryId ? city.countryId === selectedCountryId : true
+    selectedCountryId && selectedCountryId !== '' ? city.countryId === selectedCountryId : true
   ) || [];
 
   // Filter distribution points by selected city and category
   const filteredPoints = settings?.points.filter(point => {
-    if (selectedCityId && point.cityId !== selectedCityId) return false;
-    if (selectedCategoryId && point.categoryId !== selectedCategoryId) return false;
+    if (selectedCityId && selectedCityId !== '' && point.cityId !== selectedCityId) return false;
+    if (selectedCategoryId && selectedCategoryId !== '' && point.categoryId !== selectedCategoryId) return false;
     return true;
   }) || [];
 
@@ -267,7 +267,7 @@ const DistributionSettings = () => {
                 <SelectValue placeholder="All countries" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All countries</SelectItem>
+                <SelectItem value="">All countries</SelectItem>
                 {settings?.countries.map((country) => (
                   <SelectItem key={country._id} value={country._id || ''}>
                     {country.name}
@@ -400,7 +400,7 @@ const DistributionSettings = () => {
                 <SelectValue placeholder="All cities" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all_cities">All cities</SelectItem>
+                <SelectItem value="">All cities</SelectItem>
                 {settings?.cities.slice(0, 50).map((city) => (
                   <SelectItem key={city._id} value={city._id || ''}>
                     {city.name}
@@ -416,7 +416,7 @@ const DistributionSettings = () => {
                 <SelectValue placeholder="All categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all_categories">All categories</SelectItem>
+                <SelectItem value="">All categories</SelectItem>
                 {settings?.categories.map((category) => (
                   <SelectItem key={category._id} value={category._id || ''}>
                     {category.name}

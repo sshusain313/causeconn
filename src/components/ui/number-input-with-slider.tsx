@@ -179,14 +179,14 @@ const NumberInputWithSlider: React.FC<NumberInputWithSliderProps> = ({
         </div>
 
         {/* Limits Explanation */}
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+        {/* <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
           <div className="text-xs text-blue-800 space-y-1">
             <div className="font-medium">Limits:</div>
             <div>• Slider: {min.toLocaleString()} - {sliderMax.toLocaleString()}</div>
             <div>• Manual Input: {min.toLocaleString()} - {inputMax.toLocaleString()}</div>
             <div>• Values above {sliderMax.toLocaleString()} can be entered manually but won't affect the slider</div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
