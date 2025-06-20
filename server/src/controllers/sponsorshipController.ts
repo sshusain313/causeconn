@@ -897,4 +897,61 @@ export const getDashboardMetrics = async (req: Request, res: Response): Promise<
     console.error('Error calculating dashboard metrics:', error);
     res.status(500).json({ message: 'Error calculating dashboard metrics' });
   }
+};
+
+export const endCampaign = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('=== endCampaign START ===');
+    console.log('Ending campaign for sponsorship ID:', req.params.id);
+    console.log('Authenticated user:', req.user);
+    
+    const sponsorshipId = req.params.id;
+    
+    // Find the sponsorship
+    const sponsorship = await Sponsorship.findById(sponsorshipId);
+    
+    if (!sponsorship) {
+      console.log('Sponsorship not found');
+      res.status(404).json({ message: 'Sponsorship not found' });
+      return;
+    }
+    
+    // Check if the sponsorship is approved
+    if (sponsorship.status !== SponsorshipStatus.APPROVED) {
+      console.log('Cannot end campaign - sponsorship is not approved. Current status:', sponsorship.status);
+      res.status(400).json({ 
+        message: 'Cannot end campaign - sponsorship must be approved first',
+        currentStatus: sponsorship.status
+      });
+      return;
+    }
+    
+    // Update the sponsorship status to 'ended'
+    sponsorship.status = 'ended';
+    sponsorship.isOnline = false; // Take it offline when ending
+    sponsorship.endedAt = new Date();
+    sponsorship.endedBy = req.user?._id;
+    
+    await sponsorship.save();
+    
+    console.log('Campaign ended successfully');
+    res.json({ 
+      message: 'Campaign ended successfully',
+      sponsorship: {
+        _id: sponsorship._id,
+        status: sponsorship.status,
+        isOnline: sponsorship.isOnline,
+        endedAt: sponsorship.endedAt
+      }
+    });
+    
+    console.log('=== endCampaign SUCCESS ===');
+  } catch (error) {
+    console.error('=== endCampaign ERROR ===');
+    console.error('Error ending campaign:', error);
+    res.status(500).json({ 
+      message: 'Error ending campaign', 
+      error: error.message 
+    });
+  }
 }; 

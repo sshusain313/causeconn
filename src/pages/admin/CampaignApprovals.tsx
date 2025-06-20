@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { Search, ChevronDown, ChevronRight, Download, Check, X, Eye } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, Download, Check, X, Eye, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import authAxios from '@/utils/authAxios';
 import { AxiosResponse } from 'axios';
@@ -33,16 +33,12 @@ interface Sponsorship {
   selectedCities?: string[];
   distributionType: 'physical' | 'online';
   distributionLocations?: Array<{
-    name: {
-      name: string;
-      address: string;
-      contactPerson: string;
-      phone: string;
-      location: string;
-      totesCount: number;
-    };
-    type: string;
-    totesCount: number;
+    name: string;
+    address: string;
+    contactPerson: string;
+    phone: string;
+    location?: string;
+    totesCount?: number;
   }>;
   distributionStartDate?: string;
   distributionEndDate?: string;
@@ -154,9 +150,11 @@ const ExpandableSection = ({ title, isExpanded, onToggle, children }: Expandable
   );
 };
 
-const CampaignCard = ({ sponsorship, onToggleOnline }: { 
+const CampaignCard = ({ sponsorship, onApprove, onReject, onEndCampaign }: { 
   sponsorship: Sponsorship;
-  onToggleOnline: (id: string) => void;
+  onApprove: (id: string) => void;
+  onReject: (id: string) => void;
+  onEndCampaign: (id: string) => void;
 }) => {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
@@ -167,6 +165,9 @@ const CampaignCard = ({ sponsorship, onToggleOnline }: {
         : [...prev, sectionId]
     );
   };
+
+  const isPending = sponsorship.status.toLowerCase() === 'pending';
+  const isApproved = sponsorship.status.toLowerCase() === 'approved';
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -186,7 +187,9 @@ const CampaignCard = ({ sponsorship, onToggleOnline }: {
           {sponsorship.logoStatus && (
             <StatusBadge status={sponsorship.logoStatus} />
           )}
-          <StatusBadge status={sponsorship.isOnline ? 'online' : 'offline'} />
+          {/* {isApproved && (
+            <StatusBadge status={sponsorship.isOnline ? 'online' : 'offline'} />
+          )} */}
         </div>
       </div>
 
@@ -257,10 +260,6 @@ const CampaignCard = ({ sponsorship, onToggleOnline }: {
               <span className="text-sm font-medium text-gray-700">Quantity: </span>
               <span className="text-sm text-gray-600">{sponsorship.toteQuantity ?? 'N/A'}</span>
             </div>
-            {/* <div>
-              <span className="text-sm font-medium text-gray-700">Number of Totes: </span>
-              <span className="text-sm text-gray-600">{sponsorship.toteDetails?.numberOfTotes ?? 'N/A'}</span>
-            </div> */}
             <div>
               <span className="text-sm font-medium text-gray-700">Unit Price: </span>
               <span className="text-sm text-gray-600">{sponsorship.unitPrice ?? 'N/A'}</span>
@@ -308,29 +307,21 @@ const CampaignCard = ({ sponsorship, onToggleOnline }: {
                   <div className="space-y-3">
                     {Array.isArray(sponsorship.distributionLocations) && sponsorship.distributionLocations.length > 0
                       ? sponsorship.distributionLocations.map((location, index) => {
-                          // Handle the nested data structure properly
-                          const locationName = location.name?.name || 'N/A';
-                          const locationAddress = location.name?.address || 'N/A';
-                          const contactPerson = location.name?.contactPerson || 'N/A';
-                          const locationPhone = location.name?.phone || 'N/A';
-                          const totesCount = location.name?.totesCount || location.totesCount || 'N/A';
-                          const locationType = location.type || 'N/A';
-                          
                           return (
                             <div key={index} className="bg-gray-50 p-3 rounded-md">
                               <div className="grid md:grid-cols-2 gap-2">
                                 <div>
-                                  <div className="font-medium text-sm text-gray-900">{locationName}</div>
-                                  <div className="text-sm text-gray-600">{locationAddress}</div>
-                                  <div className="text-xs text-gray-500">Type: {locationType}</div>
+                                  <div className="font-medium text-sm text-gray-900">{location.name || 'N/A'}</div>
+                                  <div className="text-sm text-gray-600">{location.address || 'N/A'}</div>
+                                  <div className="text-xs text-gray-500">Type: {location.location || 'N/A'}</div>
                                 </div>
                                 <div>
                                   <div className="text-sm text-gray-600">
-                                    Contact: {contactPerson}
+                                    Contact: {location.contactPerson || 'N/A'}
                                   </div>
-                                  <div className="text-sm text-gray-600">Phone: {locationPhone}</div>
+                                  <div className="text-sm text-gray-600">Phone: {location.phone || 'N/A'}</div>
                                   <div className="text-sm font-medium text-gray-900">
-                                    Totes: {totesCount}
+                                    Totes: {location.totesCount || 'N/A'}
                                   </div>
                                 </div>
                               </div>
@@ -353,28 +344,37 @@ const CampaignCard = ({ sponsorship, onToggleOnline }: {
           </div>
         </ExpandableSection>
       </div>
+      
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4 border-t border-gray-100">
-        <button
-          onClick={() => onToggleOnline(sponsorship._id)}
-          className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-            sponsorship.isOnline 
-              ? 'bg-red-600 text-white hover:bg-red-700' 
-              : 'bg-green-600 text-white hover:bg-green-700'
-          }`}
-        >
-          {sponsorship.isOnline ? (
-            <>
-              <X className="w-4 h-4 mr-1" />
-              Take Offline
-            </>
-          ) : (
-            <>
+        {isPending && (
+          <>
+            <button
+              onClick={() => onApprove(sponsorship._id)}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors"
+            >
               <Check className="w-4 h-4 mr-1" />
-              Put Online
-            </>
-          )}
-        </button>
+              Approve
+            </button>
+            <button
+              onClick={() => onReject(sponsorship._id)}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors"
+            >
+              <X className="w-4 h-4 mr-1" />
+              Reject
+            </button>
+          </>
+        )}
+        
+        {isApproved && (
+          <button
+            onClick={() => onEndCampaign(sponsorship._id)}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-orange-600 text-white hover:bg-orange-700 transition-colors"
+          >
+            <AlertTriangle className="w-4 h-4 mr-1" />
+            End Campaign
+          </button>
+        )}
       </div>
     </div>
   );
@@ -393,13 +393,19 @@ const CampaignApprovals = () => {
   const fetchSponsorships = async () => {
     try {
       setLoading(true);
-      const response = await authAxios.get<Sponsorship[]>('/api/sponsorships/approved');
-      setSponsorships(response.data);
+      // Fetch both approved and pending sponsorships
+      const [approvedResponse, pendingResponse] = await Promise.all([
+        authAxios.get<Sponsorship[]>('/api/sponsorships/approved'),
+        authAxios.get<Sponsorship[]>('/api/sponsorships/pending')
+      ]);
+      
+      const allSponsorships = [...approvedResponse.data, ...pendingResponse.data];
+      setSponsorships(allSponsorships);
     } catch (error) {
       console.error('Error fetching sponsorships:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch approved sponsorships",
+        description: "Failed to fetch sponsorships",
         variant: "destructive"
       });
     } finally {
@@ -407,19 +413,55 @@ const CampaignApprovals = () => {
     }
   };
 
-  const handleToggleOnline = async (id: string) => {
+  const handleApprove = async (id: string) => {
     try {
-      await authAxios.patch(`/api/sponsorships/${id}/toggle-online`);
+      await authAxios.patch(`/api/sponsorships/${id}/approve`);
       toast({
         title: "Success",
-        description: "Sponsorship online status updated successfully"
+        description: "Sponsorship approved successfully"
       });
       fetchSponsorships(); // Refresh the list
     } catch (error) {
-      console.error('Error updating sponsorship online status:', error);
+      console.error('Error approving sponsorship:', error);
       toast({
         title: "Error",
-        description: "Failed to update sponsorship online status",
+        description: "Failed to approve sponsorship",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    try {
+      await authAxios.patch(`/api/sponsorships/${id}/reject`);
+      toast({
+        title: "Success",
+        description: "Sponsorship rejected successfully"
+      });
+      fetchSponsorships(); // Refresh the list
+    } catch (error) {
+      console.error('Error rejecting sponsorship:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reject sponsorship",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEndCampaign = async (id: string) => {
+    try {
+      await authAxios.patch(`/api/sponsorships/${id}/end-campaign`);
+      toast({
+        title: "Success",
+        description: "Campaign ended successfully"
+      });
+      fetchSponsorships(); // Refresh the list
+    } catch (error) {
+      console.error('Error ending campaign:', error);
+      toast({
+        title: "Error",
+        description: "Failed to end campaign",
         variant: "destructive"
       });
     }
@@ -430,16 +472,33 @@ const CampaignApprovals = () => {
     sponsorship.organizationName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const pendingCount = sponsorships.filter(s => s.status.toLowerCase() === 'pending').length;
+  const approvedCount = sponsorships.filter(s => s.status.toLowerCase() === 'approved').length;
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <AdminLayout title="Approved Campaigns" subtitle="Manage online/offline status of approved campaigns">
+      <AdminLayout title="Campaign Approvals" subtitle="Review and manage sponsorship campaigns">
       <div className="flex-1 p-6">
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
-            <h1 className="text-2xl font-semibold text-gray-800">Approved Campaigns</h1>
+            <h1 className="text-2xl font-semibold text-gray-800">Campaign Approvals</h1>
             <span className="text-sm text-gray-500">Admin (Admin)</span>
           </div>
-          <p className="text-gray-600 mb-4">Manage online/offline status of approved campaigns</p>
+          <p className="text-gray-600 mb-4">Review and manage sponsorship campaigns</p>
+          
+          {/* Status Summary */}
+          <div className="flex gap-4 mb-4">
+            <div className="bg-yellow-100 px-3 py-2 rounded-md">
+              <span className="text-sm font-medium text-yellow-800">
+                Pending: {pendingCount}
+              </span>
+            </div>
+            <div className="bg-green-100 px-3 py-2 rounded-md">
+              <span className="text-sm font-medium text-green-800">
+                Approved: {approvedCount}
+              </span>
+            </div>
+          </div>
           
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -463,14 +522,16 @@ const CampaignApprovals = () => {
                 <CampaignCard
                   key={sponsorship._id}
                   sponsorship={sponsorship}
-                  onToggleOnline={handleToggleOnline}
+                  onApprove={handleApprove}
+                  onReject={handleReject}
+                  onEndCampaign={handleEndCampaign}
                 />
               ))}
             </div>
           ) : (
             <div className="text-center py-12">
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No approved campaigns</h3>
-              <p className="text-gray-500">No campaigns have been approved yet</p>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">No campaigns found</h3>
+              <p className="text-gray-500">No campaigns match your search criteria</p>
             </div>
           )}
       </div>
