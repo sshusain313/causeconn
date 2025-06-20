@@ -8,6 +8,7 @@ import { CheckCircle, XCircle, Download, Loader2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import config from '@/config';
 import {
   Dialog,
@@ -45,10 +46,12 @@ const LogoReview = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { token } = useAuth();
+  const navigate = useNavigate();
   const [previewCanvasSize] = useState({ width: 400, height: 400 });
   const [rejectionDialogOpen, setRejectionDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('Logo does not meet our guidelines');
   const [selectedSponsorshipId, setSelectedSponsorshipId] = useState<string | null>(null);
+  const [approvedLogos, setApprovedLogos] = useState<Set<string>>(new Set());
 
   // Create axios instance with auth headers
   const authAxios = axios.create({
@@ -102,28 +105,6 @@ const LogoReview = () => {
     }
   }, [sponsorships]);
 
-  // Mutation for approving a sponsorship
-  const approveMutation = useMutation({
-    mutationFn: async (sponsorshipId: string) => {
-      return authAxios.patch(`/api/sponsorships/${sponsorshipId}/approve`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pendingSponsorships'] });
-      toast({
-        title: 'Logo Approved',
-        description: 'The logo has been approved and is now live on the campaign.'
-      });
-    },
-    onError: (error) => {
-      console.error('Error approving logo:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to approve the logo. Please try again.',
-        variant: 'destructive'
-      });
-    }
-  });
-
   // Mutation for rejecting a sponsorship
   const rejectMutation = useMutation({
     mutationFn: async ({ sponsorshipId, reason }: { sponsorshipId: string, reason: string }) => {
@@ -148,7 +129,19 @@ const LogoReview = () => {
   });
 
   const handleApprove = (sponsorshipId: string) => {
-    approveMutation.mutate(sponsorshipId);
+    // Add to approved logos set
+    setApprovedLogos(prev => new Set(prev).add(sponsorshipId));
+    
+    // Show success message
+    toast({
+      title: 'Logo Approved',
+      description: 'The logo has been approved. Navigating to campaign approvals...'
+    });
+    
+    // Navigate to CampaignApprovals after a short delay
+    setTimeout(() => {
+      navigate('/admin/approvals');
+    }, 1500);
   };
 
   const handleReject = (sponsorshipId: string) => {
@@ -250,141 +243,149 @@ const LogoReview = () => {
   }
 
   // Update the card content to include both original logo and preview
-  const renderSponsorshipCard = (sponsorship: Sponsorship) => (
-    <Card key={sponsorship._id} className="overflow-hidden">
-      <CardHeader>
-        <div className="flex justify-between items-start mb-1">
-          <CardTitle className="text-lg">{sponsorship.cause?.title || 'Unnamed Campaign'}</CardTitle>
-          <Badge 
-            variant="outline" 
-            className="bg-yellow-100 text-yellow-800 w-fit"
-          >
-            Pending Review
-          </Badge>
-        </div>
-        <p className="text-sm text-gray-600">by {sponsorship.organizationName}</p>
-        {sponsorship.cause?.title && (
-          <div className="mt-2 text-xs bg-primary-50 text-primary-800 px-2 py-1 rounded-md inline-block">
-            Campaign: {sponsorship.cause.title}
+  const renderSponsorshipCard = (sponsorship: Sponsorship) => {
+    const isApproved = approvedLogos.has(sponsorship._id);
+    
+    return (
+      <Card key={sponsorship._id} className="overflow-hidden">
+        <CardHeader>
+          <div className="flex justify-between items-start mb-1">
+            <CardTitle className="text-lg">{sponsorship.cause?.title || 'Unnamed Campaign'}</CardTitle>
+            <Badge 
+              variant="outline" 
+              className={isApproved ? "bg-green-100 text-green-800 w-fit" : "bg-yellow-100 text-yellow-800 w-fit"}
+            >
+              {isApproved ? 'Logo Approved' : 'Pending Review'}
+            </Badge>
           </div>
-        )}
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          {/* Logo Preview Section */}
-          <div className="grid grid-cols-2 gap-6">
-            {/* Original Logo */}
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-500">Original Logo</p>
-              <div className="relative aspect-square bg-gray-50 rounded-lg border overflow-hidden">
-                <img 
-                  src={sponsorship.logoUrl.startsWith('http') 
+          <p className="text-sm text-gray-600">by {sponsorship.organizationName}</p>
+          {sponsorship.cause?.title && (
+            <div className="mt-2 text-xs bg-primary-50 text-primary-800 px-2 py-1 rounded-md inline-block">
+              Campaign: {sponsorship.cause.title}
+            </div>
+          )}
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Logo Preview Section */}
+            <div className="grid grid-cols-2 gap-6">
+              {/* Original Logo */}
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-500">Original Logo</p>
+                <div className="relative aspect-square bg-gray-50 rounded-lg border overflow-hidden">
+                  <img 
+                    src={sponsorship.logoUrl.startsWith('http') 
+                      ? sponsorship.logoUrl 
+                      : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`
+                    } 
+                    alt="Campaign Logo" 
+                    className="w-full h-full object-contain p-4"
+                    onError={(e) => {
+                      console.error('Image failed to load:', sponsorship.logoUrl);
+                      e.currentTarget.src = '/placeholder.svg';
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Tote Bag Preview */}
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-500">Tote Bag Preview</p>
+                <div className="relative aspect-square bg-gray-50 rounded-lg border overflow-hidden">
+                  <canvas
+                    ref={canvas => {
+                      if (canvas) {
+                        drawLogoPreview(
+                          canvas,
+                          sponsorship.logoUrl,
+                          sponsorship.logoPosition
+                        );
+                      }
+                    }}
+                    width={previewCanvasSize.width}
+                    height={previewCanvasSize.height}
+                    className="w-full h-full"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Sponsorship Details */}
+            <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+              <div>
+                <p className="text-sm text-gray-500">Amount</p>
+                <p className="font-medium">${sponsorship.totalAmount.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Tote Quantity</p>
+                <p className="font-medium">{sponsorship.toteQuantity.toLocaleString()}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-sm text-gray-500">Submitted</p>
+                <p className="font-medium">
+                  {new Date(sponsorship.createdAt).toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => handleApprove(sponsorship._id)}
+                  className={`flex-1 flex items-center justify-center gap-1 ${
+                    isApproved 
+                      ? 'bg-green-600 text-white cursor-default' 
+                      : 'bg-green-600 hover:bg-green-700'
+                  }`}
+                  size="default"
+                  disabled={isApproved}
+                >
+                  {isApproved ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4" />
+                  )}
+                  {isApproved ? 'Logo Approved' : 'Approve Logo'}
+                </Button>
+                <Button 
+                  onClick={() => handleReject(sponsorship._id)}
+                  variant="destructive"
+                  className="flex-1 flex items-center justify-center gap-1"
+                  size="default"
+                  disabled={rejectMutation.isPending || isApproved}
+                >
+                  {rejectMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <XCircle className="w-4 h-4" />
+                  )}
+                  Reject Logo
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="default"
+                  className="flex items-center justify-center gap-1 min-w-[120px]"
+                  onClick={() => window.open(sponsorship.logoUrl.startsWith('http') 
                     ? sponsorship.logoUrl 
-                    : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`
-                  } 
-                  alt="Campaign Logo" 
-                  className="w-full h-full object-contain p-4"
-                  onError={(e) => {
-                    console.error('Image failed to load:', sponsorship.logoUrl);
-                    e.currentTarget.src = '/placeholder.svg';
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Tote Bag Preview */}
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-500">Tote Bag Preview</p>
-              <div className="relative aspect-square bg-gray-50 rounded-lg border overflow-hidden">
-                <canvas
-                  ref={canvas => {
-                    if (canvas) {
-                      drawLogoPreview(
-                        canvas,
-                        sponsorship.logoUrl,
-                        sponsorship.logoPosition
-                      );
-                    }
-                  }}
-                  width={previewCanvasSize.width}
-                  height={previewCanvasSize.height}
-                  className="w-full h-full"
-                />
+                    : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`, '_blank')}
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </Button>
               </div>
             </div>
           </div>
-
-          {/* Sponsorship Details */}
-          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-            <div>
-              <p className="text-sm text-gray-500">Amount</p>
-              <p className="font-medium">${sponsorship.totalAmount.toLocaleString()}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Tote Quantity</p>
-              <p className="font-medium">{sponsorship.toteQuantity.toLocaleString()}</p>
-            </div>
-            <div className="col-span-2">
-              <p className="text-sm text-gray-500">Submitted</p>
-              <p className="font-medium">
-                {new Date(sponsorship.createdAt).toLocaleDateString(undefined, {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </p>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => handleApprove(sponsorship._id)}
-                className="flex-1 flex items-center justify-center gap-1 bg-green-600 hover:bg-green-700"
-                size="default"
-                disabled={approveMutation.isPending}
-              >
-                {approveMutation.isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <CheckCircle className="w-4 h-4" />
-                )}
-                Approve Logo
-              </Button>
-              <Button 
-                onClick={() => handleReject(sponsorship._id)}
-                variant="destructive"
-                className="flex-1 flex items-center justify-center gap-1"
-                size="default"
-                disabled={rejectMutation.isPending}
-              >
-                {rejectMutation.isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <XCircle className="w-4 h-4" />
-                )}
-                Reject Logo
-              </Button>
-              <Button 
-                variant="outline" 
-                size="default"
-                className="flex items-center justify-center gap-1 min-w-[120px]"
-                onClick={() => window.open(sponsorship.logoUrl.startsWith('http') 
-                  ? sponsorship.logoUrl 
-                  : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`, '_blank')}
-              >
-                <Download className="w-4 h-4" />
-                Download
-              </Button>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <AdminLayout title="Logo Review" subtitle="Review and approve submitted campaign logos">
