@@ -57,8 +57,30 @@ export const updateCategory = async (req: Request, res: Response) => {
 
 // Point
 export const createPoint = async (req: Request, res: Response) => {
-  const point = await DistributionPoint.create(req.body);
-  res.json(point);
+  try {
+    const { name, cityId, categoryId, isActive } = req.body;
+    
+    // If defaultToteCount is not provided, get it from the category
+    let defaultToteCount = req.body.defaultToteCount;
+    if (!defaultToteCount && categoryId) {
+      const category = await DistributionCategory.findById(categoryId);
+      if (category) {
+        defaultToteCount = category.defaultToteCount;
+      }
+    }
+    
+    const point = await DistributionPoint.create({
+      name,
+      cityId,
+      categoryId,
+      defaultToteCount: defaultToteCount || 400, // fallback to 400 if no category found
+      isActive: isActive ?? true
+    });
+    res.json(point);
+  } catch (error) {
+    console.error('Error creating distribution point:', error);
+    res.status(500).json({ message: 'Error creating distribution point' });
+  }
 };
 export const updatePoint = async (req: Request, res: Response) => {
   const point = await DistributionPoint.findByIdAndUpdate(req.params.id, req.body, { new: true });

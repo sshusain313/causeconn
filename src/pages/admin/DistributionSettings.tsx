@@ -43,6 +43,7 @@ import {
   updateCountryStatus,
   updateCityStatus,
   updateCategoryStatus,
+  updateCategory,
   updateDistributionPointStatus,
   deleteCountry,
   deleteCity,
@@ -86,6 +87,15 @@ const DistributionSettings = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['distribution-settings'] });
       toast({ title: 'Category created successfully' });
+    },
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<DistributionCategory> }) =>
+      updateCategory(id, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['distribution-settings'] });
+      toast({ title: 'Category updated successfully' });
     },
   });
 
@@ -342,7 +352,15 @@ const DistributionSettings = () => {
                     {category.name}
                   </div>
                 </TableCell>
-                <TableCell>{category.defaultToteCount}</TableCell>
+                <TableCell>
+                  <EditableCategoryToteCount 
+                    category={category} 
+                    onUpdate={(totes) => updateCategoryMutation.mutate({
+                      id: category._id!,
+                      updates: { defaultToteCount: totes }
+                    })}
+                  />
+                </TableCell>
                 <TableCell>
                   {settings?.points.filter(p => p.categoryId === category._id).length}
                 </TableCell>
@@ -417,7 +435,6 @@ const DistributionSettings = () => {
               <TableHead>Name</TableHead>
               <TableHead>City</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Default Totes</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -432,15 +449,6 @@ const DistributionSettings = () => {
                   <TableCell>{city?.name}</TableCell>
                   <TableCell>
                     <Badge variant="outline">{category?.name}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <EditableToteCount 
-                      point={point} 
-                      onUpdate={(totes) => updatePointMutation.mutate({
-                        id: point._id!,
-                        updates: { defaultToteCount: totes }
-                      })}
-                    />
                   </TableCell>
                   <TableCell>
                     <Badge variant={point.isActive ? 'default' : 'secondary'}>
@@ -684,21 +692,18 @@ const DistributionSettings = () => {
     const [name, setName] = useState('');
     const [cityId, setCityId] = useState('');
     const [categoryId, setCategoryId] = useState('');
-    const [defaultToteCount, setDefaultToteCount] = useState(400);
 
     const handleSubmit = () => {
       createPointMutation.mutate({
         name,
         cityId,
         categoryId,
-        defaultToteCount,
         isActive: true
       });
       setOpen(false);
       setName('');
       setCityId('');
       setCategoryId('');
-      setDefaultToteCount(400);
     };
 
     return (
@@ -756,16 +761,6 @@ const DistributionSettings = () => {
                 placeholder="e.g., Phoenix MarketCity"
               />
             </div>
-            <div>
-              <Label htmlFor="point-totes">Default Tote Count</Label>
-              <Input
-                id="point-totes"
-                type="number"
-                value={defaultToteCount}
-                onChange={(e) => setDefaultToteCount(parseInt(e.target.value) || 400)}
-                placeholder="400"
-              />
-            </div>
             <Button onClick={handleSubmit} disabled={!name || !cityId || !categoryId}>
               Create Distribution Point
             </Button>
@@ -775,9 +770,9 @@ const DistributionSettings = () => {
     );
   };
 
-  const EditableToteCount = ({ point, onUpdate }: { point: DistributionPoint; onUpdate: (totes: number) => void }) => {
+  const EditableCategoryToteCount = ({ category, onUpdate }: { category: DistributionCategory; onUpdate: (totes: number) => void }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [value, setValue] = useState(point.defaultToteCount);
+    const [value, setValue] = useState(category.defaultToteCount);
 
     const handleSave = () => {
       onUpdate(value);
@@ -802,7 +797,7 @@ const DistributionSettings = () => {
 
     return (
       <div className="flex items-center gap-2">
-        <span>{point.defaultToteCount}</span>
+        <span>{category.defaultToteCount}</span>
         <Button
           variant="ghost"
           size="sm"

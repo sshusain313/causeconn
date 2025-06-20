@@ -96,7 +96,7 @@ const CausesManagement = () => {
       
       // Send update to the server
       const response = await fetch(getApiUrl(`/causes/${causeId}`), {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`

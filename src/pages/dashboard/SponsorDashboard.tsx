@@ -17,6 +17,7 @@ import axios from 'axios';
 const SponsorDashboard = () => {
   const [sponsorships, setSponsorships] = useState<Sponsorship[]>([]);
   const [sponsorCauses, setSponsorCauses] = useState<SponsorCause[]>([]);
+  const [verifiedClaims, setVerifiedClaims] = useState<VerifiedClaimsData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -39,17 +40,20 @@ const SponsorDashboard = () => {
           'Authorization': `Bearer ${token}`
         };
 
-        // Fetch both sponsorships and sponsor causes in parallel
-        const [sponsorshipsResponse, sponsorCausesResponse] = await Promise.all([
+        // Fetch sponsorships, sponsor causes, and verified claims in parallel
+        const [sponsorshipsResponse, sponsorCausesResponse, verifiedClaimsResponse] = await Promise.all([
           axios.get(`${config.apiUrl}/sponsorships/user`, { headers }),
-          axios.get(`${config.apiUrl}/causes/sponsor-causes-with-claims`, { headers })
+          axios.get(`${config.apiUrl}/causes/sponsor-causes-with-claims`, { headers }),
+          axios.get(`${config.apiUrl}/claims/sponsored-causes/verified-claims`, { headers })
         ]);
 
         console.log('Fetched sponsorships:', sponsorshipsResponse.data);
         console.log('Fetched sponsor causes:', sponsorCausesResponse.data);
+        console.log('Fetched verified claims:', verifiedClaimsResponse.data);
         
         setSponsorships(sponsorshipsResponse.data);
         setSponsorCauses(sponsorCausesResponse.data);
+        setVerifiedClaims(verifiedClaimsResponse.data);
       } catch (err: any) {
         console.error('Error fetching data:', err);
         setError(err.response?.data?.message || 'Failed to load dashboard data');
@@ -137,6 +141,35 @@ interface SponsorCause {
     shippingDate?: string;
     deliveryDate?: string;
   }>;
+}
+
+interface VerifiedClaim {
+  _id: string;
+  causeId: string;
+  causeTitle: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  purpose: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  status: 'verified';
+  emailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+  shippingDate?: string;
+  deliveryDate?: string;
+}
+
+interface VerifiedClaimsData {
+  causeId: string;
+  causeTitle: string;
+  causeImageUrl: string;
+  causeCategory: string;
+  totalClaims: number;
+  claims: VerifiedClaim[];
 }
 
 interface Sponsorship {
@@ -528,23 +561,26 @@ interface Sponsorship {
         
         <TabsContent value="totes-claimed">
           <div className="space-y-6">
-            {sponsorCauses.length > 0 ? (
-              sponsorCauses.map((cause) => (
-                <Card key={cause._id}>
+            {verifiedClaims.length > 0 ? (
+              verifiedClaims.map((causeData) => (
+                <Card key={causeData.causeId}>
                   <CardHeader>
                     <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle>{cause.title}</CardTitle>
-                        <p className="text-sm text-gray-500 mt-1">{cause.category}</p>
+                      <div className="flex items-center gap-4">
+                        <img 
+                          src={getImageUrl(causeData.causeImageUrl)} 
+                          alt={causeData.causeTitle} 
+                          className="w-16 h-16 object-cover rounded-md"
+                          onError={(e) => handleImageError(e)}
+                        />
+                        <div>
+                          <CardTitle>{causeData.causeTitle}</CardTitle>
+                          <p className="text-sm text-gray-500 mt-1">{causeData.causeCategory}</p>
+                        </div>
                       </div>
                       <div className="flex gap-2">
-                        {cause.claimedTotes === cause.totalTotes && cause.totalTotes > 0 && (
-                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                            All Totes Claimed
-                          </Badge>
-                        )}
                         <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                          {cause.claimedTotes} / {cause.totalTotes} Claimed
+                          {causeData.totalClaims} Verified Claims
                         </Badge>
                       </div>
                     </div>
@@ -554,58 +590,73 @@ interface Sponsorship {
                       <div className="w-full bg-gray-200 rounded-full h-3">
                         <div 
                           className="bg-primary-600 h-3 rounded-full transition-all duration-300" 
-                          style={{ width: `${cause.totalTotes > 0 ? (cause.claimedTotes / cause.totalTotes) * 100 : 0}%` }}
+                          style={{ width: `${Math.min((causeData.totalClaims / 100) * 100, 100)}%` }}
                         ></div>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                       <div className="text-center">
-                        <p className="text-2xl font-bold text-primary">{cause.claimedTotes}</p>
-                        <p className="text-sm text-gray-500">People Claimed</p>
+                        <p className="text-2xl font-bold text-primary">{causeData.totalClaims}</p>
+                        <p className="text-sm text-gray-500">Total Verified</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-2xl font-bold text-green-600">{cause.shippedClaims}</p>
-                        <p className="text-sm text-gray-500">Totes Shipped</p>
+                        <p className="text-2xl font-bold text-green-600">
+                          {causeData.claims.filter(claim => claim.status === 'verified').length}
+                        </p>
+                        <p className="text-sm text-gray-500">Verified</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-2xl font-bold text-blue-600">{cause.totalTotes - cause.claimedTotes}</p>
-                        <p className="text-sm text-gray-500">Still Available</p>
+                        <p className="text-2xl font-bold text-blue-600">
+                          {causeData.claims.filter(claim => claim.status === 'verified').length}
+                        </p>
+                        <p className="text-sm text-gray-500">Ready for Processing</p>
                       </div>
                     </div>
                     
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                       <p className="text-green-800 font-medium">
-                        { cause.claimedTotes > 0 ? (
-                        <span role="img" aria-label="celebration">🎉 {cause.claimedTotes} people have claimed your totes!</span>
+                        { causeData.totalClaims > 0 ? (
+                        <span role="img" aria-label="celebration">🎉 {causeData.totalClaims} people have claimed your totes!</span>
                         ):(
                         <span>No totes claimed yet. Share your cause to get more claims!</span>
                         )
                       }
                       </p>
-                      {cause.shippedClaims > 0 && (
+                      {causeData.claims.filter(claim => claim.status === 'verified').length > 0 && (
                         <p className="text-green-700 text-sm mt-1">
-                          {cause.shippedClaims} totes have been shipped and are making an impact.
+                          {causeData.claims.filter(claim => claim.status === 'verified').length} totes have been verified and are ready for processing.
                         </p>
                       )}
                     </div>
                     
-                    {cause.claimDetails.length > 0 && (
+                    {causeData.claims.length > 0 && (
                       <div className="mt-4">
-                        <h4 className="font-medium mb-2">Recent Claims:</h4>
+                        <h4 className="font-medium mb-2">Recent Verified Claims:</h4>
                         <div className="space-y-2">
-                          {cause.claimDetails.slice(0, 3).map((claim) => (
-                            <div key={claim._id} className="flex justify-between items-center text-sm">
-                              <span>{claim.fullName} - {claim.city}, {claim.state}</span>
-                              <Badge variant="outline" className={
-                                claim.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                                'bg-blue-100 text-blue-800'
-                              }>
-                                {claim.status === 'delivered' ? 'Delivered' : 'Shipped'}
-                              </Badge>
+                          {causeData.claims.slice(0, 5).map((claim) => (
+                            <div key={claim._id} className="flex justify-between items-center text-sm p-2 bg-gray-50 rounded">
+                              <div>
+                                <span className="font-medium">{claim.fullName}</span>
+                                <span className="text-gray-500"> - {claim.city}, {claim.state}</span>
+                                <div className="text-xs text-gray-400">{claim.purpose}</div>
+                              </div>
+                              <div className="flex flex-col items-end gap-1">
+                                <Badge variant="outline" className="bg-green-100 text-green-800">
+                                  Verified
+                                </Badge>
+                                <span className="text-xs text-gray-400">
+                                  {new Date(claim.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
                             </div>
                           ))}
                         </div>
+                        {causeData.claims.length > 5 && (
+                          <p className="text-sm text-gray-500 mt-2">
+                            Showing 5 of {causeData.claims.length} verified claims
+                          </p>
+                        )}
                       </div>
                     )}
                   </CardContent>
@@ -613,7 +664,7 @@ interface Sponsorship {
                     <Button 
                       variant="outline" 
                       className="w-full"
-                      onClick={() => navigate(`/cause/${cause._id}`)}
+                      onClick={() => navigate(`/cause/${causeData.causeId}`)}
                     >
                       View Full Cause Details
                     </Button>
@@ -622,10 +673,10 @@ interface Sponsorship {
               ))
             ) : (
               <div className="text-center py-12">
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">No causes with claims yet</h3>
-                <p className="text-gray-500 mb-6">Once you create causes and people start claiming totes, you'll see the impact here.</p>
-                <Button onClick={() => navigate('/create-cause')}>
-                  Create Your First Cause
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No verified claims yet</h3>
+                <p className="text-gray-500 mb-6">Once people start claiming totes from your sponsored causes and their claims get verified, you'll see the impact here.</p>
+                <Button onClick={() => navigate('/causes')}>
+                  Browse Causes to Sponsor
                 </Button>
               </div>
             )}

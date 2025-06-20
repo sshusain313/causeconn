@@ -55,6 +55,7 @@ import EditCause from './pages/admin/EditCause';
 
 // Test Components
 import PaymentTest from "./components/PaymentTest";
+import NumberInputDemo from "./components/NumberInputDemo";
 
 // Create QueryClient once, outside of component
 const queryClient = new QueryClient();
@@ -80,6 +81,7 @@ const App: React.FC = () => {
                 
                 {/* Test Routes */}
                 <Route path="/test/payment" element={<PaymentTest />} />
+                <Route path="/demo/number-input" element={<NumberInputDemo />} />
                 
                 {/* Public Information Pages */}
                 <Route path="/why-sponsor" element={<WhySponsorPage />} />

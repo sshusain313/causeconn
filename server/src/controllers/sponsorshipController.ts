@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Sponsorship, { SponsorshipStatus, DistributionType } from '../models/Sponsorship';
+import Cause from '../models/Cause';
 
 export const createSponsorship = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -10,9 +11,37 @@ export const createSponsorship = async (req: Request, res: Response): Promise<vo
       req.body.cause = req.body.selectedCause;
     }
 
+    // Handle field name mismatches
+    if (!req.body.numberOfTotes && req.body.toteQuantity) {
+      req.body.numberOfTotes = req.body.toteQuantity;
+    }
+
     // Extract distributionLocations from physicalDistributionDetails if present
     if (!req.body.distributionLocations && req.body.physicalDistributionDetails?.distributionLocations) {
-      req.body.distributionLocations = req.body.physicalDistributionDetails.distributionLocations;
+      // Transform the distribution locations to match the expected schema
+      req.body.distributionLocations = req.body.physicalDistributionDetails.distributionLocations.map((location: any) => {
+        // Handle nested name object structure
+        if (location.name && typeof location.name === 'object') {
+          return {
+            name: location.name.name || 'Unknown Location',
+            address: location.name.address || 'N/A',
+            contactPerson: location.name.contactPerson || 'N/A',
+            phone: location.name.phone || 'N/A',
+            location: location.name.location || '',
+            totesCount: location.name.totesCount || location.totesCount || 0
+          };
+        } else {
+          // Handle flat structure
+          return {
+            name: location.name || 'Unknown Location',
+            address: location.address || 'N/A',
+            contactPerson: location.contactPerson || 'N/A',
+            phone: location.phone || 'N/A',
+            location: location.location || '',
+            totesCount: location.totesCount || 0
+          };
+        }
+      });
     }
     
     // Check for required fields
@@ -22,16 +51,18 @@ export const createSponsorship = async (req: Request, res: Response): Promise<vo
       'contactName',
       'email',
       'phone',
-      'toteQuantity',
-      'numberOfTotes',
       'unitPrice',
       'totalAmount',
       'distributionType',
       'selectedCities',
       'distributionStartDate',
-      'distributionEndDate',
-      'logoPosition'
+      'distributionEndDate'
     ];
+    
+    // Check for tote quantity - either toteQuantity or numberOfTotes should be present
+    if (!req.body.toteQuantity && !req.body.numberOfTotes) {
+      requiredFields.push('toteQuantity');
+    }
     
     const missingFields = requiredFields.filter(field => !req.body[field]);
     
@@ -53,24 +84,38 @@ export const createSponsorship = async (req: Request, res: Response): Promise<vo
     if (!req.body.logoUrl || req.body.logoUrl === 'logo_uploaded_client_side') {
       req.body.logoUrl = 'https://api.changebag.org/uploads/default-logo.png';
     }
-    
-    // Create the sponsorship with required fields and defaults
-    const sponsorshipData = {
-      ...req.body,
-      sponsor: req.user?._id || null,
-      status: SponsorshipStatus.PENDING,
-      // Set default demographics if not provided
+
+    // Set default values for optional fields
+    const defaultValues = {
+      message: req.body.message || '',
+      logoPosition: req.body.logoPosition || {
+        x: 0,
+        y: 0,
+        scale: 1,
+        angle: 0
+      },
       demographics: req.body.demographics || {
         ageGroups: [],
         income: '',
         education: '',
         other: ''
-      }
+      },
+      // Ensure numberOfTotes is set from toteQuantity if not provided
+      numberOfTotes: req.body.numberOfTotes || req.body.toteQuantity
+    };
+    
+    // Create the sponsorship with required fields and defaults
+    const sponsorshipData = {
+      ...req.body,
+      ...defaultValues,
+      sponsor: req.user?._id || null,
+      status: SponsorshipStatus.PENDING
     };
 
     // Remove redundant fields that are now properly placed
     delete sponsorshipData.physicalDistributionDetails;
-    delete sponsorshipData.distributionPoints;
+    // Don't delete distributionPoints as it might be used by frontend
+    // delete sponsorshipData.distributionPoints;
     delete sponsorshipData.distributionPointName;
     delete sponsorshipData.distributionPointAddress;
     delete sponsorshipData.distributionPointContact;
@@ -92,10 +137,17 @@ export const createSponsorship = async (req: Request, res: Response): Promise<vo
     // Validate the sponsorship before saving
     const validationError = sponsorship.validateSync();
     if (validationError) {
-      console.error('Validation error:', validationError);
+      console.error('Validation error details:', JSON.stringify(validationError.errors, null, 2));
+      console.error('Validation error message:', validationError.message);
+      console.error('Failed sponsorship data:', JSON.stringify(sponsorshipData, null, 2));
       res.status(400).json({ 
         message: 'Validation error', 
-        errors: validationError.errors 
+        errors: validationError.errors,
+        details: Object.keys(validationError.errors).map(key => ({
+          field: key,
+          message: validationError.errors[key].message,
+          value: validationError.errors[key].value
+        }))
       });
       return;
     }
@@ -157,6 +209,46 @@ export const getPendingSponsorships = async (req: Request, res: Response): Promi
     
     res.status(500).json({ message: 'Error fetching pending sponsorships' });
     console.error('=== getPendingSponsorships ERROR END ===');
+  }
+};
+
+export const getApprovedSponsorships = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('=== getApprovedSponsorships START ===');
+    console.log('Fetching approved sponsorships, authenticated as:', req.user);
+    
+    const sponsorships = await Sponsorship.find({ status: SponsorshipStatus.APPROVED })
+      .populate('cause', 'title description category targetAmount currentAmount imageUrl status')
+      .select('_id status logoStatus cause organizationName contactName email phone toteQuantity unitPrice totalAmount logoUrl toteDetails selectedCities distributionType distributionLocations distributionStartDate distributionEndDate documents createdAt updatedAt isOnline')
+      .sort({ createdAt: -1 });
+    
+    console.log('Found approved sponsorships:', sponsorships.length);
+    
+    res.json(sponsorships);
+    console.log('=== getApprovedSponsorships SUCCESS ===');
+  } catch (error) {
+    console.error('=== getApprovedSponsorships ERROR ===');
+    console.error('Error fetching approved sponsorships:', error);
+    res.status(500).json({ message: 'Error fetching approved sponsorships' });
+  }
+};
+
+export const toggleSponsorshipOnlineStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const sponsorship = await Sponsorship.findById(req.params.id).populate('cause', 'title');
+    if (!sponsorship) {
+      res.status(404).json({ message: 'Sponsorship not found' });
+      return;
+    }
+
+    // Toggle the isOnline status
+    sponsorship.isOnline = !sponsorship.isOnline;
+    await sponsorship.save();
+
+    res.json(sponsorship);
+  } catch (error) {
+    console.error('Error toggling sponsorship online status:', error);
+    res.status(500).json({ message: 'Error toggling sponsorship online status' });
   }
 };
 
@@ -444,5 +536,365 @@ export const testPendingSponsorships = async (req: Request, res: Response): Prom
       error: error.message,
       stack: error.stack 
     });
+  }
+};
+
+export const testSponsorshipCreation = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('=== Testing Sponsorship Creation ===');
+    
+    // Create a test sponsorship with minimal required data
+    const testData = {
+      cause: req.body.cause || '507f1f77bcf86cd799439011', // Sample ObjectId
+      organizationName: 'Test Organization',
+      contactName: 'Test Contact',
+      email: 'test@example.com',
+      phone: '1234567890',
+      toteQuantity: 10,
+      unitPrice: 100,
+      totalAmount: 1000,
+      logoUrl: 'https://api.changebag.org/uploads/default-logo.png',
+      distributionType: 'online',
+      selectedCities: ['Mumbai'],
+      distributionStartDate: new Date(),
+      distributionEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      distributionLocations: [{
+        name: 'Online Distribution',
+        address: 'N/A',
+        contactPerson: 'N/A',
+        phone: 'N/A'
+      }],
+      message: 'Test sponsorship',
+      logoPosition: {
+        x: 0,
+        y: 0,
+        scale: 1,
+        angle: 0
+      },
+      demographics: {
+        ageGroups: [],
+        income: '',
+        education: '',
+        other: ''
+      }
+    };
+    
+    console.log('Test data:', JSON.stringify(testData, null, 2));
+    
+    const sponsorship = new Sponsorship(testData);
+    
+    // Validate the sponsorship
+    const validationError = sponsorship.validateSync();
+    if (validationError) {
+      console.error('Validation error:', validationError);
+      res.status(400).json({ 
+        message: 'Validation error', 
+        errors: validationError.errors 
+      });
+      return;
+    }
+    
+    console.log('Validation passed!');
+    res.json({ message: 'Test sponsorship validation passed', data: testData });
+  } catch (error) {
+    console.error('Test error:', error);
+    res.status(500).json({ 
+      message: 'Test failed', 
+      error: error.message 
+    });
+  }
+};
+
+export const testFrontendData = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('=== Testing Frontend Data Structure ===');
+    
+    // Simulate the exact data structure the frontend sends
+    const frontendData = {
+      cause: req.body.cause || '507f1f77bcf86cd799439011',
+      organizationName: 'Test Organization',
+      contactName: 'Test Contact',
+      email: 'test@example.com',
+      phone: '1234567890',
+      toteQuantity: 10,
+      unitPrice: 100,
+      totalAmount: 1000,
+      logoUrl: 'logo_uploaded_client_side',
+      distributionType: 'online',
+      selectedCities: ['Mumbai'],
+      distributionStartDate: '2025-01-01',
+      distributionEndDate: '2025-01-31',
+      message: 'Test message',
+      // Physical distribution data (if applicable)
+      physicalDistributionDetails: {
+        distributionLocations: [{
+          name: 'Test Location',
+          address: 'Test Address',
+          contactPerson: 'Test Person',
+          phone: '1234567890',
+          totesCount: 5
+        }]
+      }
+    };
+    
+    console.log('Frontend data structure:', JSON.stringify(frontendData, null, 2));
+    
+    // Process the data through the same logic as the real endpoint
+    const processedData: any = { ...frontendData };
+    
+    // Handle field name mismatches
+    if (!processedData.numberOfTotes && processedData.toteQuantity) {
+      processedData.numberOfTotes = processedData.toteQuantity;
+    }
+    
+    // Extract distributionLocations from physicalDistributionDetails if present
+    if (!processedData.distributionLocations && processedData.physicalDistributionDetails?.distributionLocations) {
+      processedData.distributionLocations = processedData.physicalDistributionDetails.distributionLocations.map((location: any) => ({
+        name: location.name || 'Unknown Location',
+        address: location.address || 'N/A',
+        contactPerson: location.contactPerson || 'N/A',
+        phone: location.phone || 'N/A',
+        location: location.location || '',
+        totesCount: location.totesCount || 0
+      }));
+    }
+    
+    // Handle logoUrl
+    if (!processedData.logoUrl || processedData.logoUrl === 'logo_uploaded_client_side') {
+      processedData.logoUrl = 'https://api.changebag.org/uploads/default-logo.png';
+    }
+    
+    // Set default values
+    const defaultValues = {
+      message: processedData.message || '',
+      logoPosition: processedData.logoPosition || {
+        x: 0,
+        y: 0,
+        scale: 1,
+        angle: 0
+      },
+      demographics: processedData.demographics || {
+        ageGroups: [],
+        income: '',
+        education: '',
+        other: ''
+      },
+      numberOfTotes: processedData.numberOfTotes || processedData.toteQuantity
+    };
+    
+    const finalData = {
+      ...processedData,
+      ...defaultValues,
+      sponsor: null,
+      status: 'pending'
+    };
+    
+    console.log('Processed data:', JSON.stringify(finalData, null, 2));
+    
+    // Create and validate the sponsorship
+    const sponsorship = new Sponsorship(finalData);
+    const validationError = sponsorship.validateSync();
+    
+    if (validationError) {
+      console.error('Validation error:', validationError);
+      res.status(400).json({ 
+        message: 'Validation error', 
+        errors: validationError.errors 
+      });
+      return;
+    }
+    
+    console.log('✅ All validations passed!');
+    res.json({ 
+      message: 'Frontend data structure is valid', 
+      originalData: frontendData,
+      processedData: finalData,
+      validation: 'passed'
+    });
+  } catch (error) {
+    console.error('Test error:', error);
+    res.status(500).json({ 
+      message: 'Test failed', 
+      error: error.message 
+    });
+  }
+};
+
+export const testNestedDistributionLocations = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('=== Testing Nested Distribution Locations ===');
+    
+    // Test data with nested name objects (like the frontend sends)
+    const testData = {
+      cause: '507f1f77bcf86cd799439011',
+      organizationName: 'Test Organization',
+      contactName: 'Test Contact',
+      email: 'test@example.com',
+      phone: '1234567890',
+      toteQuantity: 10,
+      unitPrice: 100,
+      totalAmount: 1000,
+      logoUrl: 'logo_uploaded_client_side',
+      distributionType: 'physical',
+      selectedCities: ['Mumbai'],
+      distributionStartDate: '2025-01-01',
+      distributionEndDate: '2025-01-31',
+      physicalDistributionDetails: {
+        distributionLocations: [
+          {
+            name: {
+              name: 'Lumbini Park',
+              address: 'Hyderabad, India',
+              contactPerson: 'Test Contact',
+              phone: '1234567890',
+              location: 'Hyderabad',
+              totesCount: 300
+            },
+            type: 'other',
+            totesCount: 410
+          },
+          {
+            name: {
+              name: 'Inorbit Mall',
+              address: 'Hyderabad, India',
+              contactPerson: 'Test Contact',
+              phone: '1234567890',
+              location: 'Hyderabad',
+              totesCount: 430
+            },
+            type: 'other',
+            totesCount: 410
+          }
+        ]
+      }
+    };
+    
+    // Process the data through the same logic as the real endpoint
+    const processedData: any = { ...testData };
+    
+    // Extract distributionLocations from physicalDistributionDetails if present
+    if (!processedData.distributionLocations && processedData.physicalDistributionDetails?.distributionLocations) {
+      // Transform the distribution locations to match the expected schema
+      processedData.distributionLocations = processedData.physicalDistributionDetails.distributionLocations.map((location: any) => {
+        // Handle nested name object structure
+        if (location.name && typeof location.name === 'object') {
+          return {
+            name: location.name.name || 'Unknown Location',
+            address: location.name.address || 'N/A',
+            contactPerson: location.name.contactPerson || 'N/A',
+            phone: location.name.phone || 'N/A',
+            location: location.name.location || '',
+            totesCount: location.name.totesCount || location.totesCount || 0
+          };
+        } else {
+          // Handle flat structure
+          return {
+            name: location.name || 'Unknown Location',
+            address: location.address || 'N/A',
+            contactPerson: location.contactPerson || 'N/A',
+            phone: location.phone || 'N/A',
+            location: location.location || '',
+            totesCount: location.totesCount || 0
+          };
+        }
+      });
+    }
+    
+    console.log('Original nested structure:', JSON.stringify(testData.physicalDistributionDetails.distributionLocations, null, 2));
+    console.log('Processed flat structure:', JSON.stringify(processedData.distributionLocations, null, 2));
+    
+    res.status(200).json({
+      message: 'Nested distribution locations test passed',
+      originalData: testData.physicalDistributionDetails.distributionLocations,
+      processedData: processedData.distributionLocations,
+      transformationSuccessful: true
+    });
+  } catch (error) {
+    console.error('Error testing nested distribution locations:', error);
+    res.status(500).json({ 
+      message: 'Error testing nested distribution locations',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+};
+
+export const getDashboardMetrics = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('=== getDashboardMetrics START ===');
+    
+    // Get total sponsors (unique users who have created sponsorships)
+    const totalSponsors = await Sponsorship.distinct('sponsor').countDocuments();
+    console.log('Total unique sponsors:', totalSponsors);
+    
+    // Get total raised amount from all approved sponsorships
+    const totalRaisedResult = await Sponsorship.aggregate([
+      { $match: { status: SponsorshipStatus.APPROVED } },
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+    ]);
+    const totalRaised = totalRaisedResult.length > 0 ? totalRaisedResult[0].total : 0;
+    console.log('Total raised:', totalRaised);
+    
+    // Get pending items (sponsorships with pending status)
+    const pendingItems = await Sponsorship.countDocuments({ status: SponsorshipStatus.PENDING });
+    console.log('Pending items:', pendingItems);
+    
+    // Calculate weekly changes
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    // Sponsors this week
+    const sponsorsThisWeek = await Sponsorship.distinct('sponsor', {
+      createdAt: { $gte: oneWeekAgo }
+    }).countDocuments();
+    
+    // Raised this week
+    const raisedThisWeekResult = await Sponsorship.aggregate([
+      { 
+        $match: { 
+          status: SponsorshipStatus.APPROVED,
+          createdAt: { $gte: oneWeekAgo }
+        } 
+      },
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+    ]);
+    const raisedThisWeek = raisedThisWeekResult.length > 0 ? raisedThisWeekResult[0].total : 0;
+    
+    // Urgent pending items (pending for more than 3 days)
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const urgentPendingItems = await Sponsorship.countDocuments({
+      status: SponsorshipStatus.PENDING,
+      createdAt: { $lte: threeDaysAgo }
+    });
+    
+    // Get total causes (we'll need to import the Cause model)
+    const totalCauses = await Cause.countDocuments();
+    
+    // Causes this week
+    const causesThisWeek = await Cause.countDocuments({
+      createdAt: { $gte: oneWeekAgo }
+    });
+    
+    const metrics = {
+      totalCauses,
+      totalSponsors,
+      totalRaised,
+      pendingItems,
+      weeklyStats: {
+        causesChange: causesThisWeek,
+        sponsorsChange: sponsorsThisWeek,
+        raisedChange: raisedThisWeek,
+        urgentPendingItems
+      }
+    };
+    
+    console.log('Dashboard metrics calculated:', metrics);
+    console.log('=== getDashboardMetrics SUCCESS ===');
+    
+    res.json(metrics);
+  } catch (error) {
+    console.error('=== getDashboardMetrics ERROR ===');
+    console.error('Error calculating dashboard metrics:', error);
+    res.status(500).json({ message: 'Error calculating dashboard metrics' });
   }
 }; 

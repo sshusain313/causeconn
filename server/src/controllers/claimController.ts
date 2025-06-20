@@ -232,3 +232,75 @@ export const getClaimerDashboardData = async (req: Request, res: Response): Prom
     res.status(500).json({ message: 'Error fetching claimer dashboard data' });
   }
 };
+
+// Get verified claims for sponsored causes
+export const getVerifiedClaimsForSponsoredCauses = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('=== getVerifiedClaimsForSponsoredCauses START ===');
+    console.log('Fetching verified claims for sponsored causes, user:', req.user?._id, 'email:', req.user?.email);
+    
+    // Step 1: Get all causes that the current user has sponsored
+    // Check both by user ID and by email (since some sponsorships might have null sponsor field)
+    const Sponsorship = mongoose.model('Sponsorship');
+    const sponsoredCauses = await Sponsorship.find({ 
+      $or: [
+        { sponsor: req.user?._id },
+        { email: req.user?.email }
+      ],
+      status: 'approved' // Only approved sponsorships
+    }).select('cause');
+    
+    console.log('Found sponsored causes:', sponsoredCauses.length);
+    
+    if (sponsoredCauses.length === 0) {
+      console.log('No sponsored causes found for user');
+      res.json([]);
+      return;
+    }
+    
+    // Extract cause IDs from sponsorships
+    const causeIds = sponsoredCauses.map(sponsorship => sponsorship.cause);
+    console.log('Sponsored cause IDs:', causeIds);
+    
+    // Step 2: Get all verified claims for these causes (only status 'verified')
+    const verifiedClaims = await Claim.find({
+      causeId: { $in: causeIds },
+      status: 'verified' // Only verified status
+    })
+    .populate('causeId', 'title imageUrl category')
+    .sort({ createdAt: -1 })
+    .select('causeId causeTitle fullName email phone purpose address city state zipCode status emailVerified createdAt updatedAt shippingDate deliveryDate');
+    
+    console.log('Found verified claims:', verifiedClaims.length);
+    
+    // Step 3: Group claims by cause for better organization
+    const claimsByCause = verifiedClaims.reduce((acc, claim) => {
+      const causeId = claim.causeId._id.toString();
+      if (!acc[causeId]) {
+        acc[causeId] = {
+          cause: claim.causeId,
+          claims: []
+        };
+      }
+      acc[causeId].claims.push(claim);
+      return acc;
+    }, {});
+    
+    // Convert to array format
+    const result = Object.values(claimsByCause).map((group: any) => ({
+      causeId: group.cause._id,
+      causeTitle: group.cause.title,
+      causeImageUrl: group.cause.imageUrl,
+      causeCategory: group.cause.category,
+      totalClaims: group.claims.length,
+      claims: group.claims
+    }));
+    
+    console.log('=== getVerifiedClaimsForSponsoredCauses SUCCESS ===');
+    res.json(result);
+  } catch (error) {
+    console.error('=== getVerifiedClaimsForSponsoredCauses ERROR ===');
+    console.error('Error fetching verified claims for sponsored causes:', error);
+    res.status(500).json({ message: 'Error fetching verified claims for sponsored causes' });
+  }
+};

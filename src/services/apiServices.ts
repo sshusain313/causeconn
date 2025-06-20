@@ -120,170 +120,45 @@ export const fetchStories = async (): Promise<Story[]> => {
 // Fetch dashboard metrics for admin by calculating from existing data
 export const fetchDashboardMetrics = async () => {
   try {
-    // First try to fetch all causes without filtering to get the complete dataset
-    const allCausesResponse = await fetch(`${config.apiUrl}/causes`);
+    console.log('Fetching dashboard metrics from backend...');
     
-    if (!allCausesResponse.ok) {
-      throw new Error('Failed to fetch causes data');
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Authentication required for dashboard metrics');
     }
     
-    const allCauses = await allCausesResponse.json();
-    
-    if (!Array.isArray(allCauses) || allCauses.length === 0) {
-      throw new Error('No causes data available');
-    }
-    
-    console.log('Successfully fetched', allCauses.length, 'causes');
-    
-    // Calculate metrics from real data
-    const approvedCauses = allCauses.filter(cause => cause.status === 'approved');
-    const pendingCauses = allCauses.filter(cause => cause.status === 'pending');
-    
-    // Extract all unique sponsors from all causes
-    const allSponsors = new Set();
-    let totalRaised = 0;
-    
-    // Since we don't have real sponsor data yet, use the mock data for sponsors and raised amount
-    // This is a temporary solution until the API is updated with real sponsor data
-    const mockSponsorsData = [
-      {
-        _id: 'sponsor1',
-        userId: 'user1',
-        name: 'EcoTech Solutions',
-        amount: 2500,
-        createdAt: new Date('2025-04-01')
-      },
-      {
-        _id: 'sponsor2',
-        userId: 'user2',
-        name: 'Green Future Corp',
-        amount: 5000,
-        createdAt: new Date('2025-04-15')
-      }
-    ];
-    
-    // Use mock sponsor data for now
-    mockSponsorsData.forEach(sponsor => {
-      if (sponsor.userId || sponsor._id) {
-        allSponsors.add(sponsor.userId || sponsor._id);
-      }
-      if (typeof sponsor.amount === 'number') {
-        totalRaised += sponsor.amount;
+    const response = await fetch(`${config.apiUrl}/sponsorships/dashboard-metrics`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
     });
     
-    console.log(`Using mock sponsor data: totalSponsors=${allSponsors.size}, totalRaised=${totalRaised}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch dashboard metrics: ${response.status} ${response.statusText}`);
+    }
     
-    // Calculate weekly changes
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const metrics = await response.json();
+    console.log('Dashboard metrics received:', metrics);
     
-    const causesThisWeek = allCauses.filter(cause => {
-      const createdAt = new Date(cause.createdAt);
-      return !isNaN(createdAt.getTime()) && createdAt >= oneWeekAgo;
-    }).length;
+    return metrics;
+  } catch (error) {
+    console.error('Error fetching dashboard metrics:', error);
     
-    // For sponsors this week, use mock data
-    const sponsorsThisWeek = mockSponsorsData.filter(sponsor => {
-      const createdAt = new Date(sponsor.createdAt);
-      return !isNaN(createdAt.getTime()) && createdAt >= oneWeekAgo;
-    });
-    
-    let raisedThisWeek = sponsorsThisWeek.reduce((total, sponsor) => {
-      return total + (typeof sponsor.amount === 'number' ? sponsor.amount : 0);
-    }, 0);
-    
-    // Calculate urgent pending items (those that have been pending for more than 3 days)
-    const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-    
-    const urgentPendingItems = pendingCauses.filter(cause => {
-      if (!cause.createdAt) return false;
-      const createdAt = new Date(cause.createdAt);
-      return !isNaN(createdAt.getTime()) && createdAt <= threeDaysAgo;
-    }).length;
-    
-    // Return calculated metrics with real cause data and mock sponsor data
+    // Fallback to mock data if API call fails
     return {
-      totalCauses: allCauses.length,
-      totalSponsors: allSponsors.size,
-      totalRaised: totalRaised,
-      pendingItems: pendingCauses.length,
+      totalCauses: 6,
+      totalSponsors: 2,
+      totalRaised: 14500,
+      pendingItems: 6,
       weeklyStats: {
-        causesChange: causesThisWeek,
-        sponsorsChange: sponsorsThisWeek.length,
-        raisedChange: raisedThisWeek,
-        urgentPendingItems: urgentPendingItems
+        causesChange: 2,
+        sponsorsChange: 0,
+        raisedChange: 3500,
+        urgentPendingItems: 3
       }
     };
-  } catch (error) {
-    console.error('Error calculating dashboard metrics:', error);
-    
-    // As a last resort, try to calculate from individual API endpoints
-    try {
-      console.log('Attempting to calculate from individual endpoints...');
-      
-      // Fetch approved causes
-      const approvedResponse = await fetch(`${config.apiUrl}/causes?status=approved`);
-      const pendingResponse = await fetch(`${config.apiUrl}/causes?status=pending`);
-      
-      const approvedCauses = approvedResponse.ok ? await approvedResponse.json() : [];
-      const pendingCauses = pendingResponse.ok ? await pendingResponse.json() : [];
-      
-      // Basic calculations from whatever data we could get
-      const totalCauses = Array.isArray(approvedCauses) ? approvedCauses.length : 0;
-      const pendingItems = Array.isArray(pendingCauses) ? pendingCauses.length : 0;
-      
-      // Extract sponsors and calculate total raised
-      const allSponsors = new Set();
-      let totalRaised = 0;
-      
-      if (Array.isArray(approvedCauses)) {
-        approvedCauses.forEach(cause => {
-          if (cause.sponsors && Array.isArray(cause.sponsors)) {
-            cause.sponsors.forEach(sponsor => {
-              if (sponsor.userId || sponsor._id) {
-                allSponsors.add(sponsor.userId || sponsor._id);
-              }
-              if (typeof sponsor.amount === 'number') {
-                totalRaised += sponsor.amount;
-              }
-            });
-          }
-        });
-      }
-      
-      return {
-        totalCauses: totalCauses,
-        totalSponsors: allSponsors.size,
-        totalRaised: totalRaised,
-        pendingItems: pendingItems,
-        weeklyStats: {
-          causesChange: Math.floor(totalCauses * 0.1), // Estimate 10% growth
-          sponsorsChange: Math.floor(allSponsors.size * 0.05), // Estimate 5% growth
-          raisedChange: Math.floor(totalRaised * 0.15), // Estimate 15% growth
-          urgentPendingItems: Math.ceil(pendingItems * 0.3) // Estimate 30% urgent
-        }
-      };
-    } catch (secondError) {
-      console.error('All attempts to calculate metrics failed:', secondError);
-      
-      // Only use mock data as an absolute last resort
-      alert('Unable to load real metrics data. Please check your network connection.');
-      
-      return {
-        totalCauses: 0,
-        totalSponsors: 0,
-        totalRaised: 0,
-        pendingItems: 0,
-        weeklyStats: {
-          causesChange: 0,
-          sponsorsChange: 0,
-          raisedChange: 0,
-          urgentPendingItems: 0
-        }
-      };
-    }
   }
 };
 

@@ -52,6 +52,7 @@ interface Sponsorship {
   }>;
   createdAt: string;
   updatedAt: string;
+  isOnline: boolean;
 }
 
 interface ApiResponse<T> {
@@ -82,6 +83,10 @@ const StatusBadge = ({ status }: { status: string }) => {
         return 'bg-green-100 text-green-800 border-green-200';
       case 'rejected':
         return 'bg-red-100 text-red-800 border-red-200';
+      case 'online':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'offline':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -98,6 +103,10 @@ const StatusBadge = ({ status }: { status: string }) => {
         return 'Approved';
       case 'rejected':
         return 'Rejected';
+      case 'online':
+        return 'Online';
+      case 'offline':
+        return 'Offline';
       default:
         return status;
     }
@@ -145,13 +154,11 @@ const ExpandableSection = ({ title, isExpanded, onToggle, children }: Expandable
   );
 };
 
-const CampaignCard = ({ sponsorship, onApprove, onReject }: { 
+const CampaignCard = ({ sponsorship, onToggleOnline }: { 
   sponsorship: Sponsorship;
-  onApprove: (id: string) => void;
-  onReject: (id: string, reason: string) => void;
+  onToggleOnline: (id: string) => void;
 }) => {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
-  const [rejectionReason, setRejectionReason] = useState('');
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev =>
@@ -166,7 +173,7 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">{sponsorship.cause.title}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">{sponsorship.cause?.title || 'Unknown Cause'}</h3>
           <p className="text-sm text-gray-600">
             Submitted by: <span className="font-medium">{sponsorship.organizationName || 'Unknown Organization'}</span>
           </p>
@@ -179,21 +186,21 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
           {sponsorship.logoStatus && (
             <StatusBadge status={sponsorship.logoStatus} />
           )}
+          <StatusBadge status={sponsorship.isOnline ? 'online' : 'offline'} />
         </div>
       </div>
 
       {/* Description & Basic Info */}
       <div className="mb-4">
-        <p className="text-gray-700 mb-3">{sponsorship.cause.description}</p>
+        <p className="text-gray-700 mb-3">{sponsorship.cause?.description || 'No description available'}</p>
         <div className="flex justify-between items-center">
           <div>
             <span className="text-sm text-gray-500">Category: </span>
-            <span className="text-sm font-medium text-gray-900">{sponsorship.cause.category}</span>
+            <span className="text-sm font-medium text-gray-900">{sponsorship.cause?.category || 'Unknown'}</span>
           </div>
           <div className="text-right">
             <span className="text-sm text-gray-500">Goal Amount: </span>
-            {/* <span className="text-sm font-medium text-gray-900">{sponsorship.cause.targetAmount}</span> */}
-            <span className="text-lg font-bold text-gray-900">{sponsorship.cause.targetAmount}
+            <span className="text-lg font-bold text-gray-900">{sponsorship.cause?.targetAmount || 'N/A'}
             </span>
           </div>
         </div>
@@ -210,7 +217,19 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
             <div className="space-y-2">
               <div>
                 <span className="text-sm font-medium text-gray-700">Organization: </span>
-                <span className="text-sm text-gray-600">{sponsorship.organizationName || 'Unknown'}</span>
+                <span className="text-sm text-gray-600">{sponsorship.organizationName || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Contact Name: </span>
+                <span className="text-sm text-gray-600">{sponsorship.contactName || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Email: </span>
+                <span className="text-sm text-gray-600">{sponsorship.email || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Phone: </span>
+                <span className="text-sm text-gray-600">{sponsorship.phone || 'N/A'}</span>
               </div>
             </div>
             <div className="flex justify-center md:justify-end">
@@ -225,18 +244,6 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
                   <span className="text-xs text-gray-500">No Logo</span>
                 )}
               </div>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Contact Name: </span>
-                <span className="text-sm text-gray-600">{sponsorship.contactName || 'Unknown'}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Email: </span>
-                <span className="text-sm text-gray-600">{sponsorship.contactName || 'Unknown'}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Phone: </span>
-                <span className="text-sm text-gray-600">{sponsorship.contactName || 'Unknown'}</span>
             </div>
           </div>
         </ExpandableSection>
@@ -269,56 +276,12 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
           isExpanded={expandedSections.includes('distribution')}
           onToggle={() => toggleSection('distribution')}
         >
-          {sponsorship.distributionType=='physical' ? ( 
           <div className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <span className="text-sm font-medium text-gray-700">Duration: </span>
-                <span className="text-sm text-gray-600">
-                  {sponsorship.distributionStartDate && sponsorship.distributionEndDate
-                    ? `${new Date(sponsorship.distributionStartDate).toLocaleDateString()} — ${new Date(sponsorship.distributionEndDate).toLocaleDateString()}`
-                    : 'N/A'}
-                </span>
+                <span className="text-sm font-medium text-gray-700">Distribution Type: </span>
+                <span className="text-sm text-gray-600 capitalize">{sponsorship.distributionType || 'N/A'}</span>
               </div>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-gray-700">Cities: </span>
-              <span className="text-sm text-gray-600">
-                {Array.isArray(sponsorship.selectedCities)
-                  ? sponsorship.selectedCities.join(', ')
-                  : 'N/A'}
-              </span>
-            </div>
-            <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Distribution Locations:</h4>
-              <div className="space-y-3">
-                {Array.isArray(sponsorship.distributionLocations)
-                  ? sponsorship.distributionLocations.map((location, index) => (
-                  <div key={index} className="bg-gray-50 p-3 rounded-md">
-                    <div className="grid md:grid-cols-2 gap-2">
-                      <div>
-                            <div className="font-medium text-sm text-gray-900">{location.name.name}</div>
-                            <div className="text-sm text-gray-600">{location.name.address}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-600">
-                              Contact: {location.name.contactPerson}
-                        </div>
-                            <div className="text-sm text-gray-600">Phone: {location.name.phone}</div>
-                        <div className="text-sm font-medium text-gray-900">
-                              Totes: {location.name.totesCount}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                    ))
-                  : <span className="text-xs text-gray-500">No Locations</span>}
-              </div>
-            </div>
-          </div>
-          ):(
-            <div className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <span className="text-sm font-medium text-gray-700">Duration: </span>
                 <span className="text-sm text-gray-600">
@@ -328,35 +291,90 @@ const CampaignCard = ({ sponsorship, onApprove, onReject }: {
                 </span>
               </div>
             </div>
-            </div>
+            
+            {sponsorship.distributionType === 'physical' && (
+              <>
+                <div>
+                  <span className="text-sm font-medium text-gray-700">Selected Cities: </span>
+                  <span className="text-sm text-gray-600">
+                    {Array.isArray(sponsorship.selectedCities) && sponsorship.selectedCities.length > 0
+                      ? sponsorship.selectedCities.join(', ')
+                      : 'N/A'}
+                  </span>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Distribution Locations:</h4>
+                  <div className="space-y-3">
+                    {Array.isArray(sponsorship.distributionLocations) && sponsorship.distributionLocations.length > 0
+                      ? sponsorship.distributionLocations.map((location, index) => {
+                          // Handle the nested data structure properly
+                          const locationName = location.name?.name || 'N/A';
+                          const locationAddress = location.name?.address || 'N/A';
+                          const contactPerson = location.name?.contactPerson || 'N/A';
+                          const locationPhone = location.name?.phone || 'N/A';
+                          const totesCount = location.name?.totesCount || location.totesCount || 'N/A';
+                          const locationType = location.type || 'N/A';
+                          
+                          return (
+                            <div key={index} className="bg-gray-50 p-3 rounded-md">
+                              <div className="grid md:grid-cols-2 gap-2">
+                                <div>
+                                  <div className="font-medium text-sm text-gray-900">{locationName}</div>
+                                  <div className="text-sm text-gray-600">{locationAddress}</div>
+                                  <div className="text-xs text-gray-500">Type: {locationType}</div>
+                                </div>
+                                <div>
+                                  <div className="text-sm text-gray-600">
+                                    Contact: {contactPerson}
+                                  </div>
+                                  <div className="text-sm text-gray-600">Phone: {locationPhone}</div>
+                                  <div className="text-sm font-medium text-gray-900">
+                                    Totes: {totesCount}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      : <span className="text-xs text-gray-500">No distribution locations specified</span>}
+                  </div>
+                </div>
+              </>
             )}
-        
-
+            
+            {sponsorship.distributionType === 'online' && (
+              <div>
+                <span className="text-sm text-gray-600">
+                  Online distribution - totes will be shipped directly to the organization.
+                </span>
+              </div>
+            )}
+          </div>
         </ExpandableSection>
       </div>
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4 border-t border-gray-100">
         <button
-          onClick={() => onApprove(sponsorship._id)}
-          className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
+          onClick={() => onToggleOnline(sponsorship._id)}
+          className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+            sponsorship.isOnline 
+              ? 'bg-red-600 text-white hover:bg-red-700' 
+              : 'bg-green-600 text-white hover:bg-green-700'
+          }`}
         >
-          <Check className="w-4 h-4 mr-1" />
-          Approve
+          {sponsorship.isOnline ? (
+            <>
+              <X className="w-4 h-4 mr-1" />
+              Take Offline
+            </>
+          ) : (
+            <>
+              <Check className="w-4 h-4 mr-1" />
+              Put Online
+            </>
+          )}
         </button>
-        <button
-          onClick={() => onReject(sponsorship._id, rejectionReason)}
-          className="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 transition-colors"
-        >
-          <X className="w-4 h-4 mr-1" />
-          Reject
-        </button>
-        <input
-          type="text"
-          placeholder="Rejection reason..."
-          value={rejectionReason}
-          onChange={(e) => setRejectionReason(e.target.value)}
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
       </div>
     </div>
   );
@@ -375,13 +393,13 @@ const CampaignApprovals = () => {
   const fetchSponsorships = async () => {
     try {
       setLoading(true);
-      const response = await authAxios.get<Sponsorship[]>('/api/sponsorships/pending');
+      const response = await authAxios.get<Sponsorship[]>('/api/sponsorships/approved');
       setSponsorships(response.data);
     } catch (error) {
       console.error('Error fetching sponsorships:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch pending sponsorships",
+        description: "Failed to fetch approved sponsorships",
         variant: "destructive"
       });
     } finally {
@@ -389,66 +407,39 @@ const CampaignApprovals = () => {
     }
   };
 
-  const handleApprove = async (id: string) => {
+  const handleToggleOnline = async (id: string) => {
     try {
-      await authAxios.post(`/api/sponsorships/${id}/approve`);
+      await authAxios.patch(`/api/sponsorships/${id}/toggle-online`);
       toast({
         title: "Success",
-        description: "Sponsorship approved successfully"
+        description: "Sponsorship online status updated successfully"
       });
       fetchSponsorships(); // Refresh the list
     } catch (error) {
-      console.error('Error approving sponsorship:', error);
+      console.error('Error updating sponsorship online status:', error);
       toast({
         title: "Error",
-        description: "Failed to approve sponsorship",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleReject = async (id: string, reason: string) => {
-    if (!reason.trim()) {
-      toast({
-        title: "Error",
-        description: "Please provide a reason for rejection",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      await authAxios.post(`/api/sponsorships/${id}/reject`, { reason });
-      toast({
-        title: "Success",
-        description: "Sponsorship rejected successfully"
-      });
-      fetchSponsorships(); // Refresh the list
-    } catch (error) {
-      console.error('Error rejecting sponsorship:', error);
-      toast({
-        title: "Error",
-        description: "Failed to reject sponsorship",
+        description: "Failed to update sponsorship online status",
         variant: "destructive"
       });
     }
   };
 
   const filteredSponsorships = sponsorships.filter(sponsorship =>
-    sponsorship.cause.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (sponsorship.cause?.title?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
     sponsorship.organizationName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <AdminLayout title="Campaign Approvals" subtitle="Manage and monitor all causes">
+      <AdminLayout title="Approved Campaigns" subtitle="Manage online/offline status of approved campaigns">
       <div className="flex-1 p-6">
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
-            <h1 className="text-2xl font-semibold text-gray-800">Campaign Approvals</h1>
+            <h1 className="text-2xl font-semibold text-gray-800">Approved Campaigns</h1>
             <span className="text-sm text-gray-500">Admin (Admin)</span>
           </div>
-          <p className="text-gray-600 mb-4">Review and approve new campaign submissions</p>
+          <p className="text-gray-600 mb-4">Manage online/offline status of approved campaigns</p>
           
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -472,15 +463,14 @@ const CampaignApprovals = () => {
                 <CampaignCard
                   key={sponsorship._id}
                   sponsorship={sponsorship}
-                  onApprove={handleApprove}
-                  onReject={handleReject}
+                  onToggleOnline={handleToggleOnline}
                 />
               ))}
             </div>
           ) : (
             <div className="text-center py-12">
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No pending campaigns</h3>
-              <p className="text-gray-500">All campaigns have been reviewed</p>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">No approved campaigns</h3>
+              <p className="text-gray-500">No campaigns have been approved yet</p>
             </div>
           )}
       </div>

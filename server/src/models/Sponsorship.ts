@@ -23,16 +23,12 @@ interface ILogoPosition {
 }
 
 interface IDistributionLocation {
-  // name: {
-    name: string;
-    address: string;
-    contactPerson: string;
-    phone: string;
-    location: string;
-    totesCount: number;
-  // };
-  // type: string;
-  // totesCount: number;
+  name: string;
+  address: string;
+  contactPerson: string;
+  phone: string;
+  location?: string;
+  totesCount?: number;
 }
 
 interface IDemographics {
@@ -51,7 +47,7 @@ export interface ISponsorship extends Document {
   email: string;
   phone: string;
   toteQuantity: number;
-  numberOfTotes: number;
+  numberOfTotes?: number;
   unitPrice: number;
   totalAmount: number;
   logoUrl: string;
@@ -68,6 +64,7 @@ export interface ISponsorship extends Document {
   approvedBy?: mongoose.Types.ObjectId | IUser;
   approvedAt?: Date;
   rejectionReason?: string;
+  isOnline?: boolean;
   // Payment fields
   paymentId?: string;
   paymentStatus?: 'pending' | 'completed' | 'failed';
@@ -118,7 +115,7 @@ const sponsorshipSchema = new Schema<ISponsorship>(
     },
     numberOfTotes: {
       type: Number,
-      required: true,
+      required: false,
       min: 1
     },
     unitPrice: {
@@ -164,8 +161,8 @@ const sponsorshipSchema = new Schema<ISponsorship>(
       address: { type: String, required: true },
       contactPerson: { type: String, required: true },
       phone: { type: String, required: true },
-      location: { type: String, required: true },
-      totesCount: { type: Number, required: true }
+      location: { type: String, required: false },
+      totesCount: { type: Number, required: false }
     }],
     demographics: {
       ageGroups: [String],
@@ -174,10 +171,10 @@ const sponsorshipSchema = new Schema<ISponsorship>(
       other: String
     },
     logoPosition: {
-      x: { type: Number, required: true },
-      y: { type: Number, required: true },
-      scale: { type: Number, required: true },
-      angle: { type: Number, required: true }
+      x: { type: Number, required: false, default: 0 },
+      y: { type: Number, required: false, default: 0 },
+      scale: { type: Number, required: false, default: 1 },
+      angle: { type: Number, required: false, default: 0 }
     },
     status: {
       type: String,
@@ -190,6 +187,7 @@ const sponsorshipSchema = new Schema<ISponsorship>(
     },
     approvedAt: Date,
     rejectionReason: String,
+    isOnline: Boolean,
     // Payment fields
     paymentId: {
       type: String,

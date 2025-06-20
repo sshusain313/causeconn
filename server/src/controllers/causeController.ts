@@ -327,7 +327,8 @@ export const updateCause = async (req: Request, res: Response) => {
       location, 
       category,
       distributionStartDate,
-      distributionEndDate
+      distributionEndDate,
+      isOnline
     } = req.body;
     
     const cause = await Cause.findById(req.params.id);
@@ -355,6 +356,7 @@ export const updateCause = async (req: Request, res: Response) => {
     if (category) cause.category = category;
     if (distributionStartDate) cause.distributionStartDate = new Date(distributionStartDate);
     if (distributionEndDate) cause.distributionEndDate = new Date(distributionEndDate);
+    if (typeof isOnline === 'boolean') cause.isOnline = isOnline;
     
     await cause.save();
     
