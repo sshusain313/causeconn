@@ -45,6 +45,7 @@ const AdminDashboard = () => {
         </Button>
       </div>
       <MetricsCards />
+      <hr className="my-6" />
       <DashboardTabs />
     </AdminLayout>
   );

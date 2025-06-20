@@ -29,7 +29,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
         _id: '123456789012345678901234',
         email: 'shabahatsyed101@gmail.com',
         name: 'Development User',
-        role: 'user',
+        role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -53,7 +53,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
         _id: '123456789012345678901234', // Mock MongoDB ObjectId
         email: 'shabahatsyed101@gmail.com', // Use the email that exists in sponsorships
         name: 'Mock User',
-        role: 'user',
+        role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -71,7 +71,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
         _id: '123456789012345678901234',
         email: 'shabahatsyed101@gmail.com', // Use the email that exists in sponsorships
         name: 'Mock User',
-        role: 'user',
+        role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -116,7 +116,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
           _id: '123456789012345678901234',
           email: 'shabahatsyed101@gmail.com',
           name: 'Fallback Mock User',
-          role: 'user',
+          role: 'admin',
           createdAt: new Date(),
           updatedAt: new Date()
         };

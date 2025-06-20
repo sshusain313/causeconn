@@ -105,43 +105,85 @@ const LogoReview = () => {
     }
   }, [sponsorships]);
 
+  // State to track which sponsorship is being rejected
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  
   // Mutation for rejecting a sponsorship
   const rejectMutation = useMutation({
     mutationFn: async ({ sponsorshipId, reason }: { sponsorshipId: string, reason: string }) => {
+      setRejectingId(sponsorshipId);
       return authAxios.patch(`/api/sponsorships/${sponsorshipId}/reject`, { reason });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pendingSponsorships'] });
+    onSuccess: (_, variables) => {
+      // Remove the rejected sponsorship from the displayed list
+      if (sponsorships) {
+        const updatedSponsorships = sponsorships.filter(s => s._id !== variables.sponsorshipId);
+        // Update the local state to remove the rejected logo
+        queryClient.setQueryData(['pendingSponsorships'], updatedSponsorships);
+      }
+      
       toast({
         title: 'Logo Rejected',
         description: 'The logo has been rejected. The submitter will be notified to provide a new one.',
         variant: 'destructive'
       });
+      
+      setRejectingId(null);
     },
-    onError: (error) => {
+    onError: (error, variables) => {
       console.error('Error rejecting logo:', error);
       toast({
         title: 'Error',
         description: 'Failed to reject the logo. Please try again.',
         variant: 'destructive'
       });
+      
+      setRejectingId(null);
+    }
+  });
+
+  // State to track which sponsorship is being approved
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  
+  // Mutation for approving a sponsorship
+  const approveMutation = useMutation({
+    mutationFn: async (sponsorshipId: string) => {
+      setApprovingId(sponsorshipId);
+      return authAxios.patch(`/api/sponsorships/${sponsorshipId}/approve`);
+    },
+    onSuccess: (_, sponsorshipId) => {
+      // Add to approved logos set
+      setApprovedLogos(prev => new Set(prev).add(sponsorshipId));
+      
+      // Remove the approved sponsorship from the displayed list
+      if (sponsorships) {
+        const updatedSponsorships = sponsorships.filter(s => s._id !== sponsorshipId);
+        // Update the local state to remove the approved logo
+        queryClient.setQueryData(['pendingSponsorships'], updatedSponsorships);
+      }
+      
+      // Show success message
+      toast({
+        title: 'Logo Approved',
+        description: 'The logo has been approved and removed from the review list.'
+      });
+      
+      setApprovingId(null);
+    },
+    onError: (error, sponsorshipId) => {
+      console.error('Error approving logo:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to approve the logo. Please try again.',
+        variant: 'destructive'
+      });
+      
+      setApprovingId(null);
     }
   });
 
   const handleApprove = (sponsorshipId: string) => {
-    // Add to approved logos set
-    setApprovedLogos(prev => new Set(prev).add(sponsorshipId));
-    
-    // Show success message
-    toast({
-      title: 'Logo Approved',
-      description: 'The logo has been approved. Navigating to campaign approvals...'
-    });
-    
-    // Navigate to CampaignApprovals after a short delay
-    setTimeout(() => {
-      navigate('/admin/approvals');
-    }, 1500);
+    approveMutation.mutate(sponsorshipId);
   };
 
   const handleReject = (sponsorshipId: string) => {
@@ -246,6 +288,11 @@ const LogoReview = () => {
   const renderSponsorshipCard = (sponsorship: Sponsorship) => {
     const isApproved = approvedLogos.has(sponsorship._id);
     
+    // Skip rendering if the logo is approved
+    if (isApproved) {
+      return null;
+    }
+    
     return (
       <Card key={sponsorship._id} className="overflow-hidden">
         <CardHeader>
@@ -253,9 +300,9 @@ const LogoReview = () => {
             <CardTitle className="text-lg">{sponsorship.cause?.title || 'Unnamed Campaign'}</CardTitle>
             <Badge 
               variant="outline" 
-              className={isApproved ? "bg-green-100 text-green-800 w-fit" : "bg-yellow-100 text-yellow-800 w-fit"}
+              className="bg-yellow-100 text-yellow-800 w-fit"
             >
-              {isApproved ? 'Logo Approved' : 'Pending Review'}
+              Pending Review
             </Badge>
           </div>
           <p className="text-sm text-gray-600">by {sponsorship.organizationName}</p>
@@ -339,42 +386,82 @@ const LogoReview = () => {
               <div className="flex gap-2">
                 <Button 
                   onClick={() => handleApprove(sponsorship._id)}
-                  className={`flex-1 flex items-center justify-center gap-1 ${
-                    isApproved 
-                      ? 'bg-green-600 text-white cursor-default' 
-                      : 'bg-green-600 hover:bg-green-700'
-                  }`}
+                  className="flex-1 flex items-center justify-center gap-1 border-green-600 hover:bg-green-700"
                   size="default"
-                  disabled={isApproved}
+                  disabled={approveMutation.isPending || approvingId === sponsorship._id}
                 >
-                  {isApproved ? (
-                    <CheckCircle className="w-4 h-4" />
+                  {approvingId === sponsorship._id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <CheckCircle className="w-4 h-4" />
                   )}
-                  {isApproved ? 'Logo Approved' : 'Approve Logo'}
+                  {approvingId === sponsorship._id ? 'Approving...' : 'Approve Logo'}
                 </Button>
                 <Button 
                   onClick={() => handleReject(sponsorship._id)}
                   variant="destructive"
-                  className="flex-1 flex items-center justify-center gap-1"
+                  className="flex-1 flex items-center justify-center gap-1 bg-white-600 text-red-600 border border-red-600 hover:bg-red-50"
                   size="default"
-                  disabled={rejectMutation.isPending || isApproved}
+                  disabled={rejectMutation.isPending || rejectingId === sponsorship._id}
                 >
-                  {rejectMutation.isPending ? (
+                  {rejectingId === sponsorship._id ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <XCircle className="w-4 h-4" />
+                    <XCircle className="w-4 h-4 " />
                   )}
-                  Reject Logo
+                  {rejectingId === sponsorship._id ? 'Rejecting...' : 'Reject Logo'}
                 </Button>
                 <Button 
                   variant="outline" 
                   size="default"
-                  className="flex items-center justify-center gap-1 min-w-[120px]"
-                  onClick={() => window.open(sponsorship.logoUrl.startsWith('http') 
-                    ? sponsorship.logoUrl 
-                    : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`, '_blank')}
+                  className="flex items-center justify-center gap-1 min-w-[120px] "
+                  onClick={() => {
+                    // Get the full logo URL
+                    const logoUrl = sponsorship.logoUrl.startsWith('http') 
+                      ? sponsorship.logoUrl 
+                      : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`;
+                    
+                    // Create a function to download the image
+                    const downloadLogo = async () => {
+                      try {
+                        // Fetch the image
+                        const response = await fetch(logoUrl);
+                        const blob = await response.blob();
+                        
+                        // Create a temporary link element
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        
+                        // Set the download filename - extract from URL or use default
+                        const filename = sponsorship.logoUrl.split('/').pop() || `${sponsorship.organizationName.replace(/\s+/g, '_')}_logo.png`;
+                        link.download = filename;
+                        
+                        // Append to body, click, and remove
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        // Clean up the object URL
+                        URL.revokeObjectURL(link.href);
+                        
+                        toast({
+                          title: 'Logo Downloaded',
+                          description: `The logo has been downloaded as ${filename}`,
+                          variant: 'default'
+                        });
+                      } catch (error) {
+                        console.error('Error downloading logo:', error);
+                        toast({
+                          title: 'Download Failed',
+                          description: 'There was an error downloading the logo. Please try again.',
+                          variant: 'destructive'
+                        });
+                      }
+                    };
+                    
+                    // Execute the download function
+                    downloadLogo();
+                  }}
                 >
                   <Download className="w-4 h-4" />
                   Download
@@ -391,8 +478,26 @@ const LogoReview = () => {
     <AdminLayout title="Logo Review" subtitle="Review and approve submitted campaign logos">
       <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
         {Array.isArray(sponsorships) && sponsorships.length > 0 ? (
-          sponsorships.map(renderSponsorshipCard)
+          // Filter out approved logos and then render the remaining ones
+          sponsorships
+            .filter(sponsorship => !approvedLogos.has(sponsorship._id))
+            .map(renderSponsorshipCard)
+            .filter(Boolean) // Filter out null values returned by renderSponsorshipCard
+            .length > 0 ? (
+              // If there are sponsorships to display after filtering
+              sponsorships
+                .filter(sponsorship => !approvedLogos.has(sponsorship._id))
+                .map(renderSponsorshipCard)
+            ) : (
+              // If all sponsorships have been approved
+              <div className="col-span-full flex flex-col items-center justify-center py-16 bg-gray-50 rounded-lg">
+                <CheckCircle className="w-12 h-12 text-green-500 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">All Caught Up!</h3>
+                <p className="text-gray-500 text-center">No pending logos to review at the moment.</p>
+              </div>
+            )
         ) : (
+          // If there are no sponsorships at all
           <div className="col-span-full flex flex-col items-center justify-center py-16 bg-gray-50 rounded-lg">
             <CheckCircle className="w-12 h-12 text-green-500 mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">All Caught Up!</h3>

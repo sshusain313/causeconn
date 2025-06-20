@@ -252,14 +252,14 @@ const ClaimsManagement = () => {
                     </div>
                   </div>
                   <div className="flex flex-row lg:flex-col gap-2">
-                    <Button 
+                    {/* <Button 
                       variant="outline" 
                       className="flex-1 flex items-center gap-1"
-                      onClick={() => navigate(`/admin/claims/${claim._id}`)}
+                      onClick={() => navigate(`/admin/claims/${claims._id}`)}
                     >
                       <Eye className="h-4 w-4" />
                       View Details
-                    </Button>
+                    </Button> */}
                     {claim.status === ClaimStatus.PENDING && (
                       <>
                         <Button 

@@ -14,6 +14,7 @@ import {
   testFrontendData,
   testNestedDistributionLocations,
   getDashboardMetrics,
+  testDashboardMetrics,
   endCampaign
 } from '../controllers/sponsorshipController';
 import { authenticateToken } from '../middleware/auth';
@@ -32,12 +33,12 @@ router.get('/user', authenticateToken, getUserSponsorships);
 // Admin routes (require authentication and admin role)
 router.get('/pending', authenticateToken, adminGuard, getPendingSponsorships);
 router.get('/approved', authenticateToken, adminGuard, getApprovedSponsorships);
+router.get('/dashboard-metrics', authenticateToken, adminGuard, getDashboardMetrics);
 router.patch('/:id/approve', authenticateToken, adminGuard, approveSponsorship);
 router.patch('/:id/reject', authenticateToken, adminGuard, rejectSponsorship);
 router.patch('/:id/toggle-online', authenticateToken, adminGuard, toggleSponsorshipOnlineStatus);
 router.patch('/:id/end-campaign', authenticateToken, adminGuard, endCampaign);
 router.get('/:id', authenticateToken, adminGuard, getSponsorshipById);
-router.get('/dashboard-metrics', authenticateToken, adminGuard, getDashboardMetrics);
 
 // Test routes (admin only)
 router.get('/test/model', authenticateToken, adminGuard, testSponsorshipModel);
@@ -45,5 +46,6 @@ router.get('/test/pending', authenticateToken, adminGuard, testPendingSponsorshi
 router.post('/test/create', authenticateToken, adminGuard, testSponsorshipCreation);
 router.post('/test/frontend-data', authenticateToken, adminGuard, testFrontendData);
 router.post('/test/nested-distribution', authenticateToken, adminGuard, testNestedDistributionLocations);
+router.get('/test/dashboard-metrics', testDashboardMetrics); // No auth required for testing
 
 export default router; 

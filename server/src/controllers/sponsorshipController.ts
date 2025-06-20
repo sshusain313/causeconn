@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Sponsorship, { SponsorshipStatus, DistributionType } from '../models/Sponsorship';
 import Cause from '../models/Cause';
+import mongoose from 'mongoose';
 
 export const createSponsorship = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -822,6 +823,9 @@ export const getDashboardMetrics = async (req: Request, res: Response): Promise<
   try {
     console.log('=== getDashboardMetrics START ===');
     
+    // Import Claim model for comprehensive metrics
+    const Claim = mongoose.model('Claim');
+    
     // Get total sponsors (unique users who have created sponsorships)
     const totalSponsors = await Sponsorship.distinct('sponsor').countDocuments();
     console.log('Total unique sponsors:', totalSponsors);
@@ -837,6 +841,10 @@ export const getDashboardMetrics = async (req: Request, res: Response): Promise<
     // Get pending items (sponsorships with pending status)
     const pendingItems = await Sponsorship.countDocuments({ status: SponsorshipStatus.PENDING });
     console.log('Pending items:', pendingItems);
+    
+    // Get total causes
+    const totalCauses = await Cause.countDocuments();
+    console.log('Total causes:', totalCauses);
     
     // Calculate weekly changes
     const oneWeekAgo = new Date();
@@ -859,6 +867,11 @@ export const getDashboardMetrics = async (req: Request, res: Response): Promise<
     ]);
     const raisedThisWeek = raisedThisWeekResult.length > 0 ? raisedThisWeekResult[0].total : 0;
     
+    // Causes this week
+    const causesThisWeek = await Cause.countDocuments({
+      createdAt: { $gte: oneWeekAgo }
+    });
+    
     // Urgent pending items (pending for more than 3 days)
     const threeDaysAgo = new Date();
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
@@ -867,28 +880,85 @@ export const getDashboardMetrics = async (req: Request, res: Response): Promise<
       createdAt: { $lte: threeDaysAgo }
     });
     
-    // Get total causes (we'll need to import the Cause model)
-    const totalCauses = await Cause.countDocuments();
+    // Claims statistics
+    const totalClaims = await Claim.countDocuments();
+    const verifiedClaims = await Claim.countDocuments({ status: 'verified' });
+    const pendingClaims = await Claim.countDocuments({ status: 'pending' });
+    const rejectedClaims = await Claim.countDocuments({ status: 'rejected' });
     
-    // Causes this week
-    const causesThisWeek = await Cause.countDocuments({
+    // Claims this week
+    const claimsThisWeek = await Claim.countDocuments({
       createdAt: { $gte: oneWeekAgo }
     });
+    
+    // Distribution statistics
+    const totalTotesSponsored = await Sponsorship.aggregate([
+      { $match: { status: SponsorshipStatus.APPROVED } },
+      { $group: { _id: null, total: { $sum: '$toteQuantity' } } }
+    ]);
+    const totalTotes = totalTotesSponsored.length > 0 ? totalTotesSponsored[0].total : 0;
+    
+    // Active campaigns (approved and online)
+    const activeCampaigns = await Sponsorship.countDocuments({
+      status: SponsorshipStatus.APPROVED,
+      isOnline: true
+    });
+    
+    // Completed campaigns
+    const completedCampaigns = await Sponsorship.countDocuments({
+      status: SponsorshipStatus.COMPLETED
+    });
+    
+    // Revenue metrics
+    const thisMonth = new Date();
+    thisMonth.setDate(1);
+    thisMonth.setHours(0, 0, 0, 0);
+    
+    const monthlyRevenueResult = await Sponsorship.aggregate([
+      { 
+        $match: { 
+          status: SponsorshipStatus.APPROVED,
+          createdAt: { $gte: thisMonth }
+        } 
+      },
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+    ]);
+    const monthlyRevenue = monthlyRevenueResult.length > 0 ? monthlyRevenueResult[0].total : 0;
+    
+    // Average sponsorship amount
+    const avgSponsorshipResult = await Sponsorship.aggregate([
+      { $match: { status: SponsorshipStatus.APPROVED } },
+      { $group: { _id: null, average: { $avg: '$totalAmount' } } }
+    ]);
+    const avgSponsorshipAmount = avgSponsorshipResult.length > 0 ? avgSponsorshipResult[0].average : 0;
     
     const metrics = {
       totalCauses,
       totalSponsors,
       totalRaised,
       pendingItems,
+      // Claims data
+      totalClaims,
+      verifiedClaims,
+      pendingClaims,
+      rejectedClaims,
+      // Distribution data
+      totalTotes,
+      activeCampaigns,
+      completedCampaigns,
+      // Revenue data
+      monthlyRevenue,
+      avgSponsorshipAmount,
       weeklyStats: {
         causesChange: causesThisWeek,
         sponsorsChange: sponsorsThisWeek,
         raisedChange: raisedThisWeek,
+        claimsChange: claimsThisWeek,
         urgentPendingItems
       }
     };
     
-    console.log('Dashboard metrics calculated:', metrics);
+    console.log('Comprehensive dashboard metrics calculated:', metrics);
     console.log('=== getDashboardMetrics SUCCESS ===');
     
     res.json(metrics);
@@ -970,5 +1040,51 @@ export const endCampaign = async (req: Request, res: Response): Promise<void> =>
       message: 'Error ending campaign', 
       error: error.message 
     });
+  }
+};
+
+export const testDashboardMetrics = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('=== testDashboardMetrics START ===');
+    
+    // Import Claim model for comprehensive metrics
+    const Claim = mongoose.model('Claim');
+    
+    // Get total sponsors (unique users who have created sponsorships)
+    const totalSponsors = await Sponsorship.distinct('sponsor').countDocuments();
+    console.log('Total unique sponsors:', totalSponsors);
+    
+    // Get total raised amount from all approved sponsorships
+    const totalRaisedResult = await Sponsorship.aggregate([
+      { $match: { status: SponsorshipStatus.APPROVED } },
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+    ]);
+    const totalRaised = totalRaisedResult.length > 0 ? totalRaisedResult[0].total : 0;
+    console.log('Total raised:', totalRaised);
+    
+    // Get pending items (sponsorships with pending status)
+    const pendingItems = await Sponsorship.countDocuments({ status: SponsorshipStatus.PENDING });
+    console.log('Pending items:', pendingItems);
+    
+    // Get total causes
+    const totalCauses = await Cause.countDocuments();
+    console.log('Total causes:', totalCauses);
+    
+    const metrics = {
+      totalCauses,
+      totalSponsors,
+      totalRaised,
+      pendingItems,
+      message: 'Test metrics working'
+    };
+    
+    console.log('Test dashboard metrics calculated:', metrics);
+    console.log('=== testDashboardMetrics SUCCESS ===');
+    
+    res.json(metrics);
+  } catch (error) {
+    console.error('=== testDashboardMetrics ERROR ===');
+    console.error('Error calculating test dashboard metrics:', error);
+    res.status(500).json({ message: 'Error calculating test dashboard metrics', error: error.message });
   }
 }; 
