@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
+import { generateAndSendInvoice } from '../services/invoiceService';
 
 // Initialize Razorpay instance
 const razorpay = new Razorpay({
@@ -195,11 +196,38 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
       currency: payment.currency
     });
 
-    // Here you would typically:
-    // 1. Update your database with payment status
-    // 2. Update sponsorship status to 'paid' or 'completed'
-    // 3. Send confirmation emails
-    // 4. Update cause amounts if needed
+    // Fetch order details to get sponsor info from notes
+    let order;
+    try {
+      order = await razorpay.orders.fetch(payment.order_id);
+    } catch (err) {
+      order = null;
+    }
+    const notes = order?.notes || {};
+
+    // Only send invoice if payment is captured
+    if (payment.status === 'captured') {
+      try {
+        await generateAndSendInvoice(
+          notes.email || payment.email || '',
+          {
+            paymentId: payment.id,
+            orderId: payment.order_id,
+            amount: payment.amount,
+            currency: payment.currency,
+            organizationName: notes.organizationName || '',
+            contactName: notes.contactName || '',
+            phone: notes.phone || '',
+            causeTitle: notes.causeTitle || '',
+            toteQuantity: Number(notes.toteQuantity) || 0,
+            unitPrice: Number(notes.unitPrice) || 0,
+          }
+        );
+        console.log('Invoice generated and sent to sponsor.');
+      } catch (err) {
+        console.error('Failed to generate/send invoice:', err);
+      }
+    }
 
     res.json({
       success: true,
@@ -210,8 +238,7 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
         status: payment.status,
         amount: payment.amount,
         currency: payment.currency,
-        method: payment.method,
-        captured_at: payment.captured_at
+        method: payment.method
       }
     });
 
@@ -281,8 +308,7 @@ export const getPaymentStatus = async (req: Request, res: Response): Promise<voi
         status: successfulPayment.status,
         amount: successfulPayment.amount,
         currency: successfulPayment.currency,
-        method: successfulPayment.method,
-        captured_at: successfulPayment.captured_at
+        method: successfulPayment.method
       } : null,
       totalPayments: payments.items.length
     });

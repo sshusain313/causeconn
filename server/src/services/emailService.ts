@@ -281,4 +281,94 @@ export const sendCampaignCompletionEmail = async (
     console.error(`ERROR SENDING CAMPAIGN COMPLETION EMAIL to ${email}:`, error);
     throw error;
   }
+};
+
+/**
+ * Send an invoice email to the sponsor with PDF attachment
+ * @param email Sponsor's email address
+ * @param data Invoice data including organization name, cause title, invoice number, etc.
+ * @param pdfPath Path to the generated PDF invoice
+ */
+export const sendInvoiceEmail = async (
+  email: string, 
+  data: {
+    organizationName: string;
+    causeTitle: string;
+    invoiceNumber: string;
+    total: number;
+    currency: string;
+  },
+  pdfPath: string
+) => {
+  try {
+    // Check for duplicate emails
+    if (preventDuplicateEmails(email)) {
+      return true;
+    }
+    
+    console.log(`SENDING INVOICE EMAIL: Preparing to send invoice to ${email}`);
+    
+    // Format currency
+    const formattedAmount = new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: data.currency === 'INR' ? 'INR' : 'USD'
+    }).format(data.total);
+    
+    const mailOptions = {
+      from: '"CauseConnect" <noreply@causeconnect.org>',
+      to: email,
+      subject: `Invoice #${data.invoiceNumber} - ${data.causeTitle} Campaign`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Payment Confirmation & Invoice</h2>
+          <p>Dear ${data.organizationName},</p>
+          
+          <p>Thank you for your generous sponsorship of the <strong>${data.causeTitle}</strong> campaign!</p>
+          
+          <div style="background-color: #f4f4f4; padding: 20px; margin: 20px 0; border-radius: 5px;">
+            <p style="margin-top: 0;"><strong>Payment Summary:</strong></p>
+            <ul>
+              <li>Invoice Number: <strong>${data.invoiceNumber}</strong></li>
+              <li>Campaign: <strong>${data.causeTitle}</strong></li>
+              <li>Total Amount: <strong>${formattedAmount}</strong></li>
+              <li>Payment Status: <strong style="color: #10b981;">Paid</strong></li>
+            </ul>
+          </div>
+          
+          <p>Your payment has been successfully processed and your sponsorship is now active. Your logo will be featured on the campaign page and printed on the tote bags as specified.</p>
+          
+          <p>Please find your detailed invoice attached to this email for your records.</p>
+          
+          <div style="background-color: #e0f2fe; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #0284c7;">
+            <p style="margin-top: 0;"><strong>What happens next?</strong></p>
+            <ul>
+              <li>Your campaign will be reviewed by our team</li>
+              <li>Once approved, your logo will be added to the campaign page</li>
+              <li>You'll receive updates on campaign progress and distribution</li>
+              <li>You can track your campaign performance through your dashboard</li>
+            </ul>
+          </div>
+          
+          <p>If you have any questions about your invoice or sponsorship, please don't hesitate to contact our support team.</p>
+          
+          <p>Thank you again for making a difference!</p>
+          
+          <p>Best regards,<br>The CauseConnect Team</p>
+        </div>
+      `,
+      attachments: [
+        {
+          filename: `invoice-${data.invoiceNumber}.pdf`,
+          path: pdfPath
+        }
+      ]
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`INVOICE EMAIL SENT SUCCESSFULLY: MessageID ${info.messageId} to ${email}`);
+    return true;
+  } catch (error) {
+    console.error(`ERROR SENDING INVOICE EMAIL to ${email}:`, error);
+    throw error;
+  }
 }; 
