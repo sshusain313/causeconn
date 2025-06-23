@@ -2,7 +2,7 @@
   * Imports the Express framework for creating web server routes and middleware.
   * @module express
   */
-  [import express from 'express';
+import express from 'express';
 import multer from 'multer';
 import { createClaim, getRecentClaims, getClaimById, updateClaimStatus, getClaimsStats, checkExistingClaim, getClaimerDashboardData, getVerifiedClaimsForSponsoredCauses } from '../controllers/claimController';
 import { authenticateToken } from '../middleware/auth';

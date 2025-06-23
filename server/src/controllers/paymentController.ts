@@ -213,7 +213,7 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
           {
             paymentId: payment.id,
             orderId: payment.order_id,
-            amount: payment.amount,
+            amount: Number(payment.amount),
             currency: payment.currency,
             organizationName: notes.organizationName || '',
             contactName: notes.contactName || '',

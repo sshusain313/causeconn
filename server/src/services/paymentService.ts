@@ -1,5 +1,4 @@
 import axios from 'axios';
-import config from '@/config';
 
 export interface RazorpayOrder {
   id: string;
@@ -24,7 +23,7 @@ export class PaymentService {
   private baseUrl: string;
 
   private constructor() {
-    this.baseUrl = config.apiUrl;
+    this.baseUrl = process.env.API_URL || 'http://localhost:3000';
   }
 
   public static getInstance(): PaymentService {

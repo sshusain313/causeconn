@@ -1,4 +1,5 @@
 import express from 'express';
+import { createRouter } from '../utils/routerHelper';
 import {
   getSettings,
   createCountry,
@@ -20,7 +21,7 @@ import {
   updatePointStatus
 } from '../controllers/distributionController';
 
-const router = express.Router();
+const router = createRouter();
 
 // Settings
 router.get('/settings', getSettings);
