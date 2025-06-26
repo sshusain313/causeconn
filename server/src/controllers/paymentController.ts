@@ -3,11 +3,22 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { generateAndSendInvoice } from '../services/invoiceService';
 
-// Initialize Razorpay instance
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+// Initialize Razorpay instance lazily
+let razorpay: Razorpay | null = null;
+
+const getRazorpayInstance = (): Razorpay => {
+  if (!razorpay) {
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      throw new Error('Razorpay credentials not configured. Please check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.');
+    }
+    
+    razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+  }
+  return razorpay;
+};
 
 interface CreateOrderRequest {
   amount: number;
@@ -35,17 +46,33 @@ export const testPaymentService = async (req: Request, res: Response): Promise<v
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
       res.status(500).json({ 
         message: 'Razorpay credentials not configured',
-        error: 'Missing RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET environment variables'
+        error: 'Missing RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET environment variables',
+        hasKeyId: !!process.env.RAZORPAY_KEY_ID,
+        hasKeySecret: !!process.env.RAZORPAY_KEY_SECRET
       });
       return;
     }
 
-    res.json({
-      message: 'Payment service is working',
-      razorpayConfigured: true,
-      keyId: process.env.RAZORPAY_KEY_ID.substring(0, 10) + '...',
-      timestamp: new Date().toISOString()
-    });
+    // Test Razorpay instance initialization
+    try {
+      const razorpayInstance = getRazorpayInstance();
+      console.log('Razorpay instance initialized successfully');
+      
+      res.json({
+        message: 'Payment service is working',
+        razorpayConfigured: true,
+        keyId: process.env.RAZORPAY_KEY_ID.substring(0, 10) + '...',
+        timestamp: new Date().toISOString()
+      });
+    } catch (razorpayError) {
+      console.error('Razorpay initialization error:', razorpayError);
+      res.status(500).json({ 
+        message: 'Razorpay initialization failed',
+        error: razorpayError instanceof Error ? razorpayError.message : 'Unknown Razorpay error',
+        hasKeyId: !!process.env.RAZORPAY_KEY_ID,
+        hasKeySecret: !!process.env.RAZORPAY_KEY_SECRET
+      });
+    }
   } catch (error) {
     console.error('Payment service test error:', error);
     res.status(500).json({ 
@@ -106,7 +133,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     console.log('Creating Razorpay order with options:', orderOptions);
 
     // Create order with Razorpay
-    const order = await razorpay.orders.create(orderOptions);
+    const order = await getRazorpayInstance().orders.create(orderOptions);
 
     console.log('Razorpay order created successfully:', {
       id: order.id,
@@ -186,7 +213,7 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
     console.log('Payment signature verified successfully');
 
     // Get payment details from Razorpay
-    const payment = await razorpay.payments.fetch(razorpay_payment_id);
+    const payment = await getRazorpayInstance().payments.fetch(razorpay_payment_id);
 
     console.log('Payment details retrieved:', {
       id: payment.id,
@@ -199,7 +226,7 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
     // Fetch order details to get sponsor info from notes
     let order;
     try {
-      order = await razorpay.orders.fetch(payment.order_id);
+      order = await getRazorpayInstance().orders.fetch(payment.order_id);
     } catch (err) {
       order = null;
     }
@@ -276,7 +303,7 @@ export const getPaymentStatus = async (req: Request, res: Response): Promise<voi
     }
 
     // Get order details from Razorpay
-    const order = await razorpay.orders.fetch(orderId);
+    const order = await getRazorpayInstance().orders.fetch(orderId);
     
     console.log('Order details retrieved:', {
       id: order.id,
@@ -287,7 +314,7 @@ export const getPaymentStatus = async (req: Request, res: Response): Promise<voi
     });
 
     // Get payments for this order
-    const payments = await razorpay.orders.fetchPayments(orderId);
+    const payments = await getRazorpayInstance().orders.fetchPayments(orderId);
 
     console.log('Payments for order:', payments.items.length);
 
