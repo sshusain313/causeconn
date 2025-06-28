@@ -4,7 +4,7 @@ import { Country, City, DistributionCategory, DistributionPoint, DistributionSet
 import authAxios from '@/utils/authAxios';
 
 // const BASE_URL = '/api/admin/distribution';
-const BASE_URL = '/admin/distribution';
+const BASE_URL = '/api/admin/distribution';
 
 export const fetchDistributionSettings = async (): Promise<DistributionSettings> => {
   const { data } = await authAxios.get(`${BASE_URL}/settings`);
