@@ -21,6 +21,9 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
+import authAxios from '@/utils/authAxios';
+
+
 // Interface for sponsorship data
 interface Sponsorship {
   _id: string;
@@ -54,11 +57,11 @@ const LogoReview = () => {
   const [approvedLogos, setApprovedLogos] = useState<Set<string>>(new Set());
 
   // Create axios instance with auth headers
-  const authAxios = axios.create({
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  // const authAxios = axios.create({
+  //   headers: {
+  //     Authorization: `Bearer ${token}`
+  //   }
+  // });
 
   // Fetch pending sponsorships
   const { data: sponsorships, isLoading, error } = useQuery<Sponsorship[]>({
