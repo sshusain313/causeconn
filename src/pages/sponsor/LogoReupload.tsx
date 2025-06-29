@@ -14,7 +14,7 @@ const LogoReuploadPage = () => {
   const { sponsorshipId } = useParams<{ sponsorshipId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [sponsorship, setSponsorship] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -84,12 +84,10 @@ const LogoReuploadPage = () => {
     setError(null);
 
     try {
-      // Create form data for file upload
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      formData.append('logo', selectedFile); // Correct field name
 
-      // Upload the file
-      const uploadResponse = await authAxios.post('/api/upload', formData, {
+      const uploadResponse = await authAxios.post('/api/upload/logo', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -97,7 +95,6 @@ const LogoReuploadPage = () => {
 
       const logoUrl = uploadResponse.data.url;
 
-      // Update the sponsorship with the new logo URL
       await authAxios.patch(`/api/sponsorships/${sponsorshipId}/reupload`, {
         logoUrl
       });
@@ -120,6 +117,7 @@ const LogoReuploadPage = () => {
       setIsUploading(false);
     }
   };
+
 
   // Loading state
   if (isLoading) {
@@ -195,12 +193,12 @@ const LogoReuploadPage = () => {
             <div>
               <h3 className="text-sm font-medium mb-2">Current Logo (Rejected)</h3>
               <div className="bg-gray-50 border rounded-md p-4 flex justify-center">
-                <img 
-                  src={sponsorship.logoUrl.startsWith('http') 
-                    ? sponsorship.logoUrl 
+                <img
+                  src={sponsorship.logoUrl.startsWith('http')
+                    ? sponsorship.logoUrl
                     : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`
-                  } 
-                  alt="Current Logo" 
+                  }
+                  alt="Current Logo"
                   className="max-h-40 object-contain"
                 />
               </div>
@@ -224,16 +222,16 @@ const LogoReuploadPage = () => {
                 onChange={handleFileChange}
                 disabled={isUploading}
               />
-              
+
               {previewUrl ? (
                 <div className="mb-4 flex flex-col items-center">
-                  <img 
-                    src={previewUrl} 
-                    alt="Logo Preview" 
-                    className="max-h-40 object-contain mb-4" 
+                  <img
+                    src={previewUrl}
+                    alt="Logo Preview"
+                    className="max-h-40 object-contain mb-4"
                   />
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => {
                       setSelectedFile(null);
                       setPreviewUrl(null);
@@ -252,8 +250,8 @@ const LogoReuploadPage = () => {
                   <p className="text-xs text-gray-400">
                     SVG, PNG, or JPG (max. 5MB)
                   </p>
-                  <label 
-                    htmlFor="logo-upload" 
+                  <label
+                    htmlFor="logo-upload"
                     className="mt-4 cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                   >
                     Select File
