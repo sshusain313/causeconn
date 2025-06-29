@@ -7,6 +7,9 @@ import { useToast } from '@/components/ui/use-toast';
 import { Loader2, Upload, CheckCircle, AlertCircle } from 'lucide-react';
 import config from '@/config';
 
+import authAxios from '@/utils/authAxios';
+
+
 const LogoReuploadPage = () => {
   const { sponsorshipId } = useParams<{ sponsorshipId: string }>();
   const navigate = useNavigate();
@@ -30,7 +33,7 @@ const LogoReuploadPage = () => {
       }
 
       try {
-        const response = await axios.get(`/api/sponsorships/${sponsorshipId}`);
+        const response = await authAxios.get(`/api/sponsorships/${sponsorshipId}`);
         setSponsorship(response.data);
       } catch (err) {
         console.error('Error fetching sponsorship:', err);
@@ -86,7 +89,7 @@ const LogoReuploadPage = () => {
       formData.append('file', selectedFile);
 
       // Upload the file
-      const uploadResponse = await axios.post('/api/upload', formData, {
+      const uploadResponse = await authAxios.post('/api/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -95,7 +98,7 @@ const LogoReuploadPage = () => {
       const logoUrl = uploadResponse.data.url;
 
       // Update the sponsorship with the new logo URL
-      await axios.patch(`/api/sponsorships/${sponsorshipId}/reupload`, {
+      await authAxios.patch(`/api/sponsorships/${sponsorshipId}/reupload`, {
         logoUrl
       });
 
