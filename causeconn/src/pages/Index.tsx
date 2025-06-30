@@ -161,7 +161,7 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Thoughtful Partnerships for Positive Change
+                Thoughtful Partnerships for Negative Change
               </h1>
               <p className="text-xl text-gray-700 mb-8">
                 Connect your brand with causes that align with your values. 
