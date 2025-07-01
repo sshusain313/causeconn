@@ -171,7 +171,7 @@ const Index = () => {
                 <Button 
                   onClick={() => navigate('/causes')} 
                   size="lg"
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-green-600 hover:bg-green-700 text-white"
                 >
                   Browse Causes
                 </Button>
