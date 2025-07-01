@@ -5,9 +5,11 @@ import NumberInputWithSlider from '@/components/ui/number-input-with-slider';
 interface ToteQuantityStepProps {
   formData: {
     toteQuantity: number;
+    unitPrice?: number;
   };
   updateFormData: (data: Partial<{
     toteQuantity: number;
+    unitPrice?: number;
   }>) => void;
   validationError: string | null;
 }
@@ -22,7 +24,8 @@ const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQua
     return 10; // ₹10 per tote for 50-499 totes (default)
   };
 
-  const unitPrice = getUnitPrice(formData.toteQuantity);
+  // Use stored unit price if available, otherwise calculate it
+  const unitPrice = formData.unitPrice || getUnitPrice(formData.toteQuantity);
   const totalPrice = formData.toteQuantity * unitPrice;
 
   const impactStatistics = {
@@ -32,7 +35,12 @@ const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQua
   };
 
   const handleQuantityChange = (newQuantity: number) => {
-    updateFormData({ toteQuantity: newQuantity });
+    const newUnitPrice = getUnitPrice(newQuantity);
+    console.log(`ToteQuantityStep: Quantity changed to ${newQuantity}, unit price calculated as ₹${newUnitPrice}`);
+    updateFormData({ 
+      toteQuantity: newQuantity,
+      unitPrice: newUnitPrice
+    });
   };
 
   return (

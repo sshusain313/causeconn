@@ -10,6 +10,7 @@ import claimRoutes from './routes/claims';
 import uploadRoutes from './routes/uploadRoutes';
 import otpRoutes from './routes/otpRoutes';
 import paymentRoutes from './routes/paymentRoutes';
+import statsRoutes from './routes/stats';
 import { authGuard, adminGuard } from './middleware/authGuard';
 import configureStaticFiles from './middleware/staticFiles';
 import copyUploadsToPublic from './utils/copyUploadsToPublic';
@@ -118,6 +119,7 @@ app.use('/api/claims', claimRoutes as any);
 app.use('/api/upload', uploadRoutes as any);
 app.use('/api/otp', otpRoutes as any);
 app.use('/api/payments', paymentRoutes as any);
+app.use('/api/stats', statsRoutes as any);
 app.use('/api/admin/distribution', distributionRoutes);
 
 // Protected route example

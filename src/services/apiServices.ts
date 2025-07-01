@@ -91,14 +91,18 @@ const mockCauses: Cause[] = [
 // Real API calls using the config file for the API URL
 export const fetchStats = async () => {
   try {
+    console.log('Fetching stats from:', `${config.apiUrl}/stats`);
     const response = await fetch(`${config.apiUrl}/stats`);
     if (!response.ok) {
-      throw new Error('Failed to fetch stats');
+      throw new Error(`Failed to fetch stats: ${response.status} ${response.statusText}`);
     }
-    return await response.json();
+    const data = await response.json();
+    console.log('Stats received:', data);
+    return data;
   } catch (error) {
     console.error('Error fetching stats:', error);
     // Fallback to mock data if API call fails
+    console.log('Falling back to mock stats data');
     return mockStats;
   }
 };

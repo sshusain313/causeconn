@@ -32,6 +32,7 @@ const OnboardingWizard = ({
     selectedCause: initialCauseId || '',
     causeTitle: '',
     toteQuantity: 50,
+    unitPrice: 10, // Default unit price for 50 totes
     distributionType: 'online' as 'online' | 'physical', // Default to online distribution
     numberOfTotes: 50,
     logoUrl: '',
@@ -73,11 +74,12 @@ const OnboardingWizard = ({
   });
 
   const handleFormUpdate = (data: Partial<any>) => {
-    // If we're updating toteQuantity directly from ToteQuantityStep, just update it
+    // If we're updating toteQuantity directly from ToteQuantityStep, update both quantity and unit price
     if (data.toteQuantity !== undefined && !data.distributionPoints && !data.distributionType) {
       setFormData(prev => ({
         ...prev,
-        toteQuantity: data.toteQuantity
+        toteQuantity: data.toteQuantity,
+        unitPrice: data.unitPrice || prev.unitPrice
       }));
       return;
     }
@@ -299,9 +301,21 @@ const OnboardingWizard = ({
 
   // Calculate the unit price and total amount
   const calculatePricing = () => {
-    const unitPrice = 10; // $10 per tote
+    // Calculate unit price based on quantity tiers (same logic as ToteQuantityStep)
+    const getUnitPrice = (quantity: number): number => {
+      if (quantity >= 7000) return 5; // ₹5 per tote for 7000+ totes
+      if (quantity >= 5000) return 7; // ₹7 per tote for 5000-6999 totes
+      if (quantity >= 1000) return 8; // ₹8 per tote for 1000-4999 totes
+      if (quantity >= 500) return 9;  // ₹9 per tote for 500-999 totes
+      return 10; // ₹10 per tote for 50-499 totes (default)
+    };
+    
     const toteQuantity = calculateTotalTotes();
+    // Use stored unit price if available, otherwise calculate it
+    const unitPrice = formData.unitPrice || getUnitPrice(toteQuantity);
     const totalAmount = unitPrice * toteQuantity;
+    
+    console.log(`OnboardingWizard calculatePricing: Quantity=${toteQuantity}, UnitPrice=₹${unitPrice}, TotalAmount=₹${totalAmount}`);
     
     return {
       unitPrice,
@@ -420,7 +434,9 @@ const OnboardingWizard = ({
             ...formData,
             // Ensure toteQuantity is synced with distribution points for physical distribution
             toteQuantity: formData.distributionType === 'physical' ? 
-              calculateTotalTotes() : formData.toteQuantity
+              calculateTotalTotes() : formData.toteQuantity,
+            // Include the current unit price
+            unitPrice: formData.unitPrice
           }}
           updateFormData={handleFormUpdate}
           validationError={validationError}

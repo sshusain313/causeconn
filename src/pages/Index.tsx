@@ -171,7 +171,7 @@ const Index = () => {
                 <Button 
                   onClick={() => navigate('/causes')} 
                   size="lg"
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-green-600 hover:bg-green-700 text-white"
                 >
                   Browse Causes
                 </Button>
@@ -290,6 +290,15 @@ const Index = () => {
                         variant="outline"
                       >
                         See Details
+                      </Button>
+                    )}
+                    {/* Add Sponsor button if target not achieved */}
+                    {!((cause.currentAmount || 0) >= cause.targetAmount) && (
+                      <Button 
+                        onClick={() => navigate(`/sponsor/new?causeId=${cause._id}`)} 
+                        className="w-full bg-black text-white mt-2"
+                      >
+                        Sponsor This Cause
                       </Button>
                     )}
                   </CardContent>
