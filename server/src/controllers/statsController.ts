@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import { Sponsorship, SponsorshipStatus } from '../models/Sponsorship';
-import { Cause } from '../models/Cause';
+import Sponsorship, { SponsorshipStatus } from '../models/Sponsorship';
+import Cause from '../models/Cause';
 
 // Get comprehensive statistics for public display
 export const getPublicStats = async (req: Request, res: Response): Promise<void> => {
