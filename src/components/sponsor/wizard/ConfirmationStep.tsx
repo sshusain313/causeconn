@@ -49,8 +49,10 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
   const selectedCause = formData.causeTitle || causeData?.title || causeData?.name || 'Selected Cause';
   
   // Use the pricing information from the form data
-  const unitPrice = formData.unitPrice || 10; // Default to $10 per tote if not provided
+  const unitPrice = formData.unitPrice || 10; // Default to ₹10 per tote if not provided
   const totalCost = formData.totalAmount || (formData.toteQuantity * unitPrice);
+  
+  console.log(`ConfirmationStep: UnitPrice=₹${unitPrice}, TotalCost=₹${totalCost}, ToteQuantity=${formData.toteQuantity}`);
   
   // Mock QR code value
   const qrValue = `https://changebag.org/claim/${formData.selectedCause}?sponsor=${encodeURIComponent(formData.organizationName)}`;
@@ -294,71 +296,73 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
             </CardContent>
           </Card>
           
-          {/* Distribution Information Card */}
-          <Card>
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-3">Distribution Information</h3>
-              <ul className="space-y-3">
-                {/* Distribution Date */}
-                {/* Show different date fields based on distribution type */}
-                {formData.distributionType === 'physical' ? (
-                  <>
-                    <li className="flex justify-between">
-                      <span className="text-gray-600">Start Date:</span>
-                      <span className="font-medium">
-                        {formData.distributionStartDate 
-                          ? format(new Date(formData.distributionStartDate), "MMMM d, yyyy") 
-                          : "Not specified"}
-                      </span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span className="text-gray-600">End Date:</span>
-                      <span className="font-medium">
-                        {formData.distributionEndDate 
-                          ? format(new Date(formData.distributionEndDate), "MMMM d, yyyy") 
-                          : "Not specified"}
-                      </span>
-                    </li>
-                  </>
-                ) : (
-                  <li className="flex justify-between">
-                    <span className="text-gray-600">Distribution Date:</span>
-                    <span className="font-medium">
-                      {formData.distributionDate 
-                        ? format(new Date(formData.distributionDate), "MMMM d, yyyy") 
-                        : "Not specified"}
-                    </span>
-                  </li>
-                )}
-                
-                {/* Distribution Points */}
-                <li>
-                  <span className="text-gray-600 block">Distribution Points:</span>
-                  {formData.distributionPoints && formData.distributionPoints.length > 0 ? (
-                    <ul className="list-disc pl-5 mt-1">
-                      {formData.distributionPoints.map((point, i) => (
-                        <li key={i} className="font-medium text-sm">{point}</li>
-                      ))}
-                    </ul>
+          {/* Distribution Information Card - Only show for physical distribution */}
+          {formData.distributionType !== 'online' && (
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-3">Distribution Information</h3>
+                <ul className="space-y-3">
+                  {/* Distribution Date */}
+                  {/* Show different date fields based on distribution type */}
+                  {formData.distributionType === 'physical' ? (
+                    <>
+                      <li className="flex justify-between">
+                        <span className="text-gray-600">Start Date:</span>
+                        <span className="font-medium">
+                          {formData.distributionStartDate 
+                            ? format(new Date(formData.distributionStartDate), "MMMM d, yyyy") 
+                            : "Not specified"}
+                        </span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span className="text-gray-600">End Date:</span>
+                        <span className="font-medium">
+                          {formData.distributionEndDate 
+                            ? format(new Date(formData.distributionEndDate), "MMMM d, yyyy") 
+                            : "Not specified"}
+                        </span>
+                      </li>
+                    </>
                   ) : (
-                    <span className="font-medium">None specified</span>
+                    <li className="flex justify-between">
+                      <span className="text-gray-600">Distribution Date:</span>
+                      <span className="font-medium">
+                        {formData.distributionDate 
+                          ? format(new Date(formData.distributionDate), "MMMM d, yyyy") 
+                          : "Not specified"}
+                      </span>
+                    </li>
                   )}
-                </li>
-                
-                {/* Demographics */}
-                <li>
-                  <span className="text-gray-600 block">Target Demographics:</span>
-                  <span className="font-medium">{formatDemographics()}</span>
                   
-                  {formData.demographics?.other && (
-                    <div className="mt-1 text-sm italic">
-                      "{formData.demographics.other}"
-                    </div>
-                  )}
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+                  {/* Distribution Points */}
+                  <li>
+                    <span className="text-gray-600 block">Distribution Points:</span>
+                    {formData.distributionPoints && formData.distributionPoints.length > 0 ? (
+                      <ul className="list-disc pl-5 mt-1">
+                        {formData.distributionPoints.map((point, i) => (
+                          <li key={i} className="font-medium text-sm">{point}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span className="font-medium">None specified</span>
+                    )}
+                  </li>
+                  
+                  {/* Demographics */}
+                  <li>
+                    <span className="text-gray-600 block">Target Demographics:</span>
+                    <span className="font-medium">{formatDemographics()}</span>
+                    
+                    {formData.demographics?.other && (
+                      <div className="mt-1 text-sm italic">
+                        "{formData.demographics.other}"
+                      </div>
+                    )}
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Payment Section */}
           <Card>
