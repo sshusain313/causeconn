@@ -24,8 +24,8 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } fro
 import { fetchStats, fetchStories } from '@/services/apiServices';
 import { Story } from '@/models/Story';
 
-// Sample data for the growth chart
-const growthData = [
+// Sample data for the growth chart (fallback if API data is not available)
+const fallbackGrowthData = [
   { month: 'Jan', sponsors: 10, impact: 100 },
   { month: 'Feb', sponsors: 15, impact: 200 },
   { month: 'Mar', sponsors: 25, impact: 320 },
@@ -44,6 +44,9 @@ const WhySponsor = () => {
     queryKey: ['stories'],
     queryFn: fetchStories
   });
+
+  // Use real growth data from API or fallback to sample data
+  const growthData = stats?.growthData || fallbackGrowthData;
 
   // Animation variants
   const fadeIn = {

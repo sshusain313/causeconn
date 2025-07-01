@@ -292,6 +292,15 @@ const Index = () => {
                         See Details
                       </Button>
                     )}
+                    {/* Add Sponsor button if target not achieved */}
+                    {!((cause.currentAmount || 0) >= cause.targetAmount) && (
+                      <Button 
+                        onClick={() => navigate(`/sponsor/new?causeId=${cause._id}`)} 
+                        className="w-full bg-black text-white mt-2"
+                      >
+                        Sponsor This Cause
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               ))
