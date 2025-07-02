@@ -22,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
 import authAxios from '@/utils/authAxios';
+import { getImageUrl, handleImageError } from '@/utils/imageUtils';
 
 
 // Interface for sponsorship data
@@ -233,13 +234,24 @@ const LogoReview = () => {
       const toteBagY = (canvas.height - toteBag.height * toteBagScale) / 2;
       ctx.drawImage(toteBag, toteBagX, toteBagY, toteBag.width * toteBagScale, toteBag.height * toteBagScale);
 
-      // Load and draw logo
+      // Load and draw logo using proper URL construction
       const logo = new Image();
-      logo.src = logoUrl.startsWith('http') 
-        ? logoUrl 
-        : `${config.uploadsUrl}${logoUrl.replace('/uploads', '')}`;
+      const constructedUrl = getImageUrl(logoUrl);
+      
+      // Debug logging
+      console.log('Logo URL Debug:', {
+        original: logoUrl,
+        constructed: constructedUrl,
+        config: {
+          uploadsUrl: config.uploadsUrl,
+          apiUrl: config.apiUrl
+        }
+      });
+      
+      logo.src = constructedUrl;
 
       logo.onload = () => {
+        console.log('Logo loaded successfully:', constructedUrl);
         ctx.save();
         
         // Apply transformations
@@ -255,6 +267,40 @@ const LogoReview = () => {
 
       logo.onerror = (error) => {
         console.error('Error loading logo for preview:', error);
+        console.error('Failed logo URL details:', {
+          original: logoUrl,
+          constructed: constructedUrl,
+          config: {
+            uploadsUrl: config.uploadsUrl,
+            apiUrl: config.apiUrl
+          }
+        });
+        
+        // Try alternative URL construction as fallback
+        const fallbackUrl = logoUrl.startsWith('http') 
+          ? logoUrl 
+          : `${config.apiUrl}/uploads/${logoUrl.split('/').pop()}`;
+        
+        console.log('Trying fallback URL:', fallbackUrl);
+        
+        // Create a new image with fallback URL
+        const fallbackLogo = new Image();
+        fallbackLogo.src = fallbackUrl;
+        
+        fallbackLogo.onload = () => {
+          console.log('Fallback logo loaded successfully:', fallbackUrl);
+          ctx.save();
+          ctx.translate(position.x, position.y);
+          ctx.rotate(position.angle * Math.PI / 180);
+          ctx.scale(position.scale, position.scale);
+          ctx.drawImage(fallbackLogo, -fallbackLogo.width / 2, -fallbackLogo.height / 2, fallbackLogo.width, fallbackLogo.height);
+          ctx.restore();
+        };
+        
+        fallbackLogo.onerror = (fallbackError) => {
+          console.error('Fallback logo also failed:', fallbackError);
+          console.error('Fallback URL:', fallbackUrl);
+        };
       };
     };
 
@@ -324,15 +370,15 @@ const LogoReview = () => {
                 <p className="text-sm font-medium text-gray-500">Original Logo</p>
                 <div className="relative aspect-square bg-gray-50 rounded-lg border overflow-hidden">
                   <img 
-                    src={sponsorship.logoUrl.startsWith('http') 
-                      ? sponsorship.logoUrl 
-                      : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`
-                    } 
+                    src={getImageUrl(sponsorship.logoUrl)}
                     alt="Campaign Logo" 
                     className="w-full h-full object-contain p-4"
                     onError={(e) => {
-                      console.error('Image failed to load:', sponsorship.logoUrl);
-                      e.currentTarget.src = '/placeholder.svg';
+                      console.error('Image failed to load:', {
+                        original: sponsorship.logoUrl,
+                        constructed: getImageUrl(sponsorship.logoUrl)
+                      });
+                      handleImageError(e, '/placeholder.svg');
                     }}
                   />
                 </div>
@@ -419,16 +465,21 @@ const LogoReview = () => {
                   size="default"
                   className="flex items-center justify-center gap-1 min-w-[120px] "
                   onClick={() => {
-                    // Get the full logo URL
-                    const logoUrl = sponsorship.logoUrl.startsWith('http') 
-                      ? sponsorship.logoUrl 
-                      : `${config.uploadsUrl}${sponsorship.logoUrl.replace('/uploads', '')}`;
+                    // Get the full logo URL using proper construction
+                    const logoUrl = getImageUrl(sponsorship.logoUrl);
                     
                     // Create a function to download the image
                     const downloadLogo = async () => {
                       try {
+                        console.log('Downloading logo from:', logoUrl);
+                        
                         // Fetch the image
                         const response = await fetch(logoUrl);
+                        
+                        if (!response.ok) {
+                          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
                         const blob = await response.blob();
                         
                         // Create a temporary link element
@@ -454,6 +505,7 @@ const LogoReview = () => {
                         });
                       } catch (error) {
                         console.error('Error downloading logo:', error);
+                        console.error('Download URL:', logoUrl);
                         toast({
                           title: 'Download Failed',
                           description: 'There was an error downloading the logo. Please try again.',
