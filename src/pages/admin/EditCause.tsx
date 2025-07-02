@@ -171,6 +171,20 @@ const EditCause = () => {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="imageUrl">Image URL</Label>
+              <Input
+                id="imageUrl"
+                type="url"
+                value={cause.imageUrl || ''}
+                onChange={(e) => handleChange('imageUrl', e.target.value)}
+                placeholder="https://example.com/image.jpg"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Enter a direct URL to an image for this cause
+              </p>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
