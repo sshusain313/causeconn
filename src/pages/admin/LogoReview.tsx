@@ -300,6 +300,28 @@ const LogoReview = () => {
         fallbackLogo.onerror = (fallbackError) => {
           console.error('Fallback logo also failed:', fallbackError);
           console.error('Fallback URL:', fallbackUrl);
+          
+          // Draw a placeholder text indicating missing logo
+          ctx.save();
+          ctx.translate(position.x, position.y);
+          ctx.rotate(position.angle * Math.PI / 180);
+          ctx.scale(position.scale, position.scale);
+          
+          // Draw a placeholder rectangle
+          ctx.fillStyle = '#f3f4f6';
+          ctx.fillRect(-50, -25, 100, 50);
+          ctx.strokeStyle = '#d1d5db';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(-50, -25, 100, 50);
+          
+          // Draw text
+          ctx.fillStyle = '#6b7280';
+          ctx.font = '12px Arial';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('Logo Missing', 0, 0);
+          
+          ctx.restore();
         };
       };
     };
@@ -378,7 +400,39 @@ const LogoReview = () => {
                         original: sponsorship.logoUrl,
                         constructed: getImageUrl(sponsorship.logoUrl)
                       });
-                      handleImageError(e, '/placeholder.svg');
+                      
+                      // Show a placeholder with missing logo message
+                      const img = e.currentTarget;
+                      img.onerror = null; // Prevent infinite loop
+                      
+                      // Create a canvas to draw a placeholder
+                      const canvas = document.createElement('canvas');
+                      canvas.width = 200;
+                      canvas.height = 200;
+                      const ctx = canvas.getContext('2d');
+                      
+                      if (ctx) {
+                        // Draw background
+                        ctx.fillStyle = '#f3f4f6';
+                        ctx.fillRect(0, 0, 200, 200);
+                        
+                        // Draw border
+                        ctx.strokeStyle = '#d1d5db';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(0, 0, 200, 200);
+                        
+                        // Draw text
+                        ctx.fillStyle = '#6b7280';
+                        ctx.font = '16px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('Logo File Missing', 100, 80);
+                        ctx.font = '12px Arial';
+                        ctx.fillText('File not found in uploads', 100, 110);
+                        ctx.fillText('directory', 100, 130);
+                      }
+                      
+                      img.src = canvas.toDataURL();
                     }}
                   />
                 </div>
@@ -506,9 +560,15 @@ const LogoReview = () => {
                       } catch (error) {
                         console.error('Error downloading logo:', error);
                         console.error('Download URL:', logoUrl);
+                        
+                        // Show a more specific error message
+                        const errorMessage = error.message.includes('404') 
+                          ? 'Logo file not found on server. The file may have been deleted or moved.'
+                          : 'There was an error downloading the logo. Please try again.';
+                        
                         toast({
                           title: 'Download Failed',
-                          description: 'There was an error downloading the logo. Please try again.',
+                          description: errorMessage,
                           variant: 'destructive'
                         });
                       }
