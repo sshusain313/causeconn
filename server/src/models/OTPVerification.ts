@@ -7,7 +7,7 @@ export interface IOTPVerification extends Document {
   expiresAt: Date;
   verified: boolean;
   createdAt: Date;
-  type: 'email' | 'phone';
+  type: 'email' | 'sms';
 }
 
 const otpVerificationSchema = new Schema<IOTPVerification>({
@@ -17,7 +17,7 @@ const otpVerificationSchema = new Schema<IOTPVerification>({
   },
   phone: {
     type: String,
-    required: function() { return this.type === 'phone'; },
+    required: function() { return this.type === 'sms'; },
   },
   otp: {
     type: String,
@@ -33,7 +33,7 @@ const otpVerificationSchema = new Schema<IOTPVerification>({
   },
   type: {
     type: String,
-    enum: ['email', 'phone'],
+    enum: ['email', 'sms'],
     required: true,
   },
   createdAt: {
