@@ -3,6 +3,11 @@ import OTPVerification from '../models/OTPVerification';
 import { generateOTP, hashOTP, generateExpiryTime } from '../utils/otpUtils';
 import { sendVerificationEmail } from '../services/emailService';
 import { sendVerificationSMS } from '../services/smsService';
+import axios from 'axios';
+
+const MSG91_AUTH_KEY = process.env.MSG91_AUTH_KEY;
+const MSG91_SENDER_ID = process.env.MSG91_SENDER_ID;
+const MSG91_OTP_TEMPLATE_ID = process.env.MSG91_OTP_TEMPLATE_ID;
 
 // Standardize phone number format
 const standardizePhoneNumber = (phone: string): string => {
@@ -414,5 +419,29 @@ export const debugOTPRecords = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error in debug OTP records:', error);
     res.status(500).json({ message: 'Error fetching OTP records' });
+  }
+};
+
+// Send OTP
+export const sendOtp = async (req, res) => {
+  const { phone } = req.body;
+  try {
+    const url = `https://api.msg91.com/api/v5/otp?template_id=${MSG91_OTP_TEMPLATE_ID}&mobile=${phone}&authkey=${MSG91_AUTH_KEY}&sender=${MSG91_SENDER_ID}`;
+    const response = await axios.get(url);
+    res.json({ success: true, data: response.data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+// Verify OTP
+export const verifyOtp = async (req, res) => {
+  const { phone, otp } = req.body;
+  try {
+    const url = `https://api.msg91.com/api/v5/otp/verify?otp=${otp}&mobile=${phone}&authkey=${MSG91_AUTH_KEY}`;
+    const response = await axios.get(url);
+    res.json({ success: response.data.type === 'success', data: response.data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 };
