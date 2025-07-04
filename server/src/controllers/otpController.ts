@@ -445,3 +445,166 @@ export const verifyOtp = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
+// Debug MSG91 configuration
+export const debugMSG91Config = async (req: Request, res: Response) => {
+  try {
+    console.log('=== MSG91 CONFIGURATION DEBUG ===');
+    console.log('Environment Variables:');
+    console.log('MSG91_AUTH_KEY:', process.env.MSG91_AUTH_KEY ? 'Set' : 'Not Set');
+    console.log('MSG91_SENDER_ID:', process.env.MSG91_SENDER_ID || 'Not Set');
+    console.log('MSG91_OTP_TEMPLATE_ID:', process.env.MSG91_OTP_TEMPLATE_ID || 'Not Set');
+    
+    console.log('Current Configuration:');
+    console.log('MSG91_AUTH_KEY:', MSG91_AUTH_KEY);
+    console.log('MSG91_SENDER_ID:', MSG91_SENDER_ID);
+    console.log('MSG91_OTP_TEMPLATE_ID:', MSG91_OTP_TEMPLATE_ID);
+    
+    // Test MSG91 API connectivity
+    try {
+      const testResponse = await axios.get('https://control.msg91.com/api/v5/balance', {
+        headers: {
+          'Authkey': MSG91_AUTH_KEY
+        }
+      });
+      
+      console.log('MSG91 Balance API Response:', testResponse.data);
+      
+      res.status(200).json({
+        message: 'MSG91 Configuration Debug',
+        config: {
+          authKey: MSG91_AUTH_KEY ? 'Set' : 'Not Set',
+          senderId: MSG91_SENDER_ID,
+          templateId: MSG91_OTP_TEMPLATE_ID
+        },
+        balance: testResponse.data,
+        status: 'connected'
+      });
+    } catch (apiError: any) {
+      console.error('MSG91 API Test Failed:', apiError.response?.data || apiError.message);
+      
+      res.status(200).json({
+        message: 'MSG91 Configuration Debug',
+        config: {
+          authKey: MSG91_AUTH_KEY ? 'Set' : 'Not Set',
+          senderId: MSG91_SENDER_ID,
+          templateId: MSG91_OTP_TEMPLATE_ID
+        },
+        error: apiError.response?.data || apiError.message,
+        status: 'failed'
+      });
+    }
+  } catch (error) {
+    console.error('Debug error:', error);
+    res.status(500).json({ message: 'Debug failed', error: error });
+  }
+};
+
+// Test different sender IDs
+export const testSenderIDs = async (req: Request, res: Response) => {
+  try {
+    console.log('=== TESTING DIFFERENT SENDER IDs ===');
+    
+    const senderIDs = [
+      'TXTLCL',    // Commonly approved
+      'SLFMRH',    // Your original
+      'CAUSEC',    // Alternative
+      'VERIFY',    // Generic
+      'OTP'        // Simple
+    ];
+    
+    const results = [];
+    
+    for (const senderId of senderIDs) {
+      try {
+        console.log(`Testing sender ID: ${senderId}`);
+        
+        const testPayload = {
+          authkey: MSG91_AUTH_KEY,
+          mobile: '918090929644', // Your test number
+          message: 'Test message from MSG91',
+          sender: senderId
+        };
+        
+        const response = await axios.post('https://control.msg91.com/api/sendhttp.php', testPayload, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        });
+        
+        console.log(`Sender ID ${senderId} response:`, response.data);
+        
+        results.push({
+          senderId,
+          status: 'success',
+          response: response.data
+        });
+        
+      } catch (error: any) {
+        console.error(`Sender ID ${senderId} failed:`, error.response?.data || error.message);
+        
+        results.push({
+          senderId,
+          status: 'failed',
+          error: error.response?.data || error.message
+        });
+      }
+    }
+    
+    res.status(200).json({
+      message: 'Sender ID Test Results',
+      results,
+      recommendation: results.find(r => r.status === 'success')?.senderId || 'None working'
+    });
+    
+  } catch (error) {
+    console.error('Sender ID test error:', error);
+    res.status(500).json({ message: 'Test failed', error: error });
+  }
+};
+
+// Test SMS delivery with legacy API
+export const testSMSDelivery = async (req: Request, res: Response) => {
+  try {
+    const { phone } = req.query;
+    const testPhone = phone || '918090929644';
+    
+    console.log('=== TESTING SMS DELIVERY ===');
+    console.log('Phone:', testPhone);
+    console.log('Auth Key:', MSG91_AUTH_KEY);
+    
+    // Test with legacy API only
+    const testPayload = {
+      authkey: MSG91_AUTH_KEY,
+      mobile: testPhone,
+      message: 'Test SMS from CauseConnect - If you receive this, SMS is working!',
+      sender: 'TXTLCL'
+    };
+    
+    console.log('Test payload:', testPayload);
+    
+    const response = await axios.post('https://control.msg91.com/api/sendhttp.php', testPayload, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+    
+    console.log('SMS Test Response:', response.data);
+    
+    res.status(200).json({
+      message: 'SMS Test Complete',
+      phone: testPhone,
+      response: response.data,
+      success: response.data.type === 'success'
+    });
+    
+  } catch (error: any) {
+    console.error('SMS Test Error:', error.response?.data || error.message);
+    
+    res.status(200).json({
+      message: 'SMS Test Failed',
+      error: error.response?.data || error.message,
+      success: false
+    });
+  }
+};

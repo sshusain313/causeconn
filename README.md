@@ -11,6 +11,72 @@ CauseConnect is a web application that allows users to create, sponsor, and clai
 - Statistics API
 - Payment processing with Razorpay
 
+## MSG91 OTP Verification System
+
+This project uses MSG91 REST APIs for phone number verification through a clean backend-based system.
+
+### Features
+
+- ✅ **No Widget Dependencies**: Completely bypasses MSG91 widget
+- ✅ **Backend-Only API Usage**: Uses MSG91 REST APIs directly
+- ✅ **Clean UI**: Custom two-step verification process
+- ✅ **Reliable Fallback**: Multiple API methods with fallback support
+- ✅ **Rate Limiting**: 2-minute cooldown between OTP requests
+- ✅ **Security**: OTP hashing and proper phone number standardization
+
+### Configuration
+
+Set these environment variables in your `.env` file:
+
+```env
+# MSG91 Configuration
+MSG91_AUTH_KEY=383885T2HhO4JY468651dc9P1
+MSG91_SENDER_ID=CAUSEC
+MSG91_OTP_TEMPLATE_ID=your_template_id_here
+```
+
+### How It Works
+
+1. **Phone Input**: User enters phone number
+2. **OTP Sending**: Backend calls MSG91 Flow API to send SMS
+3. **OTP Input**: User enters 6-digit verification code
+4. **Verification**: Backend verifies OTP against stored hash
+5. **Success**: User is redirected to confirmation page
+
+### API Endpoints
+
+- `POST /api/otp/send` - Send OTP to phone number
+- `POST /api/otp/verify` - Verify OTP code
+
+### Fallback System
+
+If MSG91 configuration is missing:
+- OTPs are logged to console instead of sent
+- System continues to work for development/testing
+- Clear error messages guide users
+
+### Development Notes
+
+- MSG91 widget script is disabled in `index.html`
+- Uses standardized phone number format (+91XXXXXXXXXX)
+- Comprehensive error handling and logging
+- 60-second countdown for resend functionality
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables
+4. Start development server: `npm run dev`
+5. Test OTP verification flow
+
+## Production Deployment
+
+1. Set proper MSG91 credentials in production environment
+2. Ensure MSG91 sender ID is approved
+3. Configure MSG91 template ID for OTP messages
+4. Deploy with PM2 or your preferred method
+
 ## Deployment Instructions
 
 This application is set up for deployment with Netlify (frontend) and Render (backend).
