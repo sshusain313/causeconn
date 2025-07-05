@@ -64,6 +64,11 @@ const OtpVerificationPage = () => {
     if (storedData) {
       const parsedData = JSON.parse(storedData);
       setFormData(parsedData);
+      
+      // Auto-fill phone number from claim form data
+      if (parsedData.phone) {
+        setPhone(parsedData.phone);
+      }
     } else {
       navigate('/causes');
     }
