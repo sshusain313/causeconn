@@ -279,6 +279,16 @@ export const approveSponsorship = async (req: Request, res: Response): Promise<v
       // Continue with the response even if email fails
     }
 
+    // Notify waitlist members that the cause is now sponsored
+    try {
+      const { notifyWaitlistMembers } = require('./waitlistController');
+      await notifyWaitlistMembers(sponsorship.cause._id.toString());
+      console.log(`Waitlist notifications triggered for cause: ${sponsorship.cause._id}`);
+    } catch (waitlistError) {
+      console.error('Error notifying waitlist members:', waitlistError);
+      // Continue with the response even if waitlist notification fails
+    }
+
     res.json(sponsorship);
   } catch (error) {
     console.error('Error approving sponsorship:', error);
