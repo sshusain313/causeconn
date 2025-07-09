@@ -286,17 +286,11 @@ const Index = () => {
                     ) : (
                       <div className="space-y-2">
                         <Button 
+                          variant="outline"
                           onClick={() => navigate(`/waitlist/${cause._id}`)} 
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          className="w-full bg-white text-black"
                         >
                           Join Waitlist
-                        </Button>
-                        <Button 
-                          onClick={() => navigate(`/cause/${cause._id}`)} 
-                          className="w-full"
-                          variant="outline"
-                        >
-                          See Details
                         </Button>
                       </div>
                     )}
