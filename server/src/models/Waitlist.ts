@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, Model } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export enum WaitlistStatus {
   WAITING = 'waiting',
@@ -25,13 +25,7 @@ export interface IWaitlist extends Document {
   updatedAt: Date;
 }
 
-// Add static methods interface
-interface WaitlistModel extends Model<IWaitlist> {
-  getNextPosition(causeId: string): Promise<number>;
-  getWaitlistCount(causeId: string): Promise<number>;
-}
-
-const waitlistSchema = new Schema<IWaitlist, WaitlistModel>(
+const waitlistSchema = new Schema(
   {
     causeId: {
       type: Schema.Types.ObjectId,
@@ -118,6 +112,6 @@ waitlistSchema.statics.getWaitlistCount = async function(causeId: string): Promi
   });
 };
 
-const Waitlist = mongoose.models.Waitlist as WaitlistModel || mongoose.model<IWaitlist, WaitlistModel>('Waitlist', waitlistSchema);
+const Waitlist = mongoose.models.Waitlist || mongoose.model('Waitlist', waitlistSchema);
 
 export default Waitlist; 
