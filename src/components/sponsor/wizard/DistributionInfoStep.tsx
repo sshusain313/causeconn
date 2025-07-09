@@ -412,6 +412,7 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                         onSelect={(date) => updateFormData({ campaignStartDate: date })}
                         initialFocus
                         className="p-3"
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                       />
                     </PopoverContent>
                   </Popover>
@@ -443,6 +444,7 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                         onSelect={(date) => updateFormData({ campaignEndDate: date })}
                         initialFocus
                         className="p-3"
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                       />
                     </PopoverContent>
                   </Popover>
@@ -491,6 +493,7 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                           onSelect={(date) => updateFormData({ campaignStartDate: date })}
                           initialFocus
                           className="p-3"
+                          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                         />
                       </PopoverContent>
                     </Popover>
@@ -522,6 +525,7 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                           onSelect={(date) => updateFormData({ campaignEndDate: date })}
                           initialFocus
                           className="p-3"
+                          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                         />
                       </PopoverContent>
                     </Popover>

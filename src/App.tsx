@@ -52,6 +52,7 @@ import QrScanner from "./pages/admin/QrScanner";
 // import ClaimDetails from '@/pages/admin/claims/ClaimDetails';
 import DistributionSettings from './pages/admin/DistributionSettings';
 import EditCause from './pages/admin/EditCause';
+import WaitlistManagement from "./pages/admin/WaitlistManagement";
 
 // Test Components
 import PaymentTest from "./components/PaymentTest";
@@ -132,6 +133,11 @@ const App: React.FC = () => {
                 <Route path="/admin/approvals" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <CampaignApprovals />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/waitlist" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <WaitlistManagement />
                   </ProtectedRoute>
                 } />
                 <Route path="/admin/logos" element={

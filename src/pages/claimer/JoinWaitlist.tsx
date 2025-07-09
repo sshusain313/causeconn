@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -19,12 +19,15 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
+import { Loader2 } from 'lucide-react';
+import config from '@/config';
+import axios from 'axios';
 
 const waitlistFormSchema = z.object({
   fullName: z.string().min(2, 'Full name is required'),
   email: z.string().email('Valid email is required'),
   phone: z.string().min(10, 'Valid phone number is required'),
-  organization: z.string().min(2, 'Organization name is required'),
   message: z.string().optional(),
   notifyEmail: z.boolean().default(true),
   notifySms: z.boolean().default(false),
@@ -32,20 +35,29 @@ const waitlistFormSchema = z.object({
 
 type WaitlistFormValues = z.infer<typeof waitlistFormSchema>;
 
+interface Cause {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  targetAmount: number;
+  currentAmount: number;
+  category: string;
+  status: string;
+  sponsorships?: Array<{
+    _id: string;
+    status: string;
+  }>;
+}
+
 const JoinWaitlistPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
-  // Mock cause data (in production would be fetched from API)
-  const cause = {
-    id,
-    title: 'Mental Health Support',
-    imageUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-    status: 'waitlist',
-    description: 'Providing resources for mental health services in underserved areas.',
-    sponsorCount: 3,
-    waitlistCount: 12,
-  };
+  const { toast } = useToast();
+  const [cause, setCause] = useState<Cause | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   
   const form = useForm<WaitlistFormValues>({
     resolver: zodResolver(waitlistFormSchema),
@@ -53,27 +65,105 @@ const JoinWaitlistPage = () => {
       fullName: '',
       email: '',
       phone: '',
-      organization: '',
       message: '',
       notifyEmail: true,
       notifySms: false,
     },
   });
-  
-  const onSubmit = (data: WaitlistFormValues) => {
-    // In production, this would submit to API
-    console.log('Form data:', data);
-    
-    // Store data in session storage for next steps
-    sessionStorage.setItem('waitlistFormData', JSON.stringify({
-      ...data,
-      causeId: id,
-      causeTitle: cause.title,
-    }));
-    
-    navigate('/waitlist/confirmed');
+
+  // Fetch cause data
+  useEffect(() => {
+    const fetchCause = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${config.apiUrl}/causes/${id}`);
+        setCause(response.data);
+      } catch (err: any) {
+        console.error('Error fetching cause:', err);
+        setError(err.response?.data?.message || 'Failed to load cause details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchCause();
+    }
+  }, [id]);
+
+  const onSubmit = async (data: WaitlistFormValues) => {
+    try {
+      setSubmitting(true);
+      
+      const response = await axios.post(`${config.apiUrl}/waitlist/join`, {
+        causeId: id,
+        ...data
+      });
+
+      // Store data in session storage for next steps
+      sessionStorage.setItem('waitlistFormData', JSON.stringify({
+        ...data,
+        causeId: id,
+        causeTitle: cause?.title,
+        position: response.data.position
+      }));
+      
+      toast({
+        title: "Successfully joined waitlist!",
+        description: "You'll be notified when totes become available.",
+      });
+
+      navigate('/waitlist/confirmed');
+    } catch (err: any) {
+      console.error('Error joining waitlist:', err);
+      toast({
+        title: "Error joining waitlist",
+        description: err.response?.data?.message || 'Please try again.',
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2">Loading cause details...</span>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error || !cause) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">Error</h3>
+          <p className="text-gray-500 mb-6">{error || 'Cause not found'}</p>
+          <Button onClick={() => navigate('/causes')}>Back to Causes</Button>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Check if cause already has approved sponsorship
+  const hasApprovedSponsorship = cause.sponsorships?.some(s => s.status === 'approved') || false;
   
+  if (hasApprovedSponsorship) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">Cause Already Sponsored</h3>
+          <p className="text-gray-500 mb-6">This cause has already been sponsored and totes are available for claiming.</p>
+          <Button onClick={() => navigate(`/claim/${cause._id}`)}>Claim a Tote</Button>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="bg-primary-50 py-10">
@@ -119,22 +209,6 @@ const JoinWaitlistPage = () => {
                       
                       <FormField
                         control={form.control}
-                        name="organization"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Organization</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Your Organization" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
                         name="email"
                         render={({ field }) => (
                           <FormItem>
@@ -146,7 +220,9 @@ const JoinWaitlistPage = () => {
                           </FormItem>
                         )}
                       />
-                      
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
                         name="phone"
@@ -179,69 +255,59 @@ const JoinWaitlistPage = () => {
                         </FormItem>
                       )}
                     />
-                    
-                    <div className="space-y-3">
-                      <h3 className="text-md font-medium">Notification Preferences</h3>
-                      
-                      <FormField
-                        control={form.control}
-                        name="notifyEmail"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox 
-                                checked={field.value} 
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1 leading-none">
-                              <FormLabel>
-                                Email notifications
-                              </FormLabel>
-                              <FormDescription>
-                                Receive updates about this cause via email
-                              </FormDescription>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="notifySms"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox 
-                                checked={field.value} 
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <div className="space-y-1 leading-none">
-                              <FormLabel>
-                                SMS notifications
-                              </FormLabel>
-                              <FormDescription>
-                                Receive text messages when totes become available
-                              </FormDescription>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <div className="flex justify-end">
-                      <Button type="submit" size="lg">
-                        Join Waitlist
-                      </Button>
-                    </div>
+
+<h3 className="text-md font-medium">Notification Preferences</h3>
+<div className="space-y-3">
+  <FormField
+    control={form.control}
+    name="notifyEmail"
+    render={({ field }) => (
+      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+        <FormControl>
+          <Checkbox 
+            checked={field.value} 
+            onCheckedChange={field.onChange}
+          />
+        </FormControl>
+        <div className="space-y-1 leading-none">
+          <FormLabel>
+            Email notifications
+          </FormLabel>
+          <FormDescription>
+            Receive updates about this cause via email
+          </FormDescription>
+        </div>
+      </FormItem>
+    )}
+  />
+  {/* <FormField ...notifySms... /> */}
+</div>
+
+<div className="pt-6">
+  <Button
+    type="submit"
+    size="lg"
+    disabled={submitting}
+    className="w-full"
+  >
+    {submitting ? (
+      <>
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        Joining Waitlist...
+      </>
+    ) : (
+      'Join Waitlist'
+    )}
+  </Button>
+</div>
+
                   </form>
                 </Form>
               </CardContent>
             </Card>
           </div>
           
-          <div>
+          <div className="md:col-span-1">
             <Card>
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-4">About This Cause</h2>
@@ -264,12 +330,12 @@ const JoinWaitlistPage = () => {
                   
                   <div className="border-t border-gray-200 pt-4">
                     <div className="flex justify-between mb-2">
-                      <span className="text-gray-600">Current Sponsors:</span>
-                      <span className="font-medium">{cause.sponsorCount}</span>
+                      <span className="text-gray-600">Target Amount:</span>
+                      <span className="font-medium">₹{cause.targetAmount.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">People on Waitlist:</span>
-                      <span className="font-medium">{cause.waitlistCount}</span>
+                      <span className="text-gray-600">Current Amount:</span>
+                      <span className="font-medium">₹{(cause.currentAmount || 0).toLocaleString()}</span>
                     </div>
                   </div>
                   

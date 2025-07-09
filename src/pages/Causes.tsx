@@ -120,6 +120,9 @@ const CausesPage = () => {
         case 'sponsored':
           matchesStatus = hasApprovedSponsorship && isFullyFunded;
           break;
+        case 'waitlist':
+          matchesStatus = !hasApprovedSponsorship;
+          break;
       }
     }
     
@@ -138,26 +141,21 @@ const CausesPage = () => {
   
   // Get the details/claim button based on sponsorship status
   const getDetailsOrClaimButton = (cause: Cause) => {
-    return hasApprovedSponsorship(cause) ? (
+    if (hasApprovedSponsorship(cause)) {
+      return (
         <Button 
-        onClick={() => navigate(`/claim/${cause._id}`)} 
+          onClick={() => navigate(`/claim/${cause._id}`)} 
           className="w-full bg-black text-white"
         >
           Claim a Tote
         </Button>
-    ) : (
-        <Button 
-          onClick={() => navigate(`/cause/${cause._id}`)} 
-        className="w-full"
-          variant="outline" 
-        >
-          See Details
-        </Button>
       );
+    }
+    return null;
   };
-  
-  // Get the sponsor button if target not achieved
-  const getSponsorButton = (cause: Cause) => {
+
+  // Get the sponsor or waitlist button
+  const getSponsorOrWaitlistButton = (cause: Cause) => {
     // Only show sponsor button if target not achieved
     if (!isTargetAchieved(cause)) {
       return (
@@ -166,6 +164,23 @@ const CausesPage = () => {
           className="w-full bg-black text-white"
         >
           Sponsor This Cause
+        </Button>
+      );
+    }
+    return null;
+  };
+
+  // Get waitlist button for unsponsored causes
+  const getWaitlistButton = (cause: Cause) => {
+    // Show waitlist button if cause doesn't have approved sponsorship
+    if (!hasApprovedSponsorship(cause)) {
+      return (
+        <Button 
+          onClick={() => navigate(`/waitlist/${cause._id}`)} 
+          className="w-full"
+          variant="outline"
+        >
+          Join Waitlist
         </Button>
       );
     }
@@ -273,7 +288,7 @@ const CausesPage = () => {
                     <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="open">Open for Sponsorship</SelectItem>
                     <SelectItem value="sponsored">Fully Sponsored</SelectItem>
-                    {/* <SelectItem value="waitlist">Waitlist Available</SelectItem> */}
+                    <SelectItem value="waitlist">Waitlist Available</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -355,24 +370,9 @@ const CausesPage = () => {
                   </div>
                   
                   <div className="space-y-3">
-                    {/* {getDetailsOrClaimButton(cause)} */}
-                    {hasApprovedSponsorship(cause) ? (
-                                          <Button 
-                                            onClick={() => navigate(`/claim/${cause._id}`)} 
-                                            className="w-full bg-black text-white"
-                                          >
-                                            Claim a Tote
-                                          </Button>
-                                        ) : (
-                                          <Button 
-                                            onClick={() => navigate(`/cause/${cause._id}`)} 
-                                            className="w-full"
-                                            variant="outline"
-                                          >
-                                            See Details
-                                          </Button>
-                                        )}
-                    {getSponsorButton(cause)}
+                    {getDetailsOrClaimButton(cause)}
+                    {getSponsorOrWaitlistButton(cause)}
+                    {getWaitlistButton(cause)}
                   </div>
                 </CardContent>
               </Card>

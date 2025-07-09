@@ -5,6 +5,8 @@ import Layout from '@/components/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { toast } from '@/components/ui/use-toast';
+import config from '@/config';
+import axios from 'axios';
 
 const MagicLinkClaimPage = () => {
   const navigate = useNavigate();
@@ -20,75 +22,73 @@ const MagicLinkClaimPage = () => {
       return;
     }
 
-    // In a real implementation, validate the token with the backend
-    setTimeout(() => {
-      // Mock token validation
-      if (token === 'invalid') {
-        setError('This link has expired or is invalid');
+    const validateToken = async () => {
+      try {
+        setLoading(true);
+        
+        const response = await axios.get(`${config.apiUrl}/waitlist/validate/${token}`);
+        
+        if (response.data.valid) {
+          // Store waitlist data for the claim form
+          sessionStorage.setItem('waitlistClaimData', JSON.stringify(response.data.waitlistEntry));
+          
+          // Redirect to claim form with special parameter
+          navigate(`/claim/${response.data.waitlistEntry.causeId}?source=waitlist`);
+        } else {
+          setError('This link has expired or is invalid');
+        }
+      } catch (err: any) {
+        console.error('Error validating magic link:', err);
+        setError(err.response?.data?.message || 'This link has expired or is invalid');
+      } finally {
         setLoading(false);
-      } else {
-        // Mock retrieving waitlist data
-        const waitlistData = {
-          fullName: 'Jane Doe',
-          email: 'jane.doe@example.com',
-          phone: '(555) 123-4567',
-          organization: 'Community Health Initiative',
-          causeId: searchParams.get('causeId') || '1',
-        };
-        
-        // Store data for the claim form
-        sessionStorage.setItem('waitlistClaimData', JSON.stringify(waitlistData));
-        
-        // Redirect to claim form with special parameter
-        navigate(`/claim/${waitlistData.causeId}?source=waitlist`);
       }
-    }, 1500);
-  }, [token, navigate, searchParams]);
+    };
 
-  return (
-    <Layout>
-      <div className="container mx-auto px-4 py-12">
-        <Card className="max-w-md mx-auto">
-          <CardContent className="p-6 text-center">
-            {loading ? (
-              <div className="py-8 space-y-4">
-                <div className="flex justify-center">
-                  <Spinner className="h-12 w-12 text-primary" />
-                </div>
-                <h2 className="text-xl font-medium">Verifying your link...</h2>
-                <p className="text-gray-600">
-                  We're preparing your tote claim form. Please wait a moment.
-                </p>
-              </div>
-            ) : error ? (
-              <div className="py-8 space-y-4">
-                <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">
-                  <p className="font-medium">{error}</p>
-                  <p className="mt-2 text-sm">
-                    The magic link you clicked may have expired or is invalid.
-                  </p>
-                </div>
-                <div className="flex flex-col space-y-2">
-                  <button 
-                    className="text-primary hover:underline"
-                    onClick={() => navigate('/causes')}
-                  >
-                    Browse available causes
-                  </button>
-                  <button 
-                    className="text-primary hover:underline"
-                    onClick={() => navigate('/login')}
-                  >
-                    Sign in to your account
-                  </button>
-                </div>
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
-      </div>
-    </Layout>
-  );
+    validateToken();
+  }, [token, navigate]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center py-20">
+          <Spinner className="h-8 w-8" />
+          <span className="ml-2">Validating your link...</span>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8 max-w-2xl">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <h2 className="text-xl font-semibold text-red-600 mb-4">Invalid Link</h2>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <p className="text-sm text-gray-500 mb-4">
+                This could happen if:
+              </p>
+              <ul className="text-sm text-gray-500 text-left mb-6 space-y-1">
+                <li>• The link has expired (links are valid for 48 hours)</li>
+                <li>• The link has already been used</li>
+                <li>• The link is invalid or corrupted</li>
+              </ul>
+              <button 
+                onClick={() => navigate('/causes')}
+                className="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary/90"
+              >
+                Browse Causes
+              </button>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
+
+  return null;
 };
 
 export default MagicLinkClaimPage;
