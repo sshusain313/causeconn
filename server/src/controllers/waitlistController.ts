@@ -111,6 +111,80 @@ export const getAllWaitlistEntries = async (req: Request, res: Response): Promis
   }
 };
 
+// Get waitlist entries for a specific user (by email)
+export const getUserWaitlistEntries = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.params;
+
+    if (!email) {
+      res.status(400).json({ message: 'Email parameter is required' });
+      return;
+    }
+
+    const waitlistEntries = await Waitlist.find({ email })
+      .sort({ createdAt: -1 })
+      .select('-magicLinkToken');
+
+    // Populate cause details for each waitlist entry
+    const entriesWithCauseDetails = await Promise.all(
+      waitlistEntries.map(async (entry) => {
+        const cause = await Cause.findById(entry.causeId).select('title description imageUrl targetAmount currentAmount status isOnline');
+        return {
+          ...entry.toObject(),
+          cause: cause || null
+        };
+      })
+    );
+
+    res.json(entriesWithCauseDetails);
+  } catch (error) {
+    console.error('Error getting user waitlist entries:', error);
+    res.status(500).json({ message: 'Error getting waitlist entries' });
+  }
+};
+
+// Leave waitlist for a specific cause
+export const leaveWaitlist = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { waitlistId } = req.params;
+    const { email } = req.body;
+
+    if (!email) {
+      res.status(400).json({ message: 'Email is required' });
+      return;
+    }
+
+    // Find and delete the waitlist entry
+    const waitlistEntry = await Waitlist.findOneAndDelete({
+      _id: waitlistId,
+      email: email
+    });
+
+    if (!waitlistEntry) {
+      res.status(404).json({ message: 'Waitlist entry not found' });
+      return;
+    }
+
+    // Reorder positions for remaining entries in the same cause
+    const remainingEntries = await Waitlist.find({
+      causeId: waitlistEntry.causeId,
+      _id: { $ne: waitlistId }
+    }).sort({ position: 1 });
+
+    // Update positions
+    for (let i = 0; i < remainingEntries.length; i++) {
+      await Waitlist.findByIdAndUpdate(remainingEntries[i]._id, {
+        position: i + 1
+      });
+    }
+
+    res.json({ message: 'Successfully left waitlist' });
+  } catch (error) {
+    console.error('Error leaving waitlist:', error);
+    res.status(500).json({ message: 'Error leaving waitlist' });
+  }
+};
+
 // Send notifications to waitlist when cause becomes sponsored
 export const notifyWaitlistMembers = async (causeId: string): Promise<void> => {
   try {
