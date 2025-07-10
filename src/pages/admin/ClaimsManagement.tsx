@@ -9,6 +9,13 @@ import { Search, CheckCircle, XCircle, Eye, ArrowUpDown, Loader2 } from 'lucide-
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 import config from '@/config';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 // Define the ClaimStatus enum to match backend
 enum ClaimStatus {
@@ -48,6 +55,8 @@ const ClaimsManagement = () => {
   const [claims, setClaims] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   
   // Fetch claims from the API
   useEffect(() => {
@@ -175,6 +184,11 @@ const ClaimsManagement = () => {
   const handleSort = (newSortBy: 'date' | 'status' | 'name') => {
     setSortBy(newSortBy);
   };
+  
+  const handleViewDetails = (claim: Claim) => {
+    setSelectedClaim(claim);
+    setIsDetailsOpen(true);
+  };
 
   return (
     <AdminLayout title="Claims Management" subtitle="Review and manage all tote bag claims">
@@ -252,14 +266,14 @@ const ClaimsManagement = () => {
                     </div>
                   </div>
                   <div className="flex flex-row lg:flex-col gap-2">
-                    {/* <Button 
+                    <Button 
                       variant="outline" 
                       className="flex-1 flex items-center gap-1"
-                      onClick={() => navigate(`/admin/claims/${claims._id}`)}
+                      onClick={() => handleViewDetails(claim)}
                     >
                       <Eye className="h-4 w-4" />
                       View Details
-                    </Button> */}
+                    </Button>
                     {claim.status === ClaimStatus.PENDING && (
                       <>
                         <Button 
@@ -293,6 +307,113 @@ const ClaimsManagement = () => {
           )}
         </div>
       )}
+      
+      {/* Details Dialog */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Claim Details</DialogTitle>
+            <DialogDescription>
+              Detailed information about this claim
+            </DialogDescription>
+          </DialogHeader>
+          {selectedClaim && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-4">
+                <h3 className="text-xl font-semibold">{selectedClaim.fullName}</h3>
+                <Badge 
+                  variant="outline" 
+                  className={getStatusBadge(selectedClaim.status)}
+                >
+                  {selectedClaim.status.charAt(0).toUpperCase() + selectedClaim.status.slice(1)}
+                </Badge>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Email</p>
+                  <p className="text-lg">{selectedClaim.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Phone</p>
+                  <p className="text-lg">{selectedClaim.phone}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Cause</p>
+                  <p className="text-lg">{selectedClaim.causeTitle}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Purpose</p>
+                  <p className="text-lg">{selectedClaim.purpose}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Claim Date</p>
+                  <p className="text-lg">{new Date(selectedClaim.createdAt).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Last Updated</p>
+                  <p className="text-lg">{new Date(selectedClaim.updatedAt).toLocaleString()}</p>
+                </div>
+                {selectedClaim.shippingDate && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Shipping Date</p>
+                    <p className="text-lg">{new Date(selectedClaim.shippingDate).toLocaleDateString()}</p>
+                  </div>
+                )}
+                {selectedClaim.deliveryDate && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Delivery Date</p>
+                    <p className="text-lg">{new Date(selectedClaim.deliveryDate).toLocaleDateString()}</p>
+                  </div>
+                )}
+              </div>
+              
+              <div>
+                <p className="text-sm font-medium text-gray-500">Shipping Address</p>
+                <div className="mt-1 p-3 bg-gray-50 rounded-md">
+                  <p>{selectedClaim.address}</p>
+                  <p>{selectedClaim.city}, {selectedClaim.state} {selectedClaim.zipCode}</p>
+                </div>
+              </div>
+              
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsDetailsOpen(false)}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+                {selectedClaim.status === ClaimStatus.PENDING && (
+                  <>
+                    <Button 
+                      onClick={() => {
+                        handleApprove(selectedClaim._id);
+                        setIsDetailsOpen(false);
+                      }}
+                      className="flex-1 flex items-center gap-1"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      Approve
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        handleReject(selectedClaim._id);
+                        setIsDetailsOpen(false);
+                      }}
+                      variant="outline"
+                      className="flex-1 flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Reject
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };

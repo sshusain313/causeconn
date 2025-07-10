@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { joinWaitlist, getWaitlistForCause, validateMagicLink, markWaitlistAsClaimed, getAllWaitlistEntries, getUserWaitlistEntries, leaveWaitlist } from '../controllers/waitlistController';
+import { joinWaitlist, getWaitlistForCause, validateMagicLink, markWaitlistAsClaimed, getAllWaitlistEntries, getUserWaitlistEntries, leaveWaitlist, resendNotification } from '../controllers/waitlistController';
 import { authenticateToken, requireRole } from '../middleware/auth';
 
 const router = Router();
@@ -16,5 +16,6 @@ router.delete('/:waitlistId/leave', leaveWaitlist);
 router.get('/cause/:causeId', authenticateToken, requireRole(['admin']), getWaitlistForCause);
 router.get('/all', authenticateToken, requireRole(['admin']), getAllWaitlistEntries);
 router.put('/:waitlistId/claim', authenticateToken, requireRole(['admin']), markWaitlistAsClaimed);
+router.post('/:waitlistId/resend-notification', authenticateToken, requireRole(['admin']), resendNotification);
 
 export default router; 

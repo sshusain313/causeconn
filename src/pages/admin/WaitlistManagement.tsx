@@ -5,9 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { Search, Users, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Search, Users, Clock, CheckCircle, AlertCircle, Eye, Mail, Download } from 'lucide-react';
 import config from '@/config';
 import axios from 'axios';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface WaitlistEntry {
   _id: string;
@@ -38,6 +46,8 @@ const WaitlistManagement = () => {
   const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>([]);
   const [causes, setCauses] = useState<Cause[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEntry, setSelectedEntry] = useState<WaitlistEntry | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,6 +69,13 @@ const WaitlistManagement = () => {
           }
         });
         setWaitlistEntries(waitlistResponse.data);
+        
+        // Debug: Log status distribution
+        const statusCounts = waitlistResponse.data.reduce((acc: any, entry: any) => {
+          acc[entry.status] = (acc[entry.status] || 0) + 1;
+          return acc;
+        }, {});
+        console.log('Waitlist status distribution:', statusCounts);
       } catch (error) {
         console.error('Error fetching data:', error);
         toast({
@@ -73,6 +90,85 @@ const WaitlistManagement = () => {
 
     fetchData();
   }, [toast]);
+
+  const handleViewDetails = (entry: WaitlistEntry) => {
+    setSelectedEntry(entry);
+    setIsDetailsOpen(true);
+  };
+
+  const handleResendNotification = async (entry: WaitlistEntry) => {
+    try {
+      const response = await axios.post(
+        `${config.apiUrl}/waitlist/${entry._id}/resend-notification`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+
+      toast({
+        title: 'Notification Sent',
+        description: `Notification resent to ${entry.email}`,
+      });
+    } catch (error: any) {
+      console.error('Error resending notification:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to resend notification';
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleExportReport = async () => {
+    try {
+      const filteredData = filteredEntries.map(entry => ({
+        Name: entry.fullName,
+        Email: entry.email,
+        Phone: entry.phone,
+        Cause: getCauseTitle(entry.causeId),
+        Position: entry.position,
+        Status: entry.status,
+        'Email Notifications': entry.notifyEmail ? 'Yes' : 'No',
+        'SMS Notifications': entry.notifySms ? 'Yes' : 'No',
+        'Joined Date': new Date(entry.createdAt).toLocaleDateString(),
+        Message: entry.message || ''
+      }));
+
+      // Create CSV content
+      const headers = Object.keys(filteredData[0]).join(',');
+      const rows = filteredData.map(row => 
+        Object.values(row).map(value => `"${value}"`).join(',')
+      );
+      const csvContent = [headers, ...rows].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `waitlist-report-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Export Successful',
+        description: 'Waitlist report has been downloaded',
+      });
+    } catch (error) {
+      console.error('Error exporting report:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to export report',
+        variant: 'destructive'
+      });
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -197,7 +293,10 @@ const WaitlistManagement = () => {
                 </option>
               ))}
             </select>
-            <Button variant="outline">Export Report</Button>
+            <Button variant="outline" onClick={handleExportReport} className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Export Report
+            </Button>
           </div>
         </div>
       </div>
@@ -252,11 +351,21 @@ const WaitlistManagement = () => {
                     )}
                   </div>
                   <div className="flex flex-row lg:flex-col gap-2">
-                    <Button variant="outline" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1 flex items-center gap-2"
+                      onClick={() => handleViewDetails(entry)}
+                    >
+                      <Eye className="h-4 w-4" />
                       View Details
                     </Button>
                     {entry.status === 'notified' && (
-                      <Button variant="outline" className="flex-1">
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 flex items-center gap-2"
+                        onClick={() => handleResendNotification(entry)}
+                      >
+                        <Mail className="h-4 w-4" />
                         Resend Notification
                       </Button>
                     )}
@@ -272,6 +381,93 @@ const WaitlistManagement = () => {
           </div>
         )}
       </div>
+
+      {/* Details Modal */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Waitlist Entry Details</DialogTitle>
+            <DialogDescription>
+              Detailed information about this waitlist entry
+            </DialogDescription>
+          </DialogHeader>
+          {selectedEntry && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Full Name</p>
+                  <p className="text-lg">{selectedEntry.fullName}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Email</p>
+                  <p className="text-lg">{selectedEntry.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Phone</p>
+                  <p className="text-lg">{selectedEntry.phone}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Position</p>
+                  <p className="text-lg">#{selectedEntry.position}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Status</p>
+                  <div className="mt-1">{getStatusBadge(selectedEntry.status)}</div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Cause</p>
+                  <p className="text-lg">{getCauseTitle(selectedEntry.causeId)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Joined</p>
+                  <p className="text-lg">{new Date(selectedEntry.createdAt).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Last Updated</p>
+                  <p className="text-lg">{new Date(selectedEntry.updatedAt).toLocaleString()}</p>
+                </div>
+              </div>
+              
+              <div>
+                <p className="text-sm font-medium text-gray-500">Notification Preferences</p>
+                <div className="flex gap-2 mt-1">
+                  {selectedEntry.notifyEmail && <Badge variant="outline">Email</Badge>}
+                  {selectedEntry.notifySms && <Badge variant="outline">SMS</Badge>}
+                </div>
+              </div>
+              
+              {selectedEntry.message && (
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Message</p>
+                  <p className="text-lg mt-1 p-3 bg-gray-50 rounded-md">{selectedEntry.message}</p>
+                </div>
+              )}
+              
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsDetailsOpen(false)}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+                {selectedEntry.status === 'notified' && (
+                  <Button 
+                    onClick={() => {
+                      handleResendNotification(selectedEntry);
+                      setIsDetailsOpen(false);
+                    }}
+                    className="flex-1 flex items-center gap-2"
+                  >
+                    <Mail className="h-4 w-4" />
+                    Resend Notification
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };

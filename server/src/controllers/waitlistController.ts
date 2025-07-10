@@ -348,3 +348,112 @@ export const markWaitlistAsClaimed = async (req: Request, res: Response): Promis
     res.status(500).json({ message: 'Error marking waitlist as claimed' });
   }
 }; 
+
+// Resend notification for a specific waitlist entry
+export const resendNotification = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { waitlistId } = req.params;
+
+    // Find the waitlist entry
+    const waitlistEntry = await Waitlist.findById(waitlistId);
+    if (!waitlistEntry) {
+      res.status(404).json({ message: 'Waitlist entry not found' });
+      return;
+    }
+
+    // Get cause details
+    const cause = await Cause.findById(waitlistEntry.causeId);
+    if (!cause) {
+      res.status(404).json({ message: 'Cause not found' });
+      return;
+    }
+
+    // Check if the entry is in notified status
+    if (waitlistEntry.status !== WaitlistStatus.NOTIFIED) {
+      res.status(400).json({ message: 'Can only resend notifications for entries in notified status' });
+      return;
+    }
+
+    // Generate new magic link
+    const magicLinkPayload = createMagicLink(
+      waitlistEntry.userId?.toString() || 'anonymous',
+      waitlistEntry._id.toString(),
+      waitlistEntry.causeId.toString(),
+      waitlistEntry.email
+    );
+
+    // Update waitlist entry with new magic link info
+    await Waitlist.findByIdAndUpdate(waitlistEntry._id, {
+      magicLinkToken: magicLinkPayload.token,
+      magicLinkSentAt: new Date(),
+      magicLinkExpires: magicLinkPayload.expires
+    });
+
+    // Send email notification if enabled
+    if (waitlistEntry.notifyEmail) {
+      const magicLinkUrl = getMagicLinkUrl(magicLinkPayload);
+      
+      const emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Totes Are Still Available - Reminder</h2>
+          <p>Hello ${waitlistEntry.fullName},</p>
+          
+          <p>This is a reminder that totes are still available for the cause <strong>${cause.title}</strong>.</p>
+          
+          <div style="background-color: #e0f2fe; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #0284c7;">
+            <p style="margin-top: 0;"><strong>As a waitlist member, you have priority access to claim your totes.</strong></p>
+            <p style="margin-bottom: 0;">This special link will expire in 48 hours, so please claim your totes soon.</p>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${magicLinkUrl}" 
+               style="background-color: #0070f3; color: white; padding: 12px 24px; border-radius: 4px; text-decoration: none; font-weight: bold; display: inline-block;">
+              Claim Your Totes Now
+            </a>
+          </div>
+          
+          <p style="text-sm; color: #666;">
+            If the button above doesn't work, copy and paste this link into your browser:<br>
+            <span style="background-color: #f5f5f5; padding: 5px; border-radius: 3px; font-family: monospace; font-size: 12px;">
+              ${magicLinkUrl}
+            </span>
+          </p>
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+          
+          <p style="font-size: 12px; color: #666;">
+            This email was sent to you because you joined the waitlist for a cause on CauseConnect. 
+            If you have any questions, please contact us at waitlist@causeconnect.org
+          </p>
+        </div>
+      `;
+
+      await sendEmail(
+        waitlistEntry.email,
+        `Reminder: Totes Available - ${cause.title}`,
+        emailHtml
+      );
+
+      console.log(`Resent notification email to ${waitlistEntry.email}`);
+    }
+
+    // TODO: Send SMS notification if enabled
+    if (waitlistEntry.notifySms) {
+      console.log(`SMS notification would be resent to ${waitlistEntry.phone}`);
+      // Implement SMS notification logic here
+    }
+
+    res.json({ 
+      message: 'Notification resent successfully',
+      waitlistEntry: {
+        _id: waitlistEntry._id,
+        email: waitlistEntry.email,
+        fullName: waitlistEntry.fullName,
+        status: waitlistEntry.status
+      }
+    });
+  } catch (error) {
+    console.error('Error resending notification:', error);
+    res.status(500).json({ message: 'Error resending notification' });
+  }
+}; 

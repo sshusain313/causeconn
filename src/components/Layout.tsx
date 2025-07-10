@@ -163,7 +163,7 @@ const Layout = ({ children }: LayoutProps) => {
           </div>
 
           {/* Newsletter Signup */}
-          <div className="bg-white rounded-lg p-6 mb-8 shadow-sm border border-gray-200">
+          {/* <div className="bg-white rounded-lg p-6 mb-8 shadow-sm border border-gray-200">
             <div className="text-center">
               <h3 className="text-lg font-semibold mb-2 text-gray-900">Stay Updated</h3>
               <p className="text-gray-600 mb-4">Get the latest updates on new causes and impact stories.</p>
@@ -178,7 +178,7 @@ const Layout = ({ children }: LayoutProps) => {
                 </Button>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Bottom Bar */}
           <div className="pt-8 border-t border-gray-200">

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Users, DollarSign, Package, Download, Calendar } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, Package, Download, Calendar, Clock, AlertCircle } from 'lucide-react';
 import { fetchDashboardMetrics, fetchStats } from '@/services/apiServices';
 import authAxios from '@/utils/authAxios';
 import config from '@/config';
@@ -31,12 +31,22 @@ interface TopCause {
   totalClaims: number;
 }
 
+interface WaitlistCause {
+  _id: string;
+  title: string;
+  status: string;
+  waitlistCount: number;
+  waitingCount: number;
+  notifiedCount: number;
+}
+
 const Analytics = () => {
   const [timeRange, setTimeRange] = useState('3months');
   const [metrics, setMetrics] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
   const [uniqueSponsorEmails, setUniqueSponsorEmails] = useState<number>(0);
   const [topCauses, setTopCauses] = useState<TopCause[]>([]);
+  const [topWaitlistCauses, setTopWaitlistCauses] = useState<WaitlistCause[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -93,6 +103,58 @@ const Analytics = () => {
           .slice(0, 4);
 
         setTopCauses(sortedCauses);
+        
+        // Fetch waitlist data
+        const waitlistResponse = await authAxios.get(`${config.apiUrl}/waitlist/all`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        // Process waitlist data by cause
+        const waitlistByCause = waitlistResponse.data.reduce((acc: any, entry: any) => {
+          if (!acc[entry.causeId]) {
+            acc[entry.causeId] = {
+              _id: entry.causeId,
+              waitlistCount: 0,
+              waitingCount: 0,
+              notifiedCount: 0
+            };
+          }
+          
+          acc[entry.causeId].waitlistCount++;
+          
+          if (entry.status === 'waiting') {
+            acc[entry.causeId].waitingCount++;
+          } else if (entry.status === 'notified') {
+            acc[entry.causeId].notifiedCount++;
+          }
+          
+          return acc;
+        }, {});
+        
+        // Get cause titles for each waitlist entry
+        const causesMap = causesResponse.data.reduce((acc: any, cause: any) => {
+          acc[cause._id] = {
+            title: cause.title,
+            status: cause.status
+          };
+          return acc;
+        }, {});
+        
+        // Create final waitlist causes array with titles
+        const waitlistCauses = Object.keys(waitlistByCause).map(causeId => ({
+          ...waitlistByCause[causeId],
+          title: causesMap[causeId]?.title || 'Unknown Cause',
+          status: causesMap[causeId]?.status || 'unknown'
+        }));
+        
+        // Sort by total waitlist count and take top 5
+        const sortedWaitlistCauses = waitlistCauses
+          .sort((a, b) => b.waitlistCount - a.waitlistCount)
+          .slice(0, 5);
+          
+        setTopWaitlistCauses(sortedWaitlistCauses);
       } catch (err: any) {
         console.error('Error fetching analytics data:', err);
         setError('Failed to load analytics data.');
@@ -268,44 +330,98 @@ const Analytics = () => {
           </div>
 
           {/* Top Campaigns */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Top Performing Campaigns</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {topCauses.map((cause, index) => (
-                  <div key={cause._id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3">
-                        <h3 className="font-semibold">{cause.title}</h3>
-                        <Badge 
-                          variant="outline" 
-                          className={cause.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}
-                        >
-                          {cause.status}
-                        </Badge>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Top Performing Campaigns</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {topCauses.map((cause, index) => (
+                    <div key={cause._id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-semibold">{cause.title}</h3>
+                          <Badge 
+                            variant="outline" 
+                            className={cause.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}
+                          >
+                            {cause.status}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex gap-8 text-sm">
+                        <div className="text-center">
+                          <p className="text-gray-500">Raised</p>
+                          <p className="font-semibold">${cause.totalAmount?.toLocaleString() || '0'}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-gray-500">Sponsors</p>
+                          <p className="font-semibold">{cause.totalSponsors}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-gray-500">Claims</p>
+                          <p className="font-semibold">{cause.totalClaims || 0}</p>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex gap-8 text-sm">
-                      <div className="text-center">
-                        <p className="text-gray-500">Raised</p>
-                        <p className="font-semibold">${cause.totalAmount?.toLocaleString() || '0'}</p>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Top Waitlist Causes */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Top Waitlist Campaigns</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {topWaitlistCauses.length > 0 ? (
+                    topWaitlistCauses.map((cause, index) => (
+                      <div key={cause._id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <h3 className="font-semibold">{cause.title}</h3>
+                            <Badge 
+                              variant="outline" 
+                              className={cause.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}
+                            >
+                              {cause.status}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex gap-6 text-sm">
+                          <div className="text-center">
+                            <p className="text-gray-500">Total Entries</p>
+                            <p className="font-semibold">{cause.waitlistCount}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-gray-500">Waiting</p>
+                            <div className="flex items-center justify-center gap-1">
+                              <Clock className="h-3 w-3 text-yellow-600" />
+                              <p className="font-semibold">{cause.waitingCount}</p>
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-gray-500">Notified</p>
+                            <div className="flex items-center justify-center gap-1">
+                              <AlertCircle className="h-3 w-3 text-blue-600" />
+                              <p className="font-semibold">{cause.notifiedCount}</p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <p className="text-gray-500">Sponsors</p>
-                        <p className="font-semibold">{cause.totalSponsors}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-gray-500">Claims</p>
-                        <p className="font-semibold">{cause.totalClaims || 0}</p>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No waitlist data available
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </>
       )}
     </AdminLayout>
