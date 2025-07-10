@@ -352,7 +352,7 @@ const CausesPage = () => {
                       : cause.description}
                   </p>
                   
-                  <div className="mb-4">
+                  {/* <div className="mb-4">
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div 
                         className="bg-primary-600 h-2.5 rounded-full" 
@@ -367,7 +367,7 @@ const CausesPage = () => {
                       ₹{cause.targetAmount.toLocaleString()} goal
                       </span>
                     </div>
-                  </div>
+                  </div> */}
                   
                   <div className="space-y-3">
                     {getDetailsOrClaimButton(cause)}

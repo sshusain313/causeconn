@@ -197,7 +197,7 @@ const Index = () => {
             </div>
           ))}
         </div>
-        <div className="text-center mt-10">
+        {/* <div className="text-center mt-10">
           <Button 
             className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition w-full sm:w-auto"
             onClick={() => navigate('/sponsor/new')}
@@ -205,7 +205,7 @@ const Index = () => {
           >
             Sponsor
           </Button>
-        </div>
+        </div> */}
       </div>
     </section>
   );
@@ -263,7 +263,7 @@ const Index = () => {
                         ? `${cause.description.substring(0, 120)}...` 
                         : cause.description}
                     </p>
-                    <div className="mb-4">
+                    {/* <div className="mb-4">
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
                         <div 
                           className="bg-green-600 h-2.5 rounded-full" 
@@ -278,7 +278,7 @@ const Index = () => {
                           ₹{cause.targetAmount.toLocaleString()} goal
                         </span>
                       </div>
-                    </div>
+                    </div> */}
                     {hasApprovedSponsorship ? (
                       <Button 
                         onClick={() => navigate(`/claim/${cause._id}`)} 
