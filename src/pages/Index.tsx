@@ -185,27 +185,31 @@ const Index = () => {
   const WhySponsorSection = () => (
     <section className="bg-white border-b border-gray-100 py-20">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-16">
-          Why brands sponsor <span className="text-green-600">changebag.org</span>
+        <h2 className="text-4xl font-bold text-gray-900 mb-4">
+        Why brands sponsor <span className="text-green-600">changebag.org</span>
         </h2>
-        <div className="flex flex-col md:grid md:grid-cols-4 gap-6 md:gap-6 space-y-8 md:space-y-0">
+        <p className="text-lg text-gray-600 mb-16">
+          We provide everything you need to launch, manage, and scale your cause effectively.
+        </p>
+        <div className="flex flex-col md:flex-row justify-center items-stretch gap-8">
           {benefits.map((benefit, idx) => (
-            <div key={idx} className="bg-green-50 rounded-xl p-8 flex flex-col items-center shadow hover:shadow-md transition w-full md:w-auto">
-              <div className="mb-4">{React.cloneElement(benefit.icon, { className: 'h-10 w-10 text-green-600' })}</div>
-              <h3 className="font-semibold text-lg mb-3 text-gray-900 text-center">{benefit.title}</h3>
+            <div
+              key={idx}
+              className={`
+                flex-1 bg-white rounded-2xl p-8 flex flex-col items-center
+                shadow-md transition-all duration-200
+                hover:shadow-xl hover:-translate-y-2
+              `}
+              style={{ minWidth: 220, maxWidth: 320 }}
+            >
+              <div className={`mb-4 flex items-center justify-center rounded-full ${idx === 1 ? 'bg-green-100' : 'bg-green-50'} w-16 h-16`}>
+                {React.cloneElement(benefit.icon, { className: 'h-10 w-10 text-green-600' })}
+              </div>
+              <h3 className="font-bold text-xl mb-2 text-center text-gray-900">{benefit.title}</h3>
               <p className="text-gray-600 text-base text-center">{benefit.description}</p>
             </div>
           ))}
         </div>
-        {/* <div className="text-center mt-10">
-          <Button 
-            className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition w-full sm:w-auto"
-            onClick={() => navigate('/sponsor/new')}
-            aria-label="Sponsor a cause"
-          >
-            Sponsor
-          </Button>
-        </div> */}
       </div>
     </section>
   );

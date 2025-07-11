@@ -58,6 +58,14 @@ import WaitlistManagement from "./pages/admin/WaitlistManagement";
 import PaymentTest from "./components/PaymentTest";
 import NumberInputDemo from "./components/NumberInputDemo";
 
+// Mock Pages
+import LookUpNotDown from "./pages/mock/LookUpNotDown";
+import RespectAtWork from "./pages/mock/RespectAtWork";
+import PlantMoreTrees from "./pages/mock/PlantMoreTrees";
+import SayNoToPlastic from "./pages/mock/SayNoToPlastic";
+import SaveWaterSaveLife from "./pages/mock/SaveWaterSaveLife";
+import MentalHealthMatters from "./pages/mock/MentalHealthMatters";
+
 // Create QueryClient once, outside of component
 const queryClient = new QueryClient();
 
@@ -188,6 +196,14 @@ const App: React.FC = () => {
                     <DistributionSettings />
                   </ProtectedRoute>
                 } />
+                
+                {/* Mock Page Routes */}
+                <Route path="/mock/Page1" element={<LookUpNotDown />} />
+                <Route path="/mock/Page2" element={<RespectAtWork />} />
+                <Route path="/mock/Page3" element={<PlantMoreTrees />} />
+                <Route path="/mock/Page4" element={<SayNoToPlastic />} />
+                <Route path="/mock/Page5" element={<SaveWaterSaveLife />} />
+                <Route path="/mock/Page6" element={<MentalHealthMatters />} />
                 
                 {/* Catch-all Route */}
                 <Route path="*" element={<NotFound />} />
