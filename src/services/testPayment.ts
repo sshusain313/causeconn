@@ -26,6 +26,8 @@ export const testCreateOrder = async () => {
         currency: 'INR',
         email: 'test@example.com',
         organizationName: 'Test Organization',
+        contactName: 'Test Contact',
+        phone: '1234567890',
         causeTitle: 'Test Cause'
       },
       {

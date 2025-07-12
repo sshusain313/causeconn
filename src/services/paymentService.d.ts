@@ -15,7 +15,11 @@ export interface CreateOrderRequest {
     sponsorshipId?: string;
     email: string;
     organizationName: string;
+    contactName: string;
+    phone: string;
     causeTitle: string;
+    toteQuantity?: number;
+    unitPrice?: number;
 }
 export interface ConfirmPaymentRequest {
     razorpay_order_id: string;

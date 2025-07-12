@@ -319,41 +319,89 @@ export const sendInvoiceEmail = async (
       to: email,
       subject: `Invoice #${data.invoiceNumber} - ${data.causeTitle} Campaign`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Payment Confirmation & Invoice</h2>
-          <p>Dear ${data.organizationName},</p>
-          
-          <p>Thank you for your generous sponsorship of the <strong>${data.causeTitle}</strong> campaign!</p>
-          
-          <div style="background-color: #f4f4f4; padding: 20px; margin: 20px 0; border-radius: 5px;">
-            <p style="margin-top: 0;"><strong>Payment Summary:</strong></p>
-            <ul>
-              <li>Invoice Number: <strong>${data.invoiceNumber}</strong></li>
-              <li>Campaign: <strong>${data.causeTitle}</strong></li>
-              <li>Total Amount: <strong>${formattedAmount}</strong></li>
-              <li>Payment Status: <strong style="color: #10b981;">Paid</strong></li>
-            </ul>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; color: white;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: bold;">CauseConnect</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">Making a difference, one tote at a time</p>
           </div>
           
-          <p>Your payment has been successfully processed and your sponsorship is now active. Your logo will be featured on the campaign page and printed on the tote bags as specified.</p>
-          
-          <p>Please find your detailed invoice attached to this email for your records.</p>
-          
-          <div style="background-color: #e0f2fe; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #0284c7;">
-            <p style="margin-top: 0;"><strong>What happens next?</strong></p>
-            <ul>
-              <li>Your campaign will be reviewed by our team</li>
-              <li>Once approved, your logo will be added to the campaign page</li>
-              <li>You'll receive updates on campaign progress and distribution</li>
-              <li>You can track your campaign performance through your dashboard</li>
-            </ul>
+          <!-- Content -->
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1f2937; margin-bottom: 20px;">Payment Confirmation & Invoice</h2>
+            
+            <p style="color: #374151; line-height: 1.6; margin-bottom: 20px;">
+              Dear <strong>${data.organizationName}</strong>,
+            </p>
+            
+            <p style="color: #374151; line-height: 1.6; margin-bottom: 20px;">
+              Thank you for your generous sponsorship of the <strong>${data.causeTitle}</strong> campaign!
+            </p>
+            
+            <!-- Payment Summary Card -->
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; margin: 25px 0;">
+              <h3 style="color: #1f2937; margin-top: 0; margin-bottom: 15px;">Payment Summary</h3>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                  <p style="margin: 8px 0; color: #6b7280;"><strong>Invoice Number:</strong></p>
+                  <p style="margin: 8px 0; color: #1f2937; font-weight: bold;">${data.invoiceNumber}</p>
+                </div>
+                <div>
+                  <p style="margin: 8px 0; color: #6b7280;"><strong>Campaign:</strong></p>
+                  <p style="margin: 8px 0; color: #1f2937; font-weight: bold;">${data.causeTitle}</p>
+                </div>
+                <div>
+                  <p style="margin: 8px 0; color: #6b7280;"><strong>Total Amount:</strong></p>
+                  <p style="margin: 8px 0; color: #059669; font-weight: bold; font-size: 18px;">${formattedAmount}</p>
+                </div>
+                <div>
+                  <p style="margin: 8px 0; color: #6b7280;"><strong>Payment Status:</strong></p>
+                  <p style="margin: 8px 0; color: #10b981; font-weight: bold;">✓ Paid</p>
+                </div>
+              </div>
+            </div>
+            
+            <p style="color: #374151; line-height: 1.6; margin-bottom: 20px;">
+              Your payment has been successfully processed and your sponsorship is now active. Your logo will be featured on the campaign page and printed on the tote bags as specified.
+            </p>
+            
+            <p style="color: #374151; line-height: 1.6; margin-bottom: 25px;">
+              Please find your detailed invoice attached to this email for your records.
+            </p>
+            
+            <!-- Next Steps Card -->
+            <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 25px 0; border-radius: 4px;">
+              <h4 style="color: #1e40af; margin-top: 0; margin-bottom: 15px;">What happens next?</h4>
+              <ul style="color: #374151; line-height: 1.6; margin: 0; padding-left: 20px;">
+                <li style="margin-bottom: 8px;">Your campaign will be reviewed by our team</li>
+                <li style="margin-bottom: 8px;">Once approved, your logo will be added to the campaign page</li>
+                <li style="margin-bottom: 8px;">You'll receive updates on campaign progress and distribution</li>
+                <li style="margin-bottom: 8px;">You can track your campaign performance through your dashboard</li>
+              </ul>
+            </div>
+            
+            <p style="color: #374151; line-height: 1.6; margin-bottom: 20px;">
+              If you have any questions about your invoice or sponsorship, please don't hesitate to contact our support team.
+            </p>
+            
+            <p style="color: #374151; line-height: 1.6; margin-bottom: 30px;">
+              Thank you again for making a difference!
+            </p>
+            
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
+              <p style="color: #6b7280; margin: 0;">
+                Best regards,<br>
+                <strong>The CauseConnect Team</strong>
+              </p>
+            </div>
           </div>
           
-          <p>If you have any questions about your invoice or sponsorship, please don't hesitate to contact our support team.</p>
-          
-          <p>Thank you again for making a difference!</p>
-          
-          <p>Best regards,<br>The CauseConnect Team</p>
+          <!-- Footer -->
+          <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+              For questions about this invoice, please contact support@causeconnect.org
+            </p>
+          </div>
         </div>
       `,
       attachments: [

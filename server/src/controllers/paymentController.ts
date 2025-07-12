@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
-import { generateAndSendInvoice } from '../services/invoiceService';
+import fs from 'fs';
+import path from 'path';
+import { generateAndSendInvoice, testPDFGeneration as testPDFService, testSimplePDF as testSimplePDFService } from '../services/invoiceService';
 
 // Initialize Razorpay instance lazily
 let razorpay: Razorpay | null = null;
@@ -25,8 +27,12 @@ interface CreateOrderRequest {
   currency: string;
   email: string;
   organizationName: string;
+  contactName: string;
+  phone: string;
   causeTitle: string;
   sponsorshipId?: string;
+  toteQuantity?: number;
+  unitPrice?: number;
 }
 
 interface ConfirmPaymentRequest {
@@ -83,6 +89,136 @@ export const testPaymentService = async (req: Request, res: Response): Promise<v
 };
 
 /**
+ * Test endpoint to generate a sample invoice
+ */
+export const testInvoiceGeneration = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('Testing invoice generation with sample data');
+    
+    // Sample payment data
+    const samplePaymentData = {
+      paymentId: 'pay_test_' + Date.now(),
+      orderId: 'order_test_' + Date.now(),
+      amount: 50000, // 500 rupees in paise
+      currency: 'INR',
+      organizationName: 'Test Organization',
+      contactName: 'Test Contact',
+      phone: '1234567890',
+      causeTitle: 'Test Cause',
+      toteQuantity: 10,
+      unitPrice: 50,
+    };
+
+    console.log('Sample payment data:', samplePaymentData);
+    
+    // Generate invoice
+    await generateAndSendInvoice('test@example.com', samplePaymentData);
+    
+    res.json({
+      message: 'Test invoice generated successfully',
+      sampleData: samplePaymentData
+    });
+  } catch (error) {
+    console.error('Test invoice generation error:', error);
+    res.status(500).json({ 
+      message: 'Test invoice generation failed',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+};
+
+/**
+ * Test endpoint to debug PDF generation directly
+ */
+export const testPDFGeneration = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('Testing PDF generation directly');
+    
+    // Test PDF generation with hardcoded data
+    const pdfPath = await testPDFService();
+    
+    res.json({
+      message: 'PDF generation test successful',
+      pdfPath: pdfPath
+    });
+  } catch (error) {
+    console.error('PDF generation test error:', error);
+    res.status(500).json({ 
+      message: 'PDF generation test failed',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+};
+
+/**
+ * Test endpoint to create a simple PDF with just a table
+ */
+export const testSimplePDF = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('Testing simple PDF generation');
+    
+    // Test simple PDF generation
+    const pdfPath = await testSimplePDFService();
+    
+    res.json({
+      message: 'Simple PDF generation test successful',
+      pdfPath: pdfPath
+    });
+  } catch (error) {
+    console.error('Simple PDF generation test error:', error);
+    res.status(500).json({ 
+      message: 'Simple PDF generation test failed',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+};
+
+/**
+ * Endpoint to download/view the latest generated PDF
+ */
+export const getLatestPDF = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const uploadsDir = path.join(__dirname, '../../uploads/invoices');
+    
+    if (!fs.existsSync(uploadsDir)) {
+      res.status(404).json({ message: 'No invoices directory found' });
+      return;
+    }
+
+    // Get the most recent PDF file
+    const files = fs.readdirSync(uploadsDir)
+      .filter(file => file.endsWith('.pdf'))
+      .map(file => ({
+        name: file,
+        path: path.join(uploadsDir, file),
+        stats: fs.statSync(path.join(uploadsDir, file))
+      }))
+      .sort((a, b) => b.stats.mtime.getTime() - a.stats.mtime.getTime());
+
+    if (files.length === 0) {
+      res.status(404).json({ message: 'No PDF files found' });
+      return;
+    }
+
+    const latestFile = files[0];
+    
+    res.json({
+      message: 'Latest PDF found',
+      fileName: latestFile.name,
+      filePath: latestFile.path,
+      fileSize: latestFile.stats.size,
+      lastModified: latestFile.stats.mtime
+    });
+  } catch (error) {
+    console.error('Error getting latest PDF:', error);
+    res.status(500).json({ 
+      message: 'Failed to get latest PDF',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+};
+
+/**
  * Create a Razorpay order
  */
 export const createOrder = async (req: Request, res: Response): Promise<void> => {
@@ -90,20 +226,39 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     console.log('Creating Razorpay order with data:', req.body);
     console.log('Request headers:', req.headers);
     
-    const { amount, currency, email, organizationName, causeTitle, sponsorshipId }: CreateOrderRequest = req.body;
+    const { amount, currency, email, organizationName, contactName, phone, causeTitle, sponsorshipId, toteQuantity, unitPrice }: CreateOrderRequest = req.body;
+
+    console.log('Extracted values:', {
+      amount,
+      currency,
+      email,
+      organizationName,
+      contactName,
+      phone,
+      causeTitle,
+      sponsorshipId,
+      toteQuantity,
+      unitPrice,
+      types: {
+        toteQuantity: typeof toteQuantity,
+        unitPrice: typeof unitPrice
+      }
+    });
 
     // Validate required fields
-    if (!amount || !currency || !email || !organizationName || !causeTitle) {
+    if (!amount || !currency || !email || !organizationName || !contactName || !phone || !causeTitle) {
       console.log('Validation failed - missing fields:', {
         amount: !!amount,
         currency: !!currency,
         email: !!email,
         organizationName: !!organizationName,
+        contactName: !!contactName,
+        phone: !!phone,
         causeTitle: !!causeTitle
       });
       res.status(400).json({
         message: 'Missing required fields',
-        required: ['amount', 'currency', 'email', 'organizationName', 'causeTitle']
+        required: ['amount', 'currency', 'email', 'organizationName', 'contactName', 'phone', 'causeTitle']
       });
       return;
     }
@@ -124,11 +279,30 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       notes: {
         email,
         organizationName,
+        contactName,
+        phone,
         causeTitle,
-        sponsorshipId: sponsorshipId || 'N/A'
+        sponsorshipId: sponsorshipId || 'N/A',
+        toteQuantity: toteQuantity || 0,
+        unitPrice: unitPrice || 0
       },
       partial_payment: false
     };
+
+    console.log('Order notes being stored:', {
+      email,
+      organizationName,
+      contactName,
+      phone,
+      causeTitle,
+      sponsorshipId: sponsorshipId || 'N/A',
+      toteQuantity: toteQuantity || 0,
+      unitPrice: unitPrice || 0,
+      types: {
+        toteQuantity: typeof (toteQuantity || 0),
+        unitPrice: typeof (unitPrice || 0)
+      }
+    });
 
     console.log('Creating Razorpay order with options:', orderOptions);
 
@@ -154,6 +328,8 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         key: process.env.RAZORPAY_KEY_ID,
         email,
         organizationName,
+        contactName,
+        phone,
         causeTitle,
         sponsorshipId
       }
@@ -232,23 +408,49 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
     }
     const notes = order?.notes || {};
 
+    console.log('Retrieved order notes:', notes);
+    console.log('Notes data types:', {
+      toteQuantity: typeof notes.toteQuantity,
+      unitPrice: typeof notes.unitPrice,
+      values: {
+        toteQuantity: notes.toteQuantity,
+        unitPrice: notes.unitPrice
+      }
+    });
+
     // Only send invoice if payment is captured
     if (payment.status === 'captured') {
       try {
+        // Get the complete sponsor data from the request body or session
+        // The complete data should be available from the sponsorship creation
+        const completeSponsorData = {
+          paymentId: payment.id,
+          orderId: payment.order_id,
+          amount: Number(payment.amount),
+          currency: payment.currency,
+          organizationName: notes.organizationName || '',
+          contactName: notes.contactName || '',
+          phone: notes.phone || '',
+          causeTitle: notes.causeTitle || '',
+          toteQuantity: Number(notes.toteQuantity) || 0,
+          unitPrice: Number(notes.unitPrice) || 0,
+        };
+
+        console.log('Complete sponsor data for invoice:', completeSponsorData);
+        console.log('Data types for invoice generation:', {
+          toteQuantity: typeof completeSponsorData.toteQuantity,
+          unitPrice: typeof completeSponsorData.unitPrice,
+          values: {
+            toteQuantity: completeSponsorData.toteQuantity,
+            unitPrice: completeSponsorData.unitPrice
+          }
+        });
+
+        console.log('Generating invoice with data:', completeSponsorData);
+        
         await generateAndSendInvoice(
           notes.email || payment.email || '',
-          {
-            paymentId: payment.id,
-            orderId: payment.order_id,
-            amount: Number(payment.amount),
-            currency: payment.currency,
-            organizationName: notes.organizationName || '',
-            contactName: notes.contactName || '',
-            phone: notes.phone || '',
-            causeTitle: notes.causeTitle || '',
-            toteQuantity: Number(notes.toteQuantity) || 0,
-            unitPrice: Number(notes.unitPrice) || 0,
-          }
+          completeSponsorData
         );
         console.log('Invoice generated and sent to sponsor.');
       } catch (err) {

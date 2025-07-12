@@ -96,8 +96,11 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
           currency: 'INR',
           email: formData.email,
           organizationName: formData.organizationName,
+          contactName: formData.contactName,
+          phone: formData.phone,
           causeTitle: selectedCause,
           toteQuantity: formData.toteQuantity,
+          unitPrice: formData.unitPrice,
           totalAmount: totalCost
         },
         {
@@ -186,8 +189,11 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
         currency: 'INR',
         email: formData.email,
         organizationName: formData.organizationName,
+        contactName: formData.contactName,
+        phone: formData.phone,
         causeTitle: selectedCause,
         toteQuantity: formData.toteQuantity,
+        unitPrice: formData.unitPrice,
         totalAmount: totalCost
       });
       setPaymentStatus('failed');

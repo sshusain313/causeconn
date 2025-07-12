@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import {
   testPaymentService,
+  testInvoiceGeneration,
+  testPDFGeneration,
+  testSimplePDF,
+  getLatestPDF,
   createOrder,
   confirmPayment,
   getPaymentStatus
@@ -9,8 +13,8 @@ import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 
-// Test endpoint (public)
-router.get('/test', testPaymentService);
+
+router.get('/latest-pdf', getLatestPDF);
 
 // Protected payment endpoints (require authentication)
 router.post('/create-order', authenticateToken, createOrder);

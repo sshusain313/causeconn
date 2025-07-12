@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Recycle, Leaf, ArrowRight, Gift, Megaphone, TrendingUp, Users, Globe, Target } from "lucide-react";
-import Layout from "@/components/Layout";
+import { Link } from "react-router-dom";
 
 const SayNoToPlastic = () => {
   const impactStats = [
@@ -28,9 +28,21 @@ const SayNoToPlastic = () => {
   ];
 
   return (
-    <Layout>
+    <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      {/* <nav className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="container mx-auto flex items-center justify-between">
+          <Link to="/" className="text-2xl font-bold text-primary">
+            ChangeBag
+          </Link>
+          <Button asChild variant="outline">
+            <Link to="/">← Back to Home</Link>
+          </Button>
+        </div>
+      </nav> */}
+
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-green-50 to-emerald-50 py-20">
+      <section className="relative bg-gradient-to-br from-green-50 to-green-100 py-20">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -191,14 +203,14 @@ const SayNoToPlastic = () => {
               <Gift className="mr-2 h-5 w-5" />
               🎁 Claim Your Free Bag
             </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-green-700 px-8 py-4 text-lg font-semibold">
+            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 text-lg font-semibold">
               <Megaphone className="mr-2 h-5 w-5" />
               📢 Sponsor This Cause
             </Button>
           </div>
         </div>
       </section>
-    </Layout>
+    </div>
   );
 };
 
