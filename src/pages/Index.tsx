@@ -21,6 +21,7 @@ interface Cause {
   targetAmount: number;
   sponsorships?: Array<{ status: string }>;
   imageUrl?: string; // Added for featured causes
+  createdAt: string;
 }
 
 const HERO_IMAGE = "/images/admin-placeholder.avif"; // Placeholder, replace with actual illustration if available
@@ -117,25 +118,10 @@ const Index = () => {
   }, []);
 
 
-    // --- MOCK PAGE ROUTES LOGIC ---
-  // Define the mock page routes
-  const mockPageRoutes = [
-    "/mock/Page3",
-    "/mock/Page5",
-    "/mock/Page6",
-    "/mock/Page4",
-    "/mock/Page2",
-    "/mock/Page3",
-  ];
-
+    // --- DYNAMIC CAUSE ROUTES LOGIC ---
   // Sort causes by createdAt descending and get the 6 most recent
   const sortedCauses = [...featuredCauses].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  const mostRecentCauses = sortedCauses.slice(0, mockPageRoutes.length);
-  // Map cause _id to mock page route
-  const causeIdToMockPage: Record<string, string> = {};
-  mostRecentCauses.forEach((cause, idx) => {
-    causeIdToMockPage[cause._id] = mockPageRoutes[idx];
-  });
+  const mostRecentCauses = sortedCauses.slice(0, 6);
   
   useEffect(() => {
     const fetchCauses = async () => {
@@ -264,14 +250,7 @@ const Index = () => {
                 <Card key={cause._id} className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
                   <div 
                     className="cursor-pointer" 
-                    onClick={() => {
-                      if (causeIdToMockPage[cause._id]) {
-                        navigate(causeIdToMockPage[cause._id]);
-                      } else {
-                        navigate(`/cause/${cause._id}`);
-                      }
-                    }}
-                    // onClick={() => navigate(`/cause/${cause._id}`)}
+                    onClick={() => navigate(`/cause/${cause._id}`)}
                     title={`View details for ${cause.title}`}
                   >
                     <img 

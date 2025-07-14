@@ -55,16 +55,11 @@ import EditCause from './pages/admin/EditCause';
 import WaitlistManagement from "./pages/admin/WaitlistManagement";
 
 // Test Components
-import PaymentTest from "./components/PaymentTest";
+// import PaymentTest from "./components/PaymentTest";
 import NumberInputDemo from "./components/NumberInputDemo";
 
-// Mock Pages
-import LookUpNotDown from "./pages/mock/LookUpNotDown";
-import RespectAtWork from "./pages/mock/RespectAtWork";
-import PlantMoreTrees from "./pages/mock/PlantMoreTrees";
-import SayNoToPlastic from "./pages/mock/SayNoToPlastic";
-import SaveWaterSaveLife from "./pages/mock/SaveWaterSaveLife";
-import MentalHealthMatters from "./pages/mock/MentalHealthMatters";
+// Dynamic Cause Page
+import DynamicCausePage from "./pages/DynamicCausePage";
 
 // Create QueryClient once, outside of component
 const queryClient = new QueryClient();
@@ -82,14 +77,14 @@ const App: React.FC = () => {
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/causes" element={<CausesPage />} />
-                <Route path="/cause/:id" element={<CauseDetailsPage />} />
+                <Route path="/cause/:id" element={<DynamicCausePage />} />
                 <Route path="/create-cause" element={<CreateCausePage />} />
                 <Route path="/sponsor/new" element={<SponsorFormPage />} />
                 <Route path="/sponsorship/confirmation" element={<SponsorshipConfirmation />} />
                 <Route path="/login" element={<LoginPage />} />
                 
                 {/* Test Routes */}
-                <Route path="/test/payment" element={<PaymentTest />} />
+                {/* <Route path="/test/payment" element={<PaymentTest />} /> */}
                 <Route path="/demo/number-input" element={<NumberInputDemo />} />
                 
                 {/* Public Information Pages */}
@@ -197,13 +192,8 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 } />
                 
-                {/* Mock Page Routes */}
-                <Route path="/mock/Page1" element={<LookUpNotDown />} />
-                <Route path="/mock/Page2" element={<RespectAtWork />} />
-                <Route path="/mock/Page3" element={<PlantMoreTrees />} />
-                <Route path="/mock/Page4" element={<SayNoToPlastic />} />
-                <Route path="/mock/Page5" element={<SaveWaterSaveLife />} />
-                <Route path="/mock/Page6" element={<MentalHealthMatters />} />
+                {/* Dynamic Cause Routes */}
+                <Route path="/causes/:id" element={<DynamicCausePage />} />
                 
                 {/* Catch-all Route */}
                 <Route path="*" element={<NotFound />} />

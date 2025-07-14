@@ -99,6 +99,7 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
           contactName: formData.contactName,
           phone: formData.phone,
           causeTitle: selectedCause,
+          causeId: formData.selectedCause || causeData?._id, // <-- ADDED BY MYSELF
           toteQuantity: formData.toteQuantity,
           unitPrice: formData.unitPrice,
           totalAmount: totalCost

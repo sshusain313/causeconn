@@ -30,6 +30,7 @@ interface CreateOrderRequest {
   contactName: string;
   phone: string;
   causeTitle: string;
+  causeId?: string;
   sponsorshipId?: string;
   toteQuantity?: number;
   unitPrice?: number;
@@ -226,7 +227,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     console.log('Creating Razorpay order with data:', req.body);
     console.log('Request headers:', req.headers);
     
-    const { amount, currency, email, organizationName, contactName, phone, causeTitle, sponsorshipId, toteQuantity, unitPrice }: CreateOrderRequest = req.body;
+    const { amount, currency, email, organizationName, contactName, phone, causeTitle, causeId, sponsorshipId, toteQuantity, unitPrice }: CreateOrderRequest = req.body;
 
     console.log('Extracted values:', {
       amount,
@@ -236,6 +237,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       contactName,
       phone,
       causeTitle,
+      causeId,
       sponsorshipId,
       toteQuantity,
       unitPrice,
@@ -282,6 +284,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         contactName,
         phone,
         causeTitle,
+        causeId: causeId || '',
         sponsorshipId: sponsorshipId || 'N/A',
         toteQuantity: toteQuantity || 0,
         unitPrice: unitPrice || 0
@@ -295,6 +298,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       contactName,
       phone,
       causeTitle,
+      causeId: causeId || '',
       sponsorshipId: sponsorshipId || 'N/A',
       toteQuantity: toteQuantity || 0,
       unitPrice: unitPrice || 0,
@@ -331,6 +335,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         contactName,
         phone,
         causeTitle,
+        causeId,
         sponsorshipId
       }
     });
@@ -432,6 +437,7 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
           contactName: notes.contactName || '',
           phone: notes.phone || '',
           causeTitle: notes.causeTitle || '',
+          causeId: notes.causeId || '',
           toteQuantity: Number(notes.toteQuantity) || 0,
           unitPrice: Number(notes.unitPrice) || 0,
         };
