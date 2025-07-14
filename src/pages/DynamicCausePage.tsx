@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { AlertTriangle, HouseIcon, DollarSignIcon, Recycle, TreePine, Thermometer, MapPin, TrendingDown, Gift, Megaphone, Globe, Leaf, Users, Heart, ShoppingBag, TrendingUp } from "lucide-react";
+import { AlertCircle, AlertTriangle, HouseIcon, DollarSignIcon, Recycle, TreePine, Thermometer, MapPin, TrendingDown, Gift, Megaphone, Globe, Leaf, Users, Heart, ShoppingBag, TrendingUp } from "lucide-react";
 import { fetchCause } from '@/services/apiServices';
 import { getFullUrl } from '@/utils/apiUtils';
 import { useToast } from '@/components/ui/use-toast';
@@ -114,6 +114,7 @@ const DynamicCausePage = () => {
   // Icon mapping function
   const getIconComponent = (iconName: string) => {
     const iconMap: { [key: string]: any } = {
+      'AlertCircle': AlertCircle,
       'AlertTriangle': AlertTriangle,
       'HouseIcon': HouseIcon,
       'Recycle': Recycle,

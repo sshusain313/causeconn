@@ -55,7 +55,7 @@ const journeySteps = [
     step: "1",
     title: "Sponsor a Cause",
     description: "Browse dozens of local causes that need your help.",
-    image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=500&h=300&fit=crop",
+    image: "https://sdmntprwestus.oaiusercontent.com/files/00000000-0100-6230-a588-a9ca7fc33584/raw?se=2025-07-14T13%3A47%3A08Z&sp=r&sv=2024-08-04&sr=b&scid=c8608bfe-c294-533a-854f-a1ed8e21b455&skoid=ea1de0bc-0467-43d6-873a-9a5cf0a9f835&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-07-14T12%3A05%3A55Z&ske=2025-07-15T12%3A05%3A55Z&sks=b&skv=2024-08-04&sig=IzABAmsPV3lqchmt7eeVo4EHrvY%2Bq1H%2BdUPD20LwBhQ%3D",
     imageAlt: "People browsing causes on laptop"
   },
   {
@@ -63,7 +63,7 @@ const journeySteps = [
     step: "2",
     title: "Upload Your Logo",
     description: "Add your brand identity to the cause page.",
-    image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=500&h=300&fit=crop",
+    image: "https://sdmntprwestus2.oaiusercontent.com/files/00000000-b74c-61f8-86de-5b0d34638348/raw?se=2025-07-14T13%3A47%3A08Z&sp=r&sv=2024-08-04&sr=b&scid=b95dfe40-04cf-5dfe-bfae-8263768dfe9e&skoid=ea1de0bc-0467-43d6-873a-9a5cf0a9f835&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-07-14T12%3A46%3A09Z&ske=2025-07-15T12%3A46%3A09Z&sks=b&skv=2024-08-04&sig=G/zyz7TYVrzTqfqkPs8b%2BKjt60zkKCacOHnlUsqvQ00%3D",
     imageAlt: "Brand logo design on computer"
   },
   {
@@ -71,7 +71,7 @@ const journeySteps = [
     step: "3", 
     title: "Choose Where to Distribute",
     description: "Select from multiple campaign channels.",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&h=300&fit=crop",
+    image: "https://sdmntprwestus.oaiusercontent.com/files/00000000-dd68-6230-a28f-3a25fef5792c/raw?se=2025-07-14T13%3A47%3A08Z&sp=r&sv=2024-08-04&sr=b&scid=f91da766-96df-5fef-91a8-9f90ab9a63ed&skoid=ea1de0bc-0467-43d6-873a-9a5cf0a9f835&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-07-14T04%3A23%3A48Z&ske=2025-07-15T04%3A23%3A48Z&sks=b&skv=2024-08-04&sig=1s2FthgkT%2BliHovxNWedqajAozEtFCjhYi7BnBJ67G0%3D",
     imageAlt: "Distribution channels and social media"
   },
   {
@@ -79,7 +79,7 @@ const journeySteps = [
     step: "4",
     title: "Track Your Reach & Impact",
     description: "Get detailed analytics on your campaign's success.",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop",
+    image: "https://sdmntprwestus.oaiusercontent.com/files/00000000-308c-6230-989e-de22b61712a0/raw?se=2025-07-14T13%3A47%3A08Z&sp=r&sv=2024-08-04&sr=b&scid=dc13c8d0-7c7d-5789-8041-62ecda749292&skoid=ea1de0bc-0467-43d6-873a-9a5cf0a9f835&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-07-13T22%3A52%3A17Z&ske=2025-07-14T22%3A52%3A17Z&sks=b&skv=2024-08-04&sig=gp9wC17KVJ58d7FQjhc9eSkdlM61EUEyWPhOGLON3PQ%3D",
     imageAlt: "Analytics dashboard showing impact metrics"
   }
 ];
@@ -148,10 +148,15 @@ const Index = () => {
 
   // Hero Section
   const HeroSection = () => (
-    <section className="bg-white border-b border-gray-100 py-16">
-      <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-10">
+    <section className="bg-white border-b border-gray-100 py-8">
+      <div className="container mx-auto flex flex-col md:flex-row items-center gap-10">
+        <img 
+          src='https://sdmntprwestus.oaiusercontent.com/files/00000000-8b2c-6230-bbd9-eeb28464dede/raw?se=2025-07-14T15%3A11%3A19Z&sp=r&sv=2024-08-04&sr=b&scid=9c4bc106-cd7b-52c7-840d-163d54816c31&skoid=61180a4f-34a9-42b7-b76d-9ca47d89946d&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-07-13T22%3A43%3A07Z&ske=2025-07-14T22%3A43%3A07Z&sks=b&skv=2024-08-04&sig=%2BTIvrAH7FKYoi6BlzJePeyAzm8Uv9w%2B5Wdz6sf2gP0U%3D' 
+          alt='hero' 
+          className="w-full h-64 md:h-80 lg:h-96 object-cover"
+        />
         {/* Left: Text */}
-        <div className="flex-1 max-w-xl">
+        {/* <div className="flex-1 max-w-xl">
           <div className="mb-2 text-sm text-gray-500 font-medium">Sponsor Change – Make an Impact</div>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
             A New-Age Promotional Platform for <span className="text-green-600">Purpose-Driven Brands</span>
@@ -166,24 +171,18 @@ const Index = () => {
                 >
             Sponsor
                 </Button>
-              </div>
+              </div> */}
         {/* Right: Illustration */}
-        <div className="flex-1 flex justify-center items-center relative">
+        {/* <div className="flex-1 flex justify-center items-center relative"> */}
           {/* <div className="rounded-full bg-green-50 w-[340px] h-[340px] flex items-center justify-center relative"> */}
-            <img 
+            {/* <img 
               src={HERO_IMAGE}
               alt="Hero Illustration"
               className="w-full h-56 md:h-96 max-w-xs md:max-w-lg object-contain drop-shadow-xl mx-auto"
               aria-hidden="true"
-            />
-            {/* Callouts (simulate with positioned badges) */}
-            {/* <span className="absolute left-2 top-8 bg-white text-xs px-2 py-1 rounded-full shadow border">Just You</span>
-            <span className="absolute right-2 top-8 bg-white text-xs px-2 py-1 rounded-full shadow border">Your Skill</span>
-            <span className="absolute left-0 bottom-10 bg-white text-xs px-2 py-1 rounded-full shadow border">No corporate politics.</span>
-            <span className="absolute right-0 bottom-10 bg-white text-xs px-2 py-1 rounded-full shadow border">No endless job applications.</span>
-            <span className="absolute left-1/2 -top-4 -translate-x-1/2 bg-white text-xs px-2 py-1 rounded-full shadow border">A role. An income to earn.</span> */}
-          {/* </div> */}
-        </div>
+            /> */}
+           
+        {/* </div> */}
       </div>
     </section>
   );
