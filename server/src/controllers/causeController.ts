@@ -184,9 +184,42 @@ export const getCauseById = async (req: Request, res: Response) => {
       ...cause.toObject(),
       totalTotes,
       claimedTotes,
-      availableTotes
+      availableTotes,
+      // Include all dynamic content fields
+      heroTitle: cause.heroTitle,
+      heroSubtitle: cause.heroSubtitle,
+      heroImageUrl: cause.heroImageUrl,
+      heroBackgroundColor: cause.heroBackgroundColor,
+      impactTitle: cause.impactTitle,
+      impactSubtitle: cause.impactSubtitle,
+      impactStats: cause.impactStats,
+      progressTitle: cause.progressTitle,
+      progressSubtitle: cause.progressSubtitle,
+      progressBackgroundImageUrl: cause.progressBackgroundImageUrl,
+      progressCards: cause.progressCards,
+      faqs: cause.faqs,
+      ctaTitle: cause.ctaTitle,
+      ctaSubtitle: cause.ctaSubtitle,
+      ctaPrimaryButtonText: cause.ctaPrimaryButtonText,
+      ctaSecondaryButtonText: cause.ctaSecondaryButtonText,
+      primaryColor: cause.primaryColor,
+      secondaryColor: cause.secondaryColor,
+      accentColor: cause.accentColor,
+      customCSS: cause.customCSS,
+      metaTitle: cause.metaTitle,
+      metaDescription: cause.metaDescription,
+      metaKeywords: cause.metaKeywords,
+      ogImageUrl: cause.ogImageUrl,
+      testimonials: cause.testimonials,
+      gallery: cause.gallery,
+      partners: cause.partners,
     };
     
+    console.log('Returning cause with dynamic content:', causeWithTotes);
+    console.log('Hero title:', causeWithTotes.heroTitle);
+    console.log('Impact stats:', causeWithTotes.impactStats);
+    console.log('Progress cards:', causeWithTotes.progressCards);
+    console.log('FAQs:', causeWithTotes.faqs);
     res.json(causeWithTotes);
   } catch (error) {
     console.error('Error fetching cause:', error);

@@ -34,6 +34,84 @@ export interface ICause extends Document {
   availableTotes?: number;
   distributionStartDate?: Date;
   distributionEndDate?: Date;
+  
+  // Dynamic content fields
+  story?: string;
+  detailedDescription?: string;
+  whyItMatters?: string;
+  
+  // Hero section
+  heroTitle?: string;
+  heroSubtitle?: string;
+  heroImageUrl?: string;
+  heroBackgroundColor?: string;
+  
+  // Impact section
+  impactTitle?: string;
+  impactSubtitle?: string;
+  impactStats?: Array<{
+    icon: string;
+    value: string;
+    label: string;
+    description?: string;
+  }>;
+  
+  // Progress section
+  progressTitle?: string;
+  progressSubtitle?: string;
+  progressBackgroundImageUrl?: string;
+  progressCards?: Array<{
+    title: string;
+    value: string;
+    description: string;
+    icon: string;
+    additionalInfo?: string;
+  }>;
+  
+  // FAQs
+  faqs?: Array<{
+    question: string;
+    answer: string;
+    category?: string;
+  }>;
+  
+  // Call to action
+  ctaTitle?: string;
+  ctaSubtitle?: string;
+  ctaPrimaryButtonText?: string;
+  ctaSecondaryButtonText?: string;
+  
+  // Theming
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  customCSS?: string;
+  
+  // SEO
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
+  ogImageUrl?: string;
+  
+  // Additional content
+  testimonials?: Array<{
+    name: string;
+    role: string;
+    content: string;
+    avatarUrl?: string;
+  }>;
+  
+  gallery?: Array<{
+    imageUrl: string;
+    caption?: string;
+    alt?: string;
+  }>;
+  
+  partners?: Array<{
+    name: string;
+    logoUrl: string;
+    website?: string;
+  }>;
 }
 
 const causeSchema = new Schema<ICause>(
@@ -105,7 +183,216 @@ const causeSchema = new Schema<ICause>(
     },
     distributionEndDate: {
       type: Date
-    }
+    },
+    
+    // Dynamic content fields
+    story: {
+      type: String,
+      trim: true
+    },
+    detailedDescription: {
+      type: String,
+      trim: true
+    },
+    whyItMatters: {
+      type: String,
+      trim: true
+    },
+    
+    // Hero section
+    heroTitle: {
+      type: String,
+      trim: true
+    },
+    heroSubtitle: {
+      type: String,
+      trim: true
+    },
+    heroImageUrl: {
+      type: String,
+      default: ''
+    },
+    heroBackgroundColor: {
+      type: String,
+      default: ''
+    },
+    
+    // Impact section
+    impactTitle: {
+      type: String,
+      trim: true
+    },
+    impactSubtitle: {
+      type: String,
+      trim: true
+    },
+    impactStats: [{
+      icon: {
+        type: String,
+        required: true
+      },
+      value: {
+        type: String,
+        required: true
+      },
+      label: {
+        type: String,
+        required: true
+      },
+      description: {
+        type: String
+      }
+    }],
+    
+    // Progress section
+    progressTitle: {
+      type: String,
+      trim: true
+    },
+    progressSubtitle: {
+      type: String,
+      trim: true
+    },
+    progressBackgroundImageUrl: {
+      type: String,
+      default: ''
+    },
+    progressCards: [{
+      title: {
+        type: String,
+        required: true
+      },
+      value: {
+        type: String,
+        required: true
+      },
+      description: {
+        type: String,
+        required: true
+      },
+      icon: {
+        type: String,
+        required: true
+      },
+      additionalInfo: {
+        type: String
+      }
+    }],
+    
+    // FAQs
+    faqs: [{
+      question: {
+        type: String,
+        required: true
+      },
+      answer: {
+        type: String,
+        required: true
+      },
+      category: {
+        type: String
+      }
+    }],
+    
+    // Call to action
+    ctaTitle: {
+      type: String,
+      trim: true
+    },
+    ctaSubtitle: {
+      type: String,
+      trim: true
+    },
+    ctaPrimaryButtonText: {
+      type: String,
+      trim: true
+    },
+    ctaSecondaryButtonText: {
+      type: String,
+      trim: true
+    },
+    
+    // Theming
+    primaryColor: {
+      type: String,
+      default: ''
+    },
+    secondaryColor: {
+      type: String,
+      default: ''
+    },
+    accentColor: {
+      type: String,
+      default: ''
+    },
+    customCSS: {
+      type: String
+    },
+    
+    // SEO
+    metaTitle: {
+      type: String,
+      trim: true
+    },
+    metaDescription: {
+      type: String,
+      trim: true
+    },
+    metaKeywords: [{
+      type: String,
+      trim: true
+    }],
+    ogImageUrl: {
+      type: String,
+      default: ''
+    },
+    
+    // Additional content
+    testimonials: [{
+      name: {
+        type: String,
+        required: true
+      },
+      role: {
+        type: String,
+        required: true
+      },
+      content: {
+        type: String,
+        required: true
+      },
+      avatarUrl: {
+        type: String,
+        default: ''
+      }
+    }],
+    
+    gallery: [{
+      imageUrl: {
+        type: String,
+        required: true
+      },
+      caption: {
+        type: String
+      },
+      alt: {
+        type: String
+      }
+    }],
+    
+    partners: [{
+      name: {
+        type: String,
+        required: true
+      },
+      logoUrl: {
+        type: String,
+        required: true
+      },
+      website: {
+        type: String
+      }
+    }]
   },
   {
     timestamps: true,

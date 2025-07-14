@@ -168,11 +168,23 @@ export const fetchDashboardMetrics = async () => {
 
 export const fetchCause = async (id: string): Promise<Cause> => {
   try {
-    const response = await fetch(`${config.apiUrl}/causes/${id}`);
+    const url = `${config.apiUrl}/causes/${id}`;
+    console.log(`Fetching cause ${id} from: ${url}`);
+    console.log('Config API URL:', config.apiUrl);
+    
+    const response = await fetch(url);
+    console.log('Response status:', response.status);
+    console.log('Response headers:', response.headers);
+    
     if (!response.ok) {
-      throw new Error('Failed to fetch cause');
+      const errorText = await response.text();
+      console.error('Response error:', errorText);
+      throw new Error(`Failed to fetch cause: ${response.status} ${response.statusText} - ${errorText}`);
     }
-    return await response.json();
+    
+    const data = await response.json();
+    console.log(`Cause ${id} data received:`, data);
+    return data;
   } catch (error) {
     console.error(`Error fetching cause ${id}:`, error);
     // Fallback to mock data if API call fails

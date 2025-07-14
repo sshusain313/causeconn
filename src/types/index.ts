@@ -37,8 +37,89 @@ export interface Cause {
   };
   hasApprovedSponsorship: boolean;
   sponsorships: Sponsorship[];
+  totalTotes?: number;
+  availableTotes?: number;
+  claimedTotes?: number;
   createdAt: string;
   updatedAt: string;
+  
+  // Dynamic content fields
+  story?: string;
+  detailedDescription?: string;
+  whyItMatters?: string;
+  
+  // Hero section
+  heroTitle?: string;
+  heroSubtitle?: string;
+  heroImageUrl?: string;
+  heroBackgroundColor?: string;
+  
+  // Impact section
+  impactTitle?: string;
+  impactSubtitle?: string;
+  impactStats?: Array<{
+    icon: string;
+    value: string;
+    label: string;
+    description?: string;
+  }>;
+  
+  // Progress section
+  progressTitle?: string;
+  progressSubtitle?: string;
+  progressBackgroundImageUrl?: string;
+  progressCards?: Array<{
+    title: string;
+    value: string;
+    description: string;
+    icon: string;
+    additionalInfo?: string;
+  }>;
+  
+  // FAQs
+  faqs?: Array<{
+    question: string;
+    answer: string;
+    category?: string;
+  }>;
+  
+  // Call to action
+  ctaTitle?: string;
+  ctaSubtitle?: string;
+  ctaPrimaryButtonText?: string;
+  ctaSecondaryButtonText?: string;
+  
+  // Theming
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  customCSS?: string;
+  
+  // SEO
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
+  ogImageUrl?: string;
+  
+  // Additional content
+  testimonials?: Array<{
+    name: string;
+    role: string;
+    content: string;
+    avatarUrl?: string;
+  }>;
+  
+  gallery?: Array<{
+    imageUrl: string;
+    caption?: string;
+    alt?: string;
+  }>;
+  
+  partners?: Array<{
+    name: string;
+    logoUrl: string;
+    website?: string;
+  }>;
 }
 
 export interface Sponsor {

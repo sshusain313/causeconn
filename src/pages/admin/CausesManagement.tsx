@@ -87,6 +87,10 @@ const CausesManagement = () => {
     navigate(`/admin/causes/${causeId}/edit`);
   };
 
+  const handleContentEditor = (causeId: string) => {
+    navigate(`/admin/causes/${causeId}/content`);
+  };
+
   const handleToggleStatus = async (causeId: string) => {
     try {
       const cause = causes.find(c => c._id === causeId);
@@ -325,6 +329,15 @@ const CausesManagement = () => {
                     >
                       <PenIcon className="w-4 h-4" />
                       <span className="ml-2 text-xs sm:text-sm">Edit</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleContentEditor(cause._id)}
+                      className="flex-1 sm:flex-none"
+                    >
+                      <PenIcon className="w-4 h-4" />
+                      <span className="ml-2 text-xs sm:text-sm">Content</span>
                     </Button>
                     <Button
                       variant="outline"

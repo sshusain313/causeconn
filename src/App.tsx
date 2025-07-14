@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Unauthorized from "./pages/Unauthorized";
@@ -53,6 +53,13 @@ import QrScanner from "./pages/admin/QrScanner";
 import DistributionSettings from './pages/admin/DistributionSettings';
 import EditCause from './pages/admin/EditCause';
 import WaitlistManagement from "./pages/admin/WaitlistManagement";
+import CauseContentEditor from "./pages/admin/CauseContentEditor";
+
+// Wrapper component for content editor
+const CauseContentEditorWrapper = () => {
+  const { id } = useParams<{ id: string }>();
+  return <CauseContentEditor causeId={id!} />;
+};
 
 // Test Components
 // import PaymentTest from "./components/PaymentTest";
@@ -189,6 +196,11 @@ const App: React.FC = () => {
                 <Route path="/admin/distribution-settings" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <DistributionSettings />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/causes/:id/content" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <CauseContentEditorWrapper />
                   </ProtectedRoute>
                 } />
                 
