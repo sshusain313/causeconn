@@ -24,6 +24,13 @@ import WhySponsorPage from "./pages/WhySponsor";
 import WhyClaimPage from "./pages/WhyClaim";
 import LogoReuploadPage from "./pages/sponsor/LogoReupload";
 
+// Legal & Support Pages
+import HelpCenter from "./pages/HelpCenter";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import CookiePolicy from "./pages/CookiePolicy";
+import AccessibilityPage from "./pages/AccessibilityPage";
+
 // Claimer Journey Pages
 import ClaimFormPage from "./pages/claimer/ClaimForm";
 import OtpVerificationPage from "./pages/claimer/OtpVerification";
@@ -98,6 +105,13 @@ const App: React.FC = () => {
                 <Route path="/why-sponsor" element={<WhySponsorPage />} />
                 <Route path="/why-claim" element={<WhyClaimPage />} />
                 <Route path="/sponsor/logo-reupload/:sponsorshipId" element={<LogoReuploadPage />} />
+                
+                {/* Legal & Support Pages */}
+                <Route path="/help-center" element={<HelpCenter />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
+                <Route path="/cookie-policy" element={<CookiePolicy />} />
+                <Route path="/accessibility" element={<AccessibilityPage />} />
                 
                 {/* Claimer Journey Routes */}
                 {/* Fix route ordering - more specific routes must come before dynamic routes */}

@@ -242,8 +242,8 @@ const CausesPage = () => {
 
   return (
     <Layout>
-      <div className="bg-gradient-to-br from-green-500 via-green-200 to-white py-16">
-        <div className="container mx-auto px-4">
+      <div className="bg-gradient-to-br from-green-500 via-green-200 to-white">
+        <div className="container mx-auto px-4 py-16">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-black to-gray-800 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-white mb-4 shadow-lg">
               <Search className="h-4 w-4" />

@@ -241,7 +241,7 @@ const CreateCause = () => {
 
               {/* <div className="grid md:grid-cols-2 gap-6"> */}
               <div className="space-y-2">
-                {/* <div className="space-y-2">
+                <div className="space-y-2">
                   <Label htmlFor="targetAmount">Target Amount (₹) *</Label>
                   <Input
                     id="targetAmount"
@@ -252,7 +252,7 @@ const CreateCause = () => {
                     min="1"
                     required
                   />
-                </div> */}
+                </div>
                  <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
                 {/* <div className="flex items-center space-x-2"> */}

@@ -225,7 +225,7 @@ const Index = () => {
           </p>
           
           {/* <Button className="bg-brand-primary hover:bg-brand-accent text-brand-primary-foreground px-8 py-3 text-lg rounded-lg"> */}
-          <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg rounded-lg">  
+          <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg rounded-lg" onClick={()=>navigate('/causes')}>  
             Sponsor
           </Button>
         </div>
