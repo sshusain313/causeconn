@@ -65,7 +65,7 @@ const journeySteps = [
     title: "Upload Your Logo",
     description: "Add your brand identity to the cause page.",
     // image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=500&h=300&fit=crop",
-    image: "/images/uploadyourlogo.png",
+    image: "/images/upload.png",
     imageAlt: "Brand logo design on computer"
   },
   {
@@ -495,7 +495,7 @@ const Index = () => {
     <section className="bg-white py-20 border-b border-gray-100">
       <div className="container mx-auto px-4">
         <div className="mb-10">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 text-left inline-block">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-left inline-block">
             How Change Spreads
           </h2>
           <div className="h-1 w-24 bg-green-600 rounded mt-2 mb-2 md:ml-0" />
