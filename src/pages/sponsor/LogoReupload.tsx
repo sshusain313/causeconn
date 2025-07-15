@@ -33,7 +33,7 @@ const LogoReuploadPage = () => {
       }
 
       try {
-        const response = await authAxios.get(`/api/sponsorships/${sponsorshipId}`);
+        const response = await authAxios.get(`/api/sponsorships/public/${sponsorshipId}`);
         setSponsorship(response.data);
       } catch (err) {
         console.error('Error fetching sponsorship:', err);

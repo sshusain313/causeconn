@@ -370,6 +370,40 @@ export const getUserSponsorships = async (req: Request, res: Response): Promise<
 };
 
 /**
+ * Get sponsorship by ID for sponsors (allows sponsors to access their own sponsorship)
+ */
+export const getSponsorshipByIdForSponsor = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const sponsorship = await Sponsorship.findById(id)
+      .populate('cause', 'title'); // Populate cause with title
+    
+    if (!sponsorship) {
+      res.status(404).json({ message: 'Sponsorship not found' });
+      return;
+    }
+
+    // If user is authenticated, check if they are the sponsor
+    if (req.user) {
+      const isSponsor = sponsorship.sponsor?.toString() === req.user._id?.toString() || 
+                       sponsorship.email === req.user?.email;
+
+      if (!isSponsor) {
+        res.status(403).json({ message: 'You do not have permission to access this sponsorship' });
+        return;
+      }
+    }
+
+    // For public access (logo reupload), allow access without authentication
+    // The sponsorship ID serves as a form of authentication
+    res.json(sponsorship);
+  } catch (error) {
+    console.error('Error fetching sponsorship:', error);
+    res.status(500).json({ message: 'Error fetching sponsorship' });
+  }
+};
+
+/**
  * Handle logo reupload for a rejected sponsorship
  */
 export const reuploadLogo = async (req: Request, res: Response): Promise<void> => {
@@ -386,6 +420,17 @@ export const reuploadLogo = async (req: Request, res: Response): Promise<void> =
     if (!sponsorship) {
       res.status(404).json({ message: 'Sponsorship not found' });
       return;
+    }
+
+    // Check if the user is the sponsor of this sponsorship (if user is authenticated)
+    if (req.user) {
+      const isSponsor = sponsorship.sponsor?.toString() === req.user._id?.toString() || 
+                       sponsorship.email === req.user.email;
+
+      if (!isSponsor) {
+        res.status(403).json({ message: 'You do not have permission to update this sponsorship' });
+        return;
+      }
     }
 
     // Store the previous logo URL for reference

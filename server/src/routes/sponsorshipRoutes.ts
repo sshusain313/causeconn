@@ -6,6 +6,7 @@ import {
   rejectSponsorship,
   toggleSponsorshipOnlineStatus,
   getSponsorshipById,
+  getSponsorshipByIdForSponsor,
   getUserSponsorships,
   reuploadLogo,
   testSponsorshipModel,
@@ -25,10 +26,14 @@ const router = createRouter();
 
 // Public routes
 router.post('/', createSponsorship); // Can work with or without authentication
-router.patch('/:sponsorshipId/reupload', reuploadLogo); // Public route for sponsors to reupload logos
 
 // Protected routes (require authentication)
 router.get('/user', authenticateToken, getUserSponsorships);
+router.get('/sponsor/:id', authenticateToken, getSponsorshipByIdForSponsor); // Allow sponsors to access their own sponsorship
+
+// Public routes with validation
+router.get('/public/:id', getSponsorshipByIdForSponsor); // Public route for logo reupload (no auth required)
+router.patch('/:sponsorshipId/reupload', reuploadLogo); // Public route for sponsors to reupload logos
 
 // Admin routes (require authentication and admin role)
 router.get('/pending', authenticateToken, adminGuard, getPendingSponsorships);
@@ -38,6 +43,8 @@ router.patch('/:id/approve', authenticateToken, adminGuard, approveSponsorship);
 router.patch('/:id/reject', authenticateToken, adminGuard, rejectSponsorship);
 router.patch('/:id/toggle-online', authenticateToken, adminGuard, toggleSponsorshipOnlineStatus);
 router.patch('/:id/end-campaign', authenticateToken, adminGuard, endCampaign);
+
+// Generic sponsorship route (admin only) - must come after specific routes
 router.get('/:id', authenticateToken, adminGuard, getSponsorshipById);
 
 // Test routes (admin only)
