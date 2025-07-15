@@ -402,89 +402,193 @@ const Index = () => {
     const currentStep = journeySteps.find(s => s.id === activeStep) || journeySteps[0];
 
     return (
-      <section className="bg-white py-20 border-b border-gray-100">
-        <div className="container mx-auto bg-white px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-20 text-center">
-            From Purpose to Impact: <span className="text-green-600">The ChangeBag Journey</span>
-          </h2>
-          {/* Mobile: Horizontal stepper above image, description for selected step only */}
+      <section className="bg-gradient-to-br from-white via-green-50/20 to-white py-24 border-b border-gray-100">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              From Purpose to Impact: <span className="text-green-600">The ChangeBag Journey</span>
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Follow our simple 4-step process to create meaningful impact while building your brand presence
+            </p>
+          </div>
+
+          {/* Mobile: Enhanced horizontal stepper */}
           <div className="block md:hidden">
-            <div className="flex flex-row justify-between items-center gap-2 mb-6 overflow-x-auto">
+            {/* Progress Bar */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4">
+                {journeySteps.map((step, index) => (
+                  <div key={step.id} className="flex flex-col items-center">
+                    <div 
+                      className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${
+                        activeStep === step.id 
+                          ? 'bg-green-600 text-white shadow-lg scale-110' 
+                          : index < journeySteps.findIndex(s => s.id === activeStep)
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-200 text-gray-600'
+                      }`}
+                    >
+                      {step.step}
+                    </div>
+                    <div className="text-xs text-center mt-2 font-medium text-gray-600 max-w-20">
+                      {step.title}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Progress Line */}
+              <div className="relative">
+                <div className="h-1 bg-gray-200 rounded-full">
+                  <div 
+                    className="h-1 bg-green-600 rounded-full transition-all duration-500"
+                    style={{ 
+                      width: `${((journeySteps.findIndex(s => s.id === activeStep) + 1) / journeySteps.length) * 100}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Current Step Content */}
+            <div className="bg-white rounded-2xl shadow-xl border border-green-100 overflow-hidden">
+              <div className="relative">
+                <img
+                  src={currentStep.image}
+                  alt={currentStep.imageAlt}
+                  className="w-full h-64 object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "/images/sponsoracause.png";
+                  }}
+                />
+                {/* <div className="absolute top-4 left-4">
+                  <div className="bg-green-600 text-white px-4 py-2 rounded-full font-bold text-sm">
+                    Step {currentStep.step}
+                  </div>
+                </div> */}
+              </div>
+              <div className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">{currentStep.title}</h3>
+                <p className="text-gray-600 text-lg leading-relaxed">{currentStep.description}</p>
+              </div>
+            </div>
+
+            {/* Navigation Dots */}
+            <div className="flex justify-center mt-6 space-x-2">
               {journeySteps.map((step) => (
                 <button
                   key={step.id}
                   onClick={() => setActiveStep(step.id)}
-                  className={`flex flex-col items-center px-3 py-2 rounded-lg transition-all border-2 ${activeStep === step.id ? 'border-green-600 bg-green-50 text-green-700 font-bold' : 'border-gray-200 bg-white text-gray-700'} min-w-[80px]`}
-                  style={{ minWidth: 80 }}
-                >
-                  <span className="font-bold text-green-600 text-lg mb-1">{step.step}</span>
-                  <span className="text-xs text-center whitespace-normal break-words">{step.title}</span>
-                </button>
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    activeStep === step.id ? 'bg-green-600 scale-125' : 'bg-gray-300'
+                  }`}
+                />
               ))}
             </div>
-            <div className="mb-8">
-              {/* <img
-                src={currentStep.image}
-                alt={currentStep.imageAlt}
-                className="w-full max-w-xs h-48 object-cover rounded-2xl shadow-2xl border border-green-100 transition-all duration-300 mx-auto"
-              /> */}
-               <img
-              src={currentStep.image}
-              alt={currentStep.imageAlt}
-              className="w-full max-w-xs h-48 object-cover rounded-2xl shadow-2xl border border-green-100 transition-all duration-300 mx-auto"
-              onError={(e) => {
-                e.currentTarget.src = "/images/sponsoracause.png";
-              }}
-            />
-            </div>
-            {/* Show only the description for the selected step */}
-            <div className="w-full px-4 py-3 border-l-2 border-r-2 border-b-2 border-green-100 bg-green-50 rounded-b-lg text-gray-700 animate-fade-in mb-2">
-              <span className="block whitespace-normal break-words text-sm">{currentStep.description}</span>
-            </div>
           </div>
-          {/* Desktop: Vertical tabs as before */}
-          <div className="hidden md:flex flex-row items-stretch gap-10">
-            {/* Vertical Tabs for Steps */}
-            <div className="w-full md:w-[420px] flex-shrink-0 flex flex-col justify-center">
-              <Tabs value={activeStep} onValueChange={setActiveStep} orientation="vertical">
-                <TabsList className="flex flex-col w-full bg-white rounded-xl p-4 min-h-[420px] gap-4">
-                  {journeySteps.map((step) => (
-                    <div key={step.id} className="w-full">
-                      <TabsTrigger
-                        value={step.id}
-                        className={
-                          `flex items-center text-2xl py-6 px-6 text-left w-full rounded-lg mb-2 last:mb-0 transition-all whitespace-normal break-words max-w-full
-                          data-[state=active]:bg-green-50 data-[state=active]:font-bold data-[state=active]:text-green-600 data-[state=active]:shadow-md
-                          data-[state=active]:border-l-4 data-[state=active]:border-green-600`
-                        }
-                        style={{ wordBreak: 'break-word', maxWidth: '100%' }}
+
+          {/* Desktop: Enhanced vertical layout */}
+          <div className="hidden md:flex flex-row items-stretch gap-12">
+            {/* Left: Enhanced Steps */}
+            <div className="w-full md:w-[500px] flex-shrink-0">
+              <div className="bg-white rounded-2xl shadow-xl border border-green-100 p-8">
+                <div className="space-y-6">
+                  {journeySteps.map((step, index) => (
+                    <div key={step.id} className="relative">
+                      {/* Progress Line */}
+                      {/* {index < journeySteps.length - 1 && (
+                        <div className={`absolute left-6 top-16 w-0.5 h-12 transition-all duration-500 ${
+                          index < journeySteps.findIndex(s => s.id === activeStep) 
+                            ? 'bg-green-500' 
+                            : 'bg-gray-200'
+                        }`}></div>
+                      )} */}
+                      
+                      <button
+                        onClick={() => setActiveStep(step.id)}
+                        className={`w-full text-left p-6 rounded-xl transition-all duration-300 group ${
+                          activeStep === step.id 
+                            ? 'bg-green-50 border-2 border-green-200 shadow-lg transform scale-105' 
+                            : 'bg-gray-50 border-2 border-transparent hover:bg-green-50/50 hover:border-green-100'
+                        }`}
                       >
-                        <span className="font-bold text-green-600 mr-4 text-3xl flex-shrink-0">{step.step}</span>
-                        <span className="flex-1 flex items-center max-w-[260px]">{step.title}</span>
-                      </TabsTrigger>
-                      {/* Show description only for active step */}
-                      {activeStep === step.id && (
-                        <div className="pl-16 pr-2 pb-4 pt-2 text-lg text-gray-700 animate-fade-in border-l-4 border-green-100 bg-green-50 rounded-bl-xl rounded-br-xl max-w-full break-words">
-                          <span className="block max-w-[340px] whitespace-normal break-words">{step.description}</span>
+                        <div className="flex items-start gap-4">
+                          {/* Step Number */}
+                          <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${
+                            activeStep === step.id 
+                              ? 'bg-green-600 text-white shadow-lg' 
+                              : index < journeySteps.findIndex(s => s.id === activeStep)
+                              ? 'bg-green-500 text-white'
+                              : 'bg-gray-200 text-gray-600 group-hover:bg-green-100'
+                          }`}>
+                            {step.step}
+                          </div>
+                          
+                          {/* Content */}
+                          <div className="flex-1">
+                            <h3 className={`text-xl font-bold mb-2 transition-colors duration-300 ${
+                              activeStep === step.id ? 'text-green-700' : 'text-gray-900'
+                            }`}>
+                              {step.title}
+                            </h3>
+                            <p className="text-gray-600 leading-relaxed">
+                              {step.description}
+                            </p>
+                          </div>
+                          
+                          {/* Active Indicator */}
+                          {/* {activeStep === step.id && (
+                            <div className="flex-shrink-0">
+                              <div className="w-3 h-3 bg-green-600 rounded-full animate-pulse"></div>
+                            </div>
+                          )} */}
                         </div>
-                      )}
+                      </button>
                     </div>
                   ))}
-                </TabsList>
-              </Tabs>
+                </div>
+              </div>
             </div>
-            {/* Image for current step */}
-            <div className="flex flex-col items-center justify-center flex-1 mt-0">
-              <img
-                src={currentStep.image}
-                alt={currentStep.imageAlt}
-                className="w-full max-w-2xl h-[420px] object-cover rounded-2xl shadow-2xl border border-green-100 transition-all duration-300 mx-auto"
-                onError={(e) => {
-                  e.currentTarget.src = "/images/sponsoracause.png";
-                }}
-              />
+
+            {/* Right: Enhanced Image Display */}
+            <div className="flex-1 flex items-center justify-center">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+                <div className="relative bg-white rounded-3xl shadow-2xl border border-green-100 overflow-hidden transform group-hover:scale-105 transition-all duration-500">
+                  <div className="relative">
+                    <img
+                      src={currentStep.image}
+                      alt={currentStep.imageAlt}
+                      className="w-full max-w-4xl h-[600px] object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "/images/sponsoracause.png";
+                      }}
+                    />
+                    {/* <div className="absolute top-6 left-6">
+                      <div className="bg-green-600 text-white px-6 py-3 rounded-full font-bold text-lg shadow-lg">
+                        Step {currentStep.step}
+                      </div>
+                    </div> */}
+                    <div className="absolute bottom-6 right-6">
+                      <div className="bg-white/90 backdrop-blur-sm text-gray-800 px-4 py-2 rounded-full font-medium text-sm shadow-lg">
+                        {currentStep.title}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Bottom CTA */}
+          {/* <div className="text-center mt-16">
+            <Button 
+              onClick={() => navigate('/causes')}
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+            >
+              Start Your Journey
+            </Button>
+          </div> */}
         </div>
       </section>
     );
@@ -492,58 +596,89 @@ const Index = () => {
 
   // How Change Spreads Section (Enhanced for Mobile)
   const SpreadSection = () => (
-    <section className="bg-white py-20 border-b border-gray-100">
-      <div className="container mx-auto px-4">
-        <div className="mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-left inline-block">
-            How Change Spreads
+    <section className="bg-white py-20  border-b border-gray-100">
+      <div className="container mx-auto px-24">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            How Change <span className="text-green-600">Spreads</span>
           </h2>
-          <div className="h-1 w-24 bg-green-600 rounded mt-2 mb-2 md:ml-0" />
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Our multi-channel approach ensures your message reaches the right audience through various touchpoints
+          </p>
         </div>
-        <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-8 space-y-4 md:space-y-0">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Website & Social Media */}
-          <div className="flex items-center gap-6 bg-green-50 rounded-xl p-6 shadow md:shadow-none">
-            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-8 flex flex-col items-center shadow-md transition-all duration-200 hover:shadow-xl hover:-translate-y-2">
+            <div className="mb-4 flex items-center justify-center rounded-full bg-green-50 w-16 h-16">
               {/* Globe/Share Icon */}
-              <svg width="36" height="36" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#16a34a" strokeWidth="2"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" stroke="#16a34a" strokeWidth="2"/></svg>
+              <svg width="40" height="40" fill="none" viewBox="0 0 24 24" className="text-green-600">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                <path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" stroke="currentColor" strokeWidth="2"/>
+              </svg>
             </div>
-            <div>
-              <h3 className="font-semibold text-xl md:text-2xl text-gray-900">Website & Social Media</h3>
-              <p className="text-gray-600 text-base md:text-lg">Engaging campaigns that go viral.</p>
-            </div>
+            <h3 className="font-bold text-xl mb-2 text-center text-gray-900">Website & Social Media</h3>
+            <p className="text-gray-600 text-base text-center">Engaging campaigns that go viral through strategic social media presence and compelling web content.</p>
           </div>
+
           {/* YouTuber Network */}
-          <div className="flex items-center gap-6 justify-end bg-green-50 rounded-xl p-6 shadow md:shadow-none">
-            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-8 flex flex-col items-center shadow-md transition-all duration-200 hover:shadow-xl hover:-translate-y-2">
+            <div className="mb-4 flex items-center justify-center rounded-full bg-green-50 w-16 h-16">
               {/* YouTube Play Icon */}
-              <svg width="36" height="36" fill="none" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="3" stroke="#16a34a" strokeWidth="2"/><polygon points="10,9 16,12 10,15" fill="#16a34a"/></svg>
+              <svg width="40" height="40" fill="none" viewBox="0 0 24 24" className="text-green-600">
+                <rect x="3" y="6" width="18" height="12" rx="3" stroke="currentColor" strokeWidth="2"/>
+                <polygon points="10,9 16,12 10,15" fill="currentColor"/>
+              </svg>
             </div>
-            <div>
-              <h3 className="font-semibold text-xl md:text-2xl text-gray-900">YouTuber Network</h3>
-              <p className="text-gray-600 text-base md:text-lg">100M+ subscribers, 50M+ views for massive reach.</p>
-            </div>
+            <h3 className="font-bold text-xl mb-2 text-center text-gray-900">YouTuber Network</h3>
+            <p className="text-gray-600 text-base text-center">100M+ subscribers, 50M+ views for massive reach through trusted influencer partnerships.</p>
           </div>
+
           {/* Change Pickup Points */}
-          <div className="flex items-center gap-6 bg-green-50 rounded-xl p-6 shadow md:shadow-none">
-            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-8 flex flex-col items-center shadow-md transition-all duration-200 hover:shadow-xl hover:-translate-y-2">
+            <div className="mb-4 flex items-center justify-center rounded-full bg-green-50 w-16 h-16">
               {/* Map Pin Icon */}
-              <svg width="36" height="36" fill="none" viewBox="0 0 24 24"><path d="M12 21s6-5.686 6-10A6 6 0 0 0 6 11c0 4.314 6 10 6 10z" stroke="#16a34a" strokeWidth="2"/><circle cx="12" cy="11" r="2" stroke="#16a34a" strokeWidth="2"/></svg>
+              <svg width="40" height="40" fill="none" viewBox="0 0 24 24" className="text-green-600">
+                <path d="M12 21s6-5.686 6-10A6 6 0 0 0 6 11c0 4.314 6 10 6 10z" stroke="currentColor" strokeWidth="2"/>
+                <circle cx="12" cy="11" r="2" stroke="currentColor" strokeWidth="2"/>
+              </svg>
             </div>
-            <div>
-              <h3 className="font-semibold text-xl md:text-2xl text-gray-900">Change Pickup Points</h3>
-              <p className="text-gray-600 text-base md:text-lg">Malls, cafes, key city junctions.</p>
-            </div>
+            <h3 className="font-bold text-xl mb-2 text-center text-gray-900">Change Pickup Points</h3>
+            <p className="text-gray-600 text-base text-center">Malls, cafes, key city junctions - strategically placed pickup points for maximum visibility.</p>
           </div>
+
           {/* E-commerce Tie-ups */}
-          <div className="flex items-center gap-6 justify-end bg-green-50 rounded-xl p-6 shadow md:shadow-none">
-            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-8 flex flex-col items-center shadow-md transition-all duration-200 hover:shadow-xl hover:-translate-y-2">
+            <div className="mb-4 flex items-center justify-center rounded-full bg-green-50 w-16 h-16">
               {/* Shopping Bag Icon */}
-              <svg width="36" height="36" fill="none" viewBox="0 0 24 24"><path d="M6 7V6a6 6 0 0 1 12 0v1" stroke="#16a34a" strokeWidth="2"/><rect x="4" y="7" width="16" height="13" rx="2" stroke="#16a34a" strokeWidth="2"/><path d="M9 11v2m6-2v2" stroke="#16a34a" strokeWidth="2"/></svg>
+              <svg width="40" height="40" fill="none" viewBox="0 0 24 24" className="text-green-600">
+                <path d="M6 7V6a6 6 0 0 1 12 0v1" stroke="currentColor" strokeWidth="2"/>
+                <rect x="4" y="7" width="16" height="13" rx="2" stroke="currentColor" strokeWidth="2"/>
+                <path d="M9 11v2m6-2v2" stroke="currentColor" strokeWidth="2"/>
+              </svg>
             </div>
-            <div>
-              <h3 className="font-semibold text-xl md:text-2xl text-gray-900">E-commerce Tie-ups</h3>
-              <p className="text-gray-600 text-base md:text-lg">Available on BookMyShow, MakeMyTrip, and more.</p>
-            </div>
+            <h3 className="font-bold text-xl mb-2 text-center text-gray-900">E-commerce Tie-ups</h3>
+            <p className="text-gray-600 text-base text-center">Available on BookMyShow, MakeMyTrip, and more - integrated into popular e-commerce platforms.</p>
+          </div>
+        </div>
+
+        {/* Stats Section */}
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">100M+</div>
+            <div className="text-gray-600 font-medium">Subscribers</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">50M+</div>
+            <div className="text-gray-600 font-medium">Views</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">500+</div>
+            <div className="text-gray-600 font-medium">Pickup Points</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">10+</div>
+            <div className="text-gray-600 font-medium">Platforms</div>
           </div>
         </div>
       </div>
@@ -552,10 +687,10 @@ const Index = () => {
 
   // Join the Movement CTA
   const JoinCTASection = () => (
-    <section className="w-full bg-gradient-to-br from-green-500 via-green-600 to-black py-16 flex items-center justify-center">
+    <section className="w-full min-h-[300px]  bg-gradient-to-br from-green-500 via-green-600 to-black py-16 flex items-center justify-center">
         <div className="container mx-auto px-4 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to join the movement?</h2>
-        <p className="text-lg text-green-100 mb-8">
+        <h2 className="text-4xl md:text-4xl font-bold text-white mb-4">Ready to join the movement?</h2>
+        <p className="text-xl text-green-100 mb-8">
           Whether you're a brand looking for authentic reach or someone who loves free, useful things that matter – ChangeBag is for you.
         </p>
             <Button 
