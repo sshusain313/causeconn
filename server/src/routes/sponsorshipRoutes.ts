@@ -26,6 +26,7 @@ const router = createRouter();
 // Public routes
 router.post('/', createSponsorship); // Can work with or without authentication
 router.patch('/:sponsorshipId/reupload', reuploadLogo); // Public route for sponsors to reupload logos
+router.get('/public/:id', getSponsorshipById); // Public route for fetching sponsorship details (for logo reupload)
 
 // Protected routes (require authentication)
 router.get('/user', authenticateToken, getUserSponsorships);

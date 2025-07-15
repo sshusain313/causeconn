@@ -7,9 +7,6 @@ import { useToast } from '@/components/ui/use-toast';
 import { Loader2, Upload, CheckCircle, AlertCircle } from 'lucide-react';
 import config from '@/config';
 
-import authAxios from '@/utils/authAxios';
-
-
 const LogoReuploadPage = () => {
   const { sponsorshipId } = useParams<{ sponsorshipId: string }>();
   const navigate = useNavigate();
@@ -32,11 +29,17 @@ const LogoReuploadPage = () => {
         return;
       }
 
+      console.log('Fetching sponsorship with ID:', sponsorshipId);
+      console.log('Using API URL:', config.apiUrl);
+
       try {
-        const response = await authAxios.get(`/api/sponsorships/${sponsorshipId}`);
+        const response = await axios.get(`${config.apiUrl}/api/sponsorships/public/${sponsorshipId}`);
+        console.log('Sponsorship fetched successfully:', response.data);
         setSponsorship(response.data);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching sponsorship:', err);
+        console.error('Error response:', err.response?.data);
+        console.error('Error status:', err.response?.status);
         setError('Could not find the sponsorship. The link may be invalid or expired.');
       } finally {
         setIsLoading(false);
@@ -83,30 +86,39 @@ const LogoReuploadPage = () => {
     setIsUploading(true);
     setError(null);
 
+    console.log('Starting logo upload for sponsorship:', sponsorshipId);
+    console.log('Selected file:', selectedFile.name, selectedFile.size, selectedFile.type);
+
     try {
       const formData = new FormData();
       formData.append('logo', selectedFile); // Correct field name
 
-      const uploadResponse = await authAxios.post('/api/upload/logo', formData, {
+      console.log('Uploading logo to:', `${config.apiUrl}/api/upload/logo`);
+      const uploadResponse = await axios.post(`${config.apiUrl}/api/upload/logo`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
+      console.log('Logo upload response:', uploadResponse.data);
       const logoUrl = uploadResponse.data.url;
 
-      await authAxios.patch(`/api/sponsorships/${sponsorshipId}/reupload`, {
+      console.log('Updating sponsorship with new logo URL:', logoUrl);
+      await axios.patch(`${config.apiUrl}/api/sponsorships/${sponsorshipId}/reupload`, {
         logoUrl
       });
 
+      console.log('Sponsorship updated successfully');
       setUploadSuccess(true);
       toast({
         title: 'Logo uploaded successfully',
         description: 'Your new logo has been submitted for review.',
         variant: 'default'
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error uploading logo:', err);
+      console.error('Upload error response:', err.response?.data);
+      console.error('Upload error status:', err.response?.status);
       setError('Failed to upload logo. Please try again.');
       toast({
         title: 'Upload failed',

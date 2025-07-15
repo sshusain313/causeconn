@@ -27,7 +27,7 @@ export const sendRejectionEmail = async (
     console.log(`Sending rejection email to ${email}`);
     
     // Create a secure reupload link
-    const reuploadLink = `https://changebag.org/reupload-logo?sponsorshipId=${sponsorshipData.sponsorshipId}`;
+    const reuploadLink = `https://changebag.org/sponsor/logo-reupload/${sponsorshipData.sponsorshipId}`;
     
     const mailOptions = {
       from: '"CauseBags" <noreply@causebags.com>',
