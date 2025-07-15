@@ -21,6 +21,7 @@ interface Cause {
   targetAmount: number;
   sponsorships?: Array<{ status: string }>;
   imageUrl?: string; // Added for featured causes
+  createdAt: string;
 }
 
 const HERO_IMAGE = "/images/zero.jpg"; // Placeholder, replace with actual illustration if available
@@ -54,7 +55,8 @@ const journeySteps = [
     step: "1",
     title: "Sponsor a Cause",
     description: "Browse dozens of local causes that need your help.",
-    image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=500&h=300&fit=crop",
+    // image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=500&h=300&fit=crop",
+    image: "/images/sponsoracause.png",
     imageAlt: "People browsing causes on laptop"
   },
   {
@@ -62,7 +64,8 @@ const journeySteps = [
     step: "2",
     title: "Upload Your Logo",
     description: "Add your brand identity to the cause page.",
-    image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=500&h=300&fit=crop",
+    // image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=500&h=300&fit=crop",
+    image: "/images/uploadyourlogo.png",
     imageAlt: "Brand logo design on computer"
   },
   {
@@ -70,7 +73,8 @@ const journeySteps = [
     step: "3", 
     title: "Choose Where to Distribute",
     description: "Select from multiple campaign channels.",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&h=300&fit=crop",
+    // image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&h=300&fit=crop",
+    image: "/images/choose.png",
     imageAlt: "Distribution channels and social media"
   },
   {
@@ -78,7 +82,8 @@ const journeySteps = [
     step: "4",
     title: "Track Your Reach & Impact",
     description: "Get detailed analytics on your campaign's success.",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop",
+    // image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop",
+    image: "/images/track.png",
     imageAlt: "Analytics dashboard showing impact metrics"
   }
 ];
@@ -119,23 +124,24 @@ const Index = () => {
 
     // --- MOCK PAGE ROUTES LOGIC ---
   // Define the mock page routes
-  const mockPageRoutes = [
-    "/mock/Page3",
-    "/mock/Page5",
-    "/mock/Page6",
-    "/mock/Page4",
-    "/mock/Page2",
-    "/mock/Page3",
-  ];
+  // const mockPageRoutes = [
+  //   "/mock/Page3",
+  //   "/mock/Page5",
+  //   "/mock/Page6",
+  //   "/mock/Page4",
+  //   "/mock/Page2",
+  //   "/mock/Page3",
+  // ];
 
   // Sort causes by createdAt descending and get the 6 most recent
   const sortedCauses = [...featuredCauses].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  const mostRecentCauses = sortedCauses.slice(0, mockPageRoutes.length);
+  // const mostRecentCauses = sortedCauses.slice(0, mockPageRoutes.length);
+
   // Map cause _id to mock page route
-  const causeIdToMockPage: Record<string, string> = {};
-  mostRecentCauses.forEach((cause, idx) => {
-    causeIdToMockPage[cause._id] = mockPageRoutes[idx];
-  });
+  // const causeIdToMockPage: Record<string, string> = {};
+  // mostRecentCauses.forEach((cause, idx) => {
+  //   causeIdToMockPage[cause._id] = mockPageRoutes[idx];
+  // });
   
   useEffect(() => {
     const fetchCauses = async () => {
@@ -218,7 +224,8 @@ const Index = () => {
             this is real-world branding with real engagement.
           </p>
           
-          <Button className="bg-brand-primary hover:bg-brand-accent text-brand-primary-foreground px-8 py-3 text-lg rounded-lg">
+          {/* <Button className="bg-brand-primary hover:bg-brand-accent text-brand-primary-foreground px-8 py-3 text-lg rounded-lg"> */}
+          <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg rounded-lg">  
             Sponsor
           </Button>
         </div>
@@ -298,11 +305,11 @@ const Index = () => {
                   <div 
                     className="cursor-pointer" 
                     onClick={() => {
-                      if (causeIdToMockPage[cause._id]) {
-                        navigate(causeIdToMockPage[cause._id]);
-                      } else {
+                      // if (causeIdToMockPage[cause._id]) {
+                      //   navigate(causeIdToMockPage[cause._id]);
+                      // } else {
                         navigate(`/cause/${cause._id}`);
-                      }
+                      // }
                     }}
                     // onClick={() => navigate(`/cause/${cause._id}`)}
                     title={`View details for ${cause.title}`}
@@ -416,11 +423,19 @@ const Index = () => {
               ))}
             </div>
             <div className="mb-8">
-              <img
+              {/* <img
                 src={currentStep.image}
                 alt={currentStep.imageAlt}
                 className="w-full max-w-xs h-48 object-cover rounded-2xl shadow-2xl border border-green-100 transition-all duration-300 mx-auto"
-              />
+              /> */}
+               <img
+              src={currentStep.image}
+              alt={currentStep.imageAlt}
+              className="w-full max-w-xs h-48 object-cover rounded-2xl shadow-2xl border border-green-100 transition-all duration-300 mx-auto"
+              onError={(e) => {
+                e.currentTarget.src = "/images/sponsoracause.png";
+              }}
+            />
             </div>
             {/* Show only the description for the selected step */}
             <div className="w-full px-4 py-3 border-l-2 border-r-2 border-b-2 border-green-100 bg-green-50 rounded-b-lg text-gray-700 animate-fade-in mb-2">
@@ -464,6 +479,9 @@ const Index = () => {
                 src={currentStep.image}
                 alt={currentStep.imageAlt}
                 className="w-full max-w-2xl h-[420px] object-cover rounded-2xl shadow-2xl border border-green-100 transition-all duration-300 mx-auto"
+                onError={(e) => {
+                  e.currentTarget.src = "/images/sponsoracause.png";
+                }}
               />
             </div>
           </div>
@@ -542,7 +560,7 @@ const Index = () => {
         </p>
             <Button 
           className="bg-white text-green-600 hover:bg-green-50 text-lg px-8 py-3 rounded-lg font-bold shadow-md transition"
-          onClick={() => navigate('/signup')}
+          onClick={() => navigate('/causes')}
           aria-label="Join Now"
         >
           Join Now
