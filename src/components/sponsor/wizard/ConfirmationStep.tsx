@@ -54,8 +54,8 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
   
   console.log(`ConfirmationStep: UnitPrice=₹${unitPrice}, TotalCost=₹${totalCost}, ToteQuantity=${formData.toteQuantity}`);
   
-  // Mock QR code value
-  const qrValue = `https://changebag.org/claim/${formData.selectedCause}?sponsor=${encodeURIComponent(formData.organizationName)}`;
+  // Generate QR code with source tracking parameters
+  const qrValue = `${window.location.origin}/claim/${formData.selectedCause}?source=qr&ref=sponsor-form&sponsor=${encodeURIComponent(formData.organizationName)}`;
 
   // Format demographic information
   const formatDemographics = () => {

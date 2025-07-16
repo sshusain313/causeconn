@@ -26,7 +26,7 @@ const createMagicLink = (userId: string, waitlistId: string, causeId: string, em
 
 const getMagicLinkUrl = (payload: any): string => {
   const baseUrl = process.env.FRONTEND_URL || 'http://localhost:8085';
-  return `${baseUrl}/claim/magic-link?token=${payload.token}&causeId=${payload.causeId}`;
+  return `${baseUrl}/claim/magic-link?token=${payload.token}&causeId=${payload.causeId}&source=magic-link&ref=waitlist`;
 };
 
 // Join waitlist for a cause

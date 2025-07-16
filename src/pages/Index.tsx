@@ -353,7 +353,7 @@ const Index = () => {
                     </div> */}
                     {hasApprovedSponsorship ? (
                       <Button 
-                        onClick={() => navigate(`/claim/${cause._id}`)} 
+                        onClick={() => navigate(`/claim/${cause._id}?source=direct&ref=homepage`)} 
                         className="w-full bg-black text-white mb-2"
                       >
                         Claim a Tote
@@ -402,13 +402,13 @@ const Index = () => {
     const currentStep = journeySteps.find(s => s.id === activeStep) || journeySteps[0];
 
     return (
-      <section className="bg-gradient-to-br from-white via-green-50/20 to-white py-24 border-b border-gray-100">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+      <section className="bg-gradient-to-br from-white via-green-50/20 to-white py-12 md:py-24 border-b border-gray-100">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="text-center mb-12 md:mb-20">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 md:mb-6">
               From Purpose to Impact: <span className="text-green-600">The ChangeBag Journey</span>
             </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto px-4">
               Follow our simple 4-step process to create meaningful impact while building your brand presence
             </p>
           </div>
@@ -416,12 +416,12 @@ const Index = () => {
           {/* Mobile: Enhanced horizontal stepper */}
           <div className="block md:hidden">
             {/* Progress Bar */}
-            <div className="mb-8">
+            <div className="mb-6 md:mb-8 px-4">
               <div className="flex justify-between items-center mb-4">
                 {journeySteps.map((step, index) => (
-                  <div key={step.id} className="flex flex-col items-center">
+                  <div key={step.id} className="flex flex-col items-center flex-1">
                     <div 
-                      className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${
+                      className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-300 ${
                         activeStep === step.id 
                           ? 'bg-green-600 text-white shadow-lg scale-110' 
                           : index < journeySteps.findIndex(s => s.id === activeStep)
@@ -431,7 +431,7 @@ const Index = () => {
                     >
                       {step.step}
                     </div>
-                    <div className="text-xs text-center mt-2 font-medium text-gray-600 max-w-20">
+                    <div className="text-xs text-center mt-2 font-medium text-gray-600 max-w-16 md:max-w-20 leading-tight">
                       {step.title}
                     </div>
                   </div>
@@ -451,70 +451,111 @@ const Index = () => {
             </div>
 
             {/* Current Step Content */}
-            <div className="bg-white rounded-2xl shadow-xl border border-green-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-xl border border-green-100 overflow-hidden mx-4">
               <div className="relative">
                 <img
                   src={currentStep.image}
                   alt={currentStep.imageAlt}
-                  className="w-full h-64 object-cover"
+                  className="w-full h-48 md:h-64 object-cover"
                   onError={(e) => {
                     e.currentTarget.src = "/images/sponsoracause.png";
                   }}
                 />
-                {/* <div className="absolute top-4 left-4">
-                  <div className="bg-green-600 text-white px-4 py-2 rounded-full font-bold text-sm">
+                <div className="absolute top-3 left-3 md:top-4 md:left-4">
+                  <div className="bg-green-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-full font-bold text-xs md:text-sm">
                     Step {currentStep.step}
                   </div>
-                </div> */}
+                </div>
               </div>
-              <div className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">{currentStep.title}</h3>
-                <p className="text-gray-600 text-lg leading-relaxed">{currentStep.description}</p>
+              <div className="p-4 md:p-6">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 md:mb-3">{currentStep.title}</h3>
+                <p className="text-gray-600 text-sm md:text-lg leading-relaxed">{currentStep.description}</p>
               </div>
             </div>
 
             {/* Navigation Dots */}
-            <div className="flex justify-center mt-6 space-x-2">
+            <div className="flex justify-center mt-4 md:mt-6 space-x-2 px-4">
               {journeySteps.map((step) => (
                 <button
                   key={step.id}
                   onClick={() => setActiveStep(step.id)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-full transition-all duration-300 ${
                     activeStep === step.id ? 'bg-green-600 scale-125' : 'bg-gray-300'
                   }`}
                 />
               ))}
             </div>
+
+            {/* Mobile Step Navigation */}
+            <div className="mt-6 px-4">
+              <div className="flex justify-between items-center">
+                <button
+                  onClick={() => {
+                    const currentIndex = journeySteps.findIndex(s => s.id === activeStep);
+                    if (currentIndex > 0) {
+                      setActiveStep(journeySteps[currentIndex - 1].id);
+                    }
+                  }}
+                  disabled={journeySteps.findIndex(s => s.id === activeStep) === 0}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    journeySteps.findIndex(s => s.id === activeStep) === 0
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                  }`}
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-gray-500">
+                  {journeySteps.findIndex(s => s.id === activeStep) + 1} of {journeySteps.length}
+                </span>
+                <button
+                  onClick={() => {
+                    const currentIndex = journeySteps.findIndex(s => s.id === activeStep);
+                    if (currentIndex < journeySteps.length - 1) {
+                      setActiveStep(journeySteps[currentIndex + 1].id);
+                    }
+                  }}
+                  disabled={journeySteps.findIndex(s => s.id === activeStep) === journeySteps.length - 1}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    journeySteps.findIndex(s => s.id === activeStep) === journeySteps.length - 1
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Desktop: Enhanced vertical layout */}
-          <div className="hidden md:flex flex-row items-stretch gap-12">
+          <div className="hidden md:flex flex-row items-stretch gap-8 lg:gap-12">
             {/* Left: Enhanced Steps */}
-            <div className="w-full md:w-[500px] flex-shrink-0">
-              <div className="bg-white rounded-2xl shadow-xl border border-green-100 p-8">
-                <div className="space-y-6">
+            <div className="w-full md:w-[450px] lg:w-[500px] flex-shrink-0">
+              <div className="bg-white rounded-2xl shadow-xl border border-green-100 p-6 lg:p-8">
+                <div className="space-y-4 lg:space-y-6">
                   {journeySteps.map((step, index) => (
                     <div key={step.id} className="relative">
                       {/* Progress Line */}
-                      {/* {index < journeySteps.length - 1 && (
+                      {index < journeySteps.length - 1 && (
                         <div className={`absolute left-6 top-16 w-0.5 h-12 transition-all duration-500 ${
                           index < journeySteps.findIndex(s => s.id === activeStep) 
                             ? 'bg-green-500' 
                             : 'bg-gray-200'
                         }`}></div>
-                      )} */}
+                      )}
                       
                       <button
                         onClick={() => setActiveStep(step.id)}
-                        className={`w-full text-left p-6 rounded-xl transition-all duration-300 group ${
+                        className={`w-full text-left p-4 lg:p-6 rounded-xl transition-all duration-300 group ${
                           activeStep === step.id 
                             ? 'bg-green-50 border-2 border-green-200 shadow-lg transform scale-105' 
                             : 'bg-gray-50 border-2 border-transparent hover:bg-green-50/50 hover:border-green-100'
                         }`}
                       >
-                        <div className="flex items-start gap-4">
+                        <div className="flex items-start gap-3 lg:gap-4">
                           {/* Step Number */}
-                          <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${
+                          <div className={`flex-shrink-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center text-sm lg:text-lg font-bold transition-all duration-300 ${
                             activeStep === step.id 
                               ? 'bg-green-600 text-white shadow-lg' 
                               : index < journeySteps.findIndex(s => s.id === activeStep)
@@ -526,22 +567,22 @@ const Index = () => {
                           
                           {/* Content */}
                           <div className="flex-1">
-                            <h3 className={`text-xl font-bold mb-2 transition-colors duration-300 ${
+                            <h3 className={`text-lg lg:text-xl font-bold mb-1 lg:mb-2 transition-colors duration-300 ${
                               activeStep === step.id ? 'text-green-700' : 'text-gray-900'
                             }`}>
                               {step.title}
                             </h3>
-                            <p className="text-gray-600 leading-relaxed">
+                            <p className="text-gray-600 leading-relaxed text-sm lg:text-base">
                               {step.description}
                             </p>
                           </div>
                           
                           {/* Active Indicator */}
-                          {/* {activeStep === step.id && (
+                          {activeStep === step.id && (
                             <div className="flex-shrink-0">
-                              <div className="w-3 h-3 bg-green-600 rounded-full animate-pulse"></div>
+                              <div className="w-2.5 h-2.5 lg:w-3 lg:h-3 bg-green-600 rounded-full animate-pulse"></div>
                             </div>
-                          )} */}
+                          )}
                         </div>
                       </button>
                     </div>
@@ -559,18 +600,13 @@ const Index = () => {
                     <img
                       src={currentStep.image}
                       alt={currentStep.imageAlt}
-                      className="w-full max-w-4xl h-[600px] object-cover"
+                      className="w-full max-w-2xl lg:max-w-4xl h-[400px] lg:h-[600px] object-cover"
                       onError={(e) => {
                         e.currentTarget.src = "/images/sponsoracause.png";
                       }}
                     />
-                    {/* <div className="absolute top-6 left-6">
-                      <div className="bg-green-600 text-white px-6 py-3 rounded-full font-bold text-lg shadow-lg">
-                        Step {currentStep.step}
-                      </div>
-                    </div> */}
-                    <div className="absolute bottom-6 right-6">
-                      <div className="bg-white/90 backdrop-blur-sm text-gray-800 px-4 py-2 rounded-full font-medium text-sm shadow-lg">
+                    <div className="absolute bottom-4 right-4 lg:bottom-6 lg:right-6">
+                      <div className="bg-white/90 backdrop-blur-sm text-gray-800 px-3 py-1 lg:px-4 lg:py-2 rounded-full font-medium text-xs lg:text-sm shadow-lg">
                         {currentStep.title}
                       </div>
                     </div>
@@ -581,14 +617,14 @@ const Index = () => {
           </div>
 
           {/* Bottom CTA */}
-          {/* <div className="text-center mt-16">
+          <div className="text-center mt-12 md:mt-16">
             <Button 
               onClick={() => navigate('/causes')}
-              className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 md:px-8 md:py-4 text-base md:text-lg rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             >
               Start Your Journey
             </Button>
-          </div> */}
+          </div>
         </div>
       </section>
     );
@@ -596,8 +632,8 @@ const Index = () => {
 
   // How Change Spreads Section (Enhanced for Mobile)
   const SpreadSection = () => (
-    <section className="bg-white py-20  border-b border-gray-100">
-      <div className="container mx-auto px-24">
+    <section className="bg-white py-20 border-b border-gray-100">
+      <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             How Change <span className="text-green-600">Spreads</span>

@@ -455,7 +455,7 @@ interface Sponsorship {
                               <div className="flex flex-col items-center justify-center py-8">
                                 <div className="bg-white p-6 rounded-lg shadow-sm mb-4">
                                   <img 
-                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${window.location.origin}/claim/${sponsorship.cause?._id || 'unknown'}`)}`}
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${window.location.origin}/claim/${sponsorship.cause?._id || 'unknown'}?source=qr&ref=sponsor-dashboard`)}`}
                                     alt="QR Code"
                                     className="w-48 h-48"
                                   />

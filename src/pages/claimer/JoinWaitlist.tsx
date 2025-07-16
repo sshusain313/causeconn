@@ -158,7 +158,7 @@ const JoinWaitlistPage = () => {
         <div className="text-center py-12">
           <h3 className="text-xl font-semibold text-gray-700 mb-2">Cause Already Sponsored</h3>
           <p className="text-gray-500 mb-6">This cause has already been sponsored and totes are available for claiming.</p>
-          <Button onClick={() => navigate(`/claim/${cause._id}`)}>Claim a Tote</Button>
+          <Button onClick={() => navigate(`/claim/${cause._id}?source=direct&ref=waitlist-page`)}>Claim a Tote</Button>
         </div>
       </Layout>
     );

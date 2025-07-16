@@ -40,7 +40,7 @@ const DynamicCausePage = () => {
 
   // Action handlers
   const handleClaim = () => {
-    navigate(`/claim/${id}`);
+    navigate(`/claim/${id}?source=direct&ref=cause-detail`);
   };
   
   const handleSponsor = () => {

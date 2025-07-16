@@ -35,6 +35,7 @@ import AccessibilityPage from "./pages/AccessibilityPage";
 import ClaimFormPage from "./pages/claimer/ClaimForm";
 import OtpVerificationPage from "./pages/claimer/OtpVerification";
 import ClaimConfirmedPage from "./pages/claimer/ClaimConfirmed";
+import QrClaimConfirmedPage from "./pages/claimer/QrClaimConfirmed";
 import ClaimStatusPage from "./pages/claimer/ClaimStatus";
 import JoinWaitlistPage from "./pages/claimer/JoinWaitlist";
 import WaitlistConfirmationPage from "./pages/claimer/WaitlistConfirmation";
@@ -56,6 +57,7 @@ import Shipping from "./pages/admin/Shipping";
 import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
 import QrScanner from "./pages/admin/QrScanner";
+import QrCodeClaims from "./pages/admin/QrCodeClaims";
 // import ClaimDetails from '@/pages/admin/claims/ClaimDetails';
 import DistributionSettings from './pages/admin/DistributionSettings';
 import EditCause from './pages/admin/EditCause';
@@ -117,6 +119,7 @@ const App: React.FC = () => {
                 {/* Fix route ordering - more specific routes must come before dynamic routes */}
                 <Route path="/claim/verify" element={<OtpVerificationPage />} />
                 <Route path="/claim/confirmed" element={<ClaimConfirmedPage />} />
+                <Route path="/claim/qr-confirmed" element={<QrClaimConfirmedPage />} />
                 <Route path="/claim/magic-link" element={<MagicLinkClaimPage />} />
                 <Route path="/claim/status/:id" element={<ClaimStatusPage />} />
                 <Route path="/claim/:id" element={<ClaimFormPage />} />
@@ -192,6 +195,11 @@ const App: React.FC = () => {
                 <Route path="/admin/qr-scanner" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <QrScanner />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/qr-claims" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <QrCodeClaims />
                   </ProtectedRoute>
                 } />
                 {/* <Route path="/admin/claims/:id" element={

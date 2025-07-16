@@ -29,7 +29,8 @@ import {
   BarChart2, 
   Settings, 
   LogOut,
-  Users
+  Users,
+  QrCode
 } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { 
@@ -83,6 +84,7 @@ const AdminLayout = ({ children, title, subtitle, loading = false }: AdminLayout
     { icon: CheckCircle, label: 'Campaign Approvals', path: '/admin/approvals' },
     { icon: Image, label: 'Logo Review', path: '/admin/logos' },
     { icon: Package, label: 'Claims Management', path: '/admin/claims' },
+    { icon: QrCode, label: 'QR Code Claims', path: '/admin/qr-claims' },
     { icon: Users, label: 'Waitlist Management', path: '/admin/waitlist' },
     { icon: MapPin, label: 'Distribution Settings', path: '/admin/distribution-settings' },
     { icon: Truck, label: 'Shipping', path: '/admin/shipping' },

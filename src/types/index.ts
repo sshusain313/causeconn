@@ -150,6 +150,17 @@ export interface ToteClaim {
   createdAt: Date;
   updatedAt: Date;
   fromWaitlist?: boolean;
+  source?: ClaimSource;
+  referrerUrl?: string;
+  qrCodeScanned?: boolean;
+}
+
+export enum ClaimSource {
+  DIRECT = 'direct',
+  QR_CODE = 'qr',
+  WAITLIST = 'waitlist',
+  MAGIC_LINK = 'magic-link',
+  SPONSOR_LINK = 'sponsor-link'
 }
 
 export interface Waitlist {

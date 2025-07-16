@@ -69,14 +69,14 @@ const ClaimsManagement = () => {
       
       try {
         setLoading(true);
-        console.log(`Fetching claims from ${config.apiUrl}/claims/recent`);
-        const response = await axios.get(`${config.apiUrl}/claims/recent`, {
+        console.log(`Fetching direct claims from ${config.apiUrl}/claims/direct`);
+        const response = await axios.get(`${config.apiUrl}/claims/direct`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
         
-        console.log('Claims data:', response.data);
+        console.log('Direct claims data:', response.data);
         
         // Handle different response formats
         if (response.data.claims) {
@@ -89,8 +89,8 @@ const ClaimsManagement = () => {
         }
         setLoading(false);
       } catch (err: any) {
-        console.error('Error fetching claims:', err);
-        setError(err.response?.data?.message || 'Failed to load claims');
+        console.error('Error fetching direct claims:', err);
+        setError(err.response?.data?.message || 'Failed to load direct claims');
         setLoading(false);
       }
     };

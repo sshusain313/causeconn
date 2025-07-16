@@ -132,7 +132,7 @@ const CausesPage = () => {
   
   // Handle claim button click
   const handleClaimAction = (cause: Cause) => {
-    navigate(`/claim/${cause._id}`);
+    navigate(`/claim/${cause._id}?source=direct&ref=causes-page`);
   };
   
   // Handle sponsor button click
@@ -145,7 +145,7 @@ const CausesPage = () => {
     if (hasApprovedSponsorship(cause)) {
       return (
         <Button 
-          onClick={() => navigate(`/claim/${cause._id}`)} 
+          onClick={() => navigate(`/claim/${cause._id}?source=direct&ref=causes-page`)} 
           className="w-full bg-black text-white"
         >
           Claim a Tote

@@ -8,6 +8,14 @@ export enum ClaimStatus {
   CANCELLED = 'cancelled'
 }
 
+export enum ClaimSource {
+  DIRECT = 'direct',
+  QR_CODE = 'qr',
+  WAITLIST = 'waitlist',
+  MAGIC_LINK = 'magic-link',
+  SPONSOR_LINK = 'sponsor-link'
+}
+
 export interface IClaim extends Document {
   causeId: mongoose.Types.ObjectId;
   causeTitle: string;
@@ -21,10 +29,16 @@ export interface IClaim extends Document {
   zipCode: string;
   status: ClaimStatus;
   emailVerified: boolean;
+  source: ClaimSource;
+  referrerUrl?: string;
+  qrCodeScanned: boolean;
   createdAt: Date;
   updatedAt: Date;
   shippingDate?: Date;
   deliveryDate?: Date;
+  trackingNumber?: string;
+  carrier?: string;
+  estimatedDelivery?: Date;
 }
 
 const claimSchema = new Schema<IClaim>(
@@ -79,10 +93,31 @@ const claimSchema = new Schema<IClaim>(
       type: Boolean,
       default: false
     },
+    source: {
+      type: String,
+      enum: Object.values(ClaimSource),
+      default: ClaimSource.DIRECT
+    },
+    referrerUrl: {
+      type: String
+    },
+    qrCodeScanned: {
+      type: Boolean,
+      default: false
+    },
     shippingDate: {
       type: Date
     },
     deliveryDate: {
+      type: Date
+    },
+    trackingNumber: {
+      type: String
+    },
+    carrier: {
+      type: String
+    },
+    estimatedDelivery: {
       type: Date
     }
   },
@@ -96,5 +131,7 @@ claimSchema.index({ createdAt: -1 });
 claimSchema.index({ status: 1 });
 claimSchema.index({ causeId: 1 });
 claimSchema.index({ email: 1 });
+claimSchema.index({ source: 1 });
+claimSchema.index({ qrCodeScanned: 1 });
 
 export default mongoose.model<IClaim>('Claim', claimSchema);

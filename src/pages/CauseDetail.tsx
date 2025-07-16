@@ -41,7 +41,7 @@ const CauseDetail = () => {
 
   const handleAction = () => {
     // Navigate to claim page
-    navigate(`/claim/${id}`);
+    navigate(`/claim/${id}?source=direct&ref=cause-detail`);
   };
   
   const handleSponsor = () => {

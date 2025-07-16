@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import Claim, { ClaimStatus } from '../models/claims';
+import Claim, { ClaimStatus, ClaimSource } from '../models/claims';
 
 // Create a new claim
 export const createClaim = async (req: Request, res: Response): Promise<void> => {
@@ -16,7 +16,11 @@ export const createClaim = async (req: Request, res: Response): Promise<void> =>
       city,
       state,
       zipCode,
-      emailVerified = false
+      emailVerified = false,
+      source = ClaimSource.DIRECT,
+      referrerUrl,
+      qrCodeScanned = false,
+      status
     } = req.body;
 
     // Check if user has already claimed a tote for this cause
@@ -46,6 +50,10 @@ export const createClaim = async (req: Request, res: Response): Promise<void> =>
       return;
     }
     
+    // For QR code claims, start with PENDING status and verify after OTP
+    // For regular claims, use PENDING status
+    const initialStatus = ClaimStatus.PENDING;
+
     // Create the claim
     const claim = new Claim({
       causeId,
@@ -58,8 +66,11 @@ export const createClaim = async (req: Request, res: Response): Promise<void> =>
       city,
       state,
       zipCode,
-      status: ClaimStatus.PENDING,
-      emailVerified
+      status: initialStatus,
+      emailVerified: false, // Will be verified after OTP for QR claims
+      source,
+      referrerUrl,
+      qrCodeScanned
     });
 
     await claim.save();
@@ -88,7 +99,7 @@ export const getRecentClaims = async (req: Request, res: Response): Promise<void
       .skip(skip)
       .limit(limit)
       .populate('causeId', 'title')
-      .select('causeId causeTitle fullName email phone purpose address city state zipCode status emailVerified createdAt updatedAt shippingDate deliveryDate');
+      .select('causeId causeTitle fullName email phone purpose address city state zipCode status emailVerified source referrerUrl qrCodeScanned createdAt updatedAt shippingDate deliveryDate');
 
     const total = await Claim.countDocuments();
 
@@ -287,7 +298,7 @@ export const getVerifiedClaimsForSponsoredCauses = async (req: Request, res: Res
     })
     .populate('causeId', 'title imageUrl category')
     .sort({ createdAt: -1 })
-    .select('causeId causeTitle fullName email phone purpose address city state zipCode status emailVerified createdAt updatedAt shippingDate deliveryDate');
+    .select('causeId causeTitle fullName email phone purpose address city state zipCode status emailVerified source referrerUrl qrCodeScanned createdAt updatedAt shippingDate deliveryDate');
     
     console.log('Found verified claims:', verifiedClaims.length);
     console.log('Verified claims data:', verifiedClaims);
@@ -335,5 +346,240 @@ export const getVerifiedClaimsForSponsoredCauses = async (req: Request, res: Res
       error: error.message,
       stack: error.stack
     });
+  }
+};
+
+// Get claims by source
+export const getClaimsBySource = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { source } = req.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const claims = await Claim.find({ source })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('causeId', 'title')
+      .select('causeId causeTitle fullName email phone purpose address city state zipCode status emailVerified source referrerUrl qrCodeScanned createdAt updatedAt shippingDate deliveryDate');
+
+    const total = await Claim.countDocuments({ source });
+
+    res.status(200).json({
+      claims,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching claims by source:', error);
+    res.status(500).json({ message: 'Error fetching claims by source', error: error.message });
+  }
+};
+
+// Get QR code claims specifically
+export const getQrCodeClaims = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const claims = await Claim.find({ 
+      $or: [
+        { source: ClaimSource.QR_CODE },
+        { qrCodeScanned: true }
+      ]
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('causeId', 'title')
+      .select('causeId causeTitle fullName email phone purpose address city state zipCode status emailVerified source referrerUrl qrCodeScanned createdAt updatedAt shippingDate deliveryDate');
+
+    const total = await Claim.countDocuments({ 
+      $or: [
+        { source: ClaimSource.QR_CODE },
+        { qrCodeScanned: true }
+      ]
+    });
+
+    res.status(200).json({
+      claims,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching QR code claims:', error);
+    res.status(500).json({ message: 'Error fetching QR code claims', error: error.message });
+  }
+};
+
+// Get claims statistics by source
+export const getClaimsStatsBySource = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const stats = await Claim.aggregate([
+      {
+        $group: {
+          _id: '$source',
+          count: { $sum: 1 },
+          verified: {
+            $sum: { $cond: [{ $eq: ['$status', 'verified'] }, 1, 0] }
+          },
+          shipped: {
+            $sum: { $cond: [{ $eq: ['$status', 'shipped'] }, 1, 0] }
+          },
+          delivered: {
+            $sum: { $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0] }
+          }
+        }
+      }
+    ]);
+
+    const qrCodeStats = await Claim.aggregate([
+      {
+        $match: { qrCodeScanned: true }
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          verified: {
+            $sum: { $cond: [{ $eq: ['$status', 'verified'] }, 1, 0] }
+          },
+          shipped: {
+            $sum: { $cond: [{ $eq: ['$status', 'shipped'] }, 1, 0] }
+          },
+          delivered: {
+            $sum: { $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0] }
+          }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      bySource: stats,
+      qrCodeStats: qrCodeStats[0] || { total: 0, verified: 0, shipped: 0, delivered: 0 }
+    });
+  } catch (error) {
+    console.error('Error fetching claims statistics by source:', error);
+    res.status(500).json({ message: 'Error fetching claims statistics by source' });
+  }
+};
+
+// Verify QR code claim after OTP verification
+export const verifyQrCodeClaim = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { claimId } = req.params;
+    
+    if (!claimId) {
+      res.status(400).json({ message: 'Claim ID is required' });
+      return;
+    }
+
+    const claim = await Claim.findById(claimId);
+    
+    if (!claim) {
+      res.status(404).json({ message: 'Claim not found' });
+      return;
+    }
+
+    // Check if this is a QR code claim
+    if (claim.source !== ClaimSource.QR_CODE && !claim.qrCodeScanned) {
+      res.status(400).json({ message: 'This claim is not a QR code claim' });
+      return;
+    }
+
+    // Update claim status to verified
+    claim.status = ClaimStatus.VERIFIED;
+    claim.emailVerified = true; // Mark as verified since OTP was successful
+    claim.updatedAt = new Date();
+
+    await claim.save();
+
+    res.status(200).json({
+      message: 'QR code claim verified successfully',
+      claim: {
+        _id: claim._id,
+        status: claim.status,
+        emailVerified: claim.emailVerified,
+        source: claim.source,
+        qrCodeScanned: claim.qrCodeScanned
+      }
+    });
+  } catch (error) {
+    console.error('Error verifying QR code claim:', error);
+    res.status(500).json({ message: 'Error verifying QR code claim', error: error.message });
+  }
+};
+
+// Get direct claims (claims made via "claim a tote" button)
+export const getDirectClaims = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const claims = await Claim.find({ source: ClaimSource.DIRECT })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('causeId', 'title')
+      .select('causeId causeTitle fullName email phone purpose address city state zipCode status emailVerified source referrerUrl qrCodeScanned createdAt updatedAt shippingDate deliveryDate');
+
+    const total = await Claim.countDocuments({ source: ClaimSource.DIRECT });
+
+    res.status(200).json({
+      claims,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching direct claims:', error);
+    res.status(500).json({ message: 'Error fetching direct claims', error: error.message });
+  }
+};
+
+// Get verified direct claims for shipping management
+export const getVerifiedDirectClaims = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const claims = await Claim.find({ 
+      source: ClaimSource.DIRECT,
+      status: ClaimStatus.VERIFIED
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('causeId', 'title')
+      .select('causeId causeTitle fullName email phone purpose address city state zipCode status emailVerified source referrerUrl qrCodeScanned createdAt updatedAt shippingDate deliveryDate trackingNumber carrier estimatedDelivery');
+
+    const total = await Claim.countDocuments({ 
+      source: ClaimSource.DIRECT,
+      status: ClaimStatus.VERIFIED
+    });
+
+    res.status(200).json({
+      claims,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching verified direct claims:', error);
+    res.status(500).json({ message: 'Error fetching verified direct claims', error: error.message });
   }
 };
