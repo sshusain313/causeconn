@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { AlertCircle, AlertTriangle, Factory, HouseIcon, DollarSignIcon, Recycle, TreePine, Thermometer, MapPin, TrendingDown, Gift, Megaphone, Globe, Leaf, Users, Heart, ShoppingBag, TrendingUp } from "lucide-react";
+import { AlertCircle, AlertTriangle, Briefcase, Eye, Clock, Smartphone, Factory, HouseIcon, DollarSignIcon, Recycle, Shield, TreePine, Thermometer, MapPin, Scale, TrendingDown, Gift, Megaphone, Globe, Leaf, Users, Heart, ShoppingBag, TrendingUp } from "lucide-react";
 import { fetchCause } from '@/services/apiServices';
 import { getFullUrl } from '@/utils/apiUtils';
 import { useToast } from '@/components/ui/use-toast';
@@ -116,12 +116,18 @@ const DynamicCausePage = () => {
     const iconMap: { [key: string]: any } = {
       'AlertCircle': AlertCircle,
       'AlertTriangle': AlertTriangle,
+      'BriefCase': Briefcase,
       'Factory': Factory,
       'HouseIcon': HouseIcon,
       'Recycle': Recycle,
       'Users': Users,
+      'Scale': Scale,
+      'Shield': Shield,
       'ShoppingBag': ShoppingBag,
       'Heart': Heart,
+      'Eye': Eye,
+      'Clock': Clock,
+      'Smartphone': Smartphone, 
       'TrendingDown': TrendingDown,
       'TrendingUp': TrendingUp,
       'TreePine': TreePine,
@@ -209,7 +215,7 @@ const DynamicCausePage = () => {
     <Layout>
             <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className={`relative ${categoryInfo.bgColor} py-20`}>
+        <section className={`relative ${categoryInfo.bgColor} py-20 bg-gradient-to-br from-green-500 via-green-200 to-white`}>
           <div className="container mx-auto px-6">
             
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -509,7 +515,9 @@ const DynamicCausePage = () => {
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-white relative overflow-hidden">
+      <section className="w-full min-h-[300px] bg-gradient-to-r from-green-500 via-green-600 to-black py-16 flex text-white relative overflow-hidden">
+      {/* <section className="w-full min-h-[300px] bg-gradient-to-r from-green-500 via-green-600 to-black py-16 flex items-center justify-center"> */}
+
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20"></div>

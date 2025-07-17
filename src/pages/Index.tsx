@@ -74,7 +74,7 @@ const journeySteps = [
     title: "Choose Where to Distribute",
     description: "Select from multiple campaign channels.",
     // image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&h=300&fit=crop",
-    image: "/images/choose.png",
+    image: "/images/distribute.png",
     imageAlt: "Distribution channels and social media"
   },
   {
@@ -617,14 +617,14 @@ const Index = () => {
           </div>
 
           {/* Bottom CTA */}
-          <div className="text-center mt-12 md:mt-16">
+          {/* <div className="text-center mt-12 md:mt-16">
             <Button 
               onClick={() => navigate('/causes')}
               className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 md:px-8 md:py-4 text-base md:text-lg rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             >
               Start Your Journey
             </Button>
-          </div>
+          </div> */}
         </div>
       </section>
     );

@@ -137,7 +137,7 @@ const Layout = ({ children }: LayoutProps) => {
       <footer className="bg-gradient-to-br from-gray-50 to-gray-100 border-t border-gray-200">
         <div className="container mx-auto px-4 py-12">
           {/* Main Footer Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8 max-w-7xl mx-auto justify-center items-center">
             {/* Brand Section */}
             <div className="lg:col-span-1">
               <div className="flex items-center mb-4">
