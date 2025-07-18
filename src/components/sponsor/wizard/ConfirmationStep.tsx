@@ -102,7 +102,8 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
           causeId: formData.selectedCause || causeData?._id, // <-- ADDED BY MYSELF
           toteQuantity: formData.toteQuantity,
           unitPrice: formData.unitPrice,
-          totalAmount: totalCost
+          totalAmount: totalCost,
+          qrCodeUrl: qrValue // Add QR code URL to the order data
         },
         {
           headers: {

@@ -369,19 +369,19 @@ const LogoReview = () => {
         <CardHeader>
           <div className="flex justify-between items-start mb-1">
             <CardTitle className="text-lg">{sponsorship.cause?.title || 'Unnamed Campaign'}</CardTitle>
-            <Badge 
+            {/* <Badge 
               variant="outline" 
               className="bg-yellow-100 text-yellow-800 w-fit"
             >
               Pending Review
-            </Badge>
+            </Badge> */}
           </div>
-          <p className="text-sm text-gray-600">by {sponsorship.organizationName}</p>
-          {sponsorship.cause?.title && (
+          {/* <p className="text-sm text-gray-600">by {sponsorship.organizationName}</p> */}
+          {/* {sponsorship.cause?.title && (
             <div className="mt-2 text-xs bg-primary-50 text-primary-800 px-2 py-1 rounded-md inline-block">
               Campaign: {sponsorship.cause.title}
             </div>
-          )}
+          )} */}
         </CardHeader>
         <CardContent>
           <div className="space-y-6">

@@ -34,6 +34,7 @@ interface CreateOrderRequest {
   sponsorshipId?: string;
   toteQuantity?: number;
   unitPrice?: number;
+  qrCodeUrl?: string; // Add QR code URL field
 }
 
 interface ConfirmPaymentRequest {
@@ -227,7 +228,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     console.log('Creating Razorpay order with data:', req.body);
     console.log('Request headers:', req.headers);
     
-    const { amount, currency, email, organizationName, contactName, phone, causeTitle, causeId, sponsorshipId, toteQuantity, unitPrice }: CreateOrderRequest = req.body;
+    const { amount, currency, email, organizationName, contactName, phone, causeTitle, causeId, sponsorshipId, toteQuantity, unitPrice, qrCodeUrl }: CreateOrderRequest = req.body;
 
     console.log('Extracted values:', {
       amount,
@@ -241,6 +242,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       sponsorshipId,
       toteQuantity,
       unitPrice,
+      qrCodeUrl,
       types: {
         toteQuantity: typeof toteQuantity,
         unitPrice: typeof unitPrice
@@ -287,7 +289,8 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         causeId: causeId || '',
         sponsorshipId: sponsorshipId || 'N/A',
         toteQuantity: toteQuantity || 0,
-        unitPrice: unitPrice || 0
+        unitPrice: unitPrice || 0,
+        qrCodeUrl: qrCodeUrl || ''
       },
       partial_payment: false
     };
@@ -302,6 +305,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       sponsorshipId: sponsorshipId || 'N/A',
       toteQuantity: toteQuantity || 0,
       unitPrice: unitPrice || 0,
+      qrCodeUrl: qrCodeUrl || '',
       types: {
         toteQuantity: typeof (toteQuantity || 0),
         unitPrice: typeof (unitPrice || 0)
@@ -336,7 +340,8 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         phone,
         causeTitle,
         causeId,
-        sponsorshipId
+        sponsorshipId,
+        qrCodeUrl: qrCodeUrl || ''
       }
     });
 
@@ -440,6 +445,7 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
           causeId: notes.causeId || '',
           toteQuantity: Number(notes.toteQuantity) || 0,
           unitPrice: Number(notes.unitPrice) || 0,
+          qrCodeUrl: notes.qrCodeUrl || ''
         };
 
         console.log('Complete sponsor data for invoice:', completeSponsorData);

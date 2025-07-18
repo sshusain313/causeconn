@@ -255,7 +255,7 @@ const CausesPage = () => {
             <p className="text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed">
               Find and support causes aligned with your organization's values. 
               Every sponsorship creates real impact.
-            </p>
+          </p>
           </div>
           
           {/* Enhanced Filters section */}
@@ -270,54 +270,54 @@ const CausesPage = () => {
               <div className="space-y-2">
                                  <label htmlFor="search" className="block text-sm font-semibold text-black">
                    Search Causes
-                 </label>
+                </label>
                  <div className="relative">
                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                   <Input
-                     id="search"
+                <Input
+                  id="search"
                      placeholder="Search by title, description..."
-                     value={searchTerm}
-                     onChange={(e) => setSearchTerm(e.target.value)}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                      className="pl-10 h-12 bg-gradient-to-r from-white to-gray-50 border-gray-300 focus:border-green-600 focus:ring-green-600 focus:bg-white"
-                   />
+                />
                  </div>
-               </div>
-               
+              </div>
+              
                {/* Category Filter */}
                <div className="space-y-2">
                  <label htmlFor="category" className="block text-sm font-semibold text-black">
-                   Category
-                 </label>
-                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  Category
+                </label>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                    <SelectTrigger className="h-12 bg-gradient-to-r from-white to-gray-50 border-gray-300 focus:border-green-600 focus:ring-green-600 focus:bg-white">
-                     <SelectValue placeholder="All Categories" />
-                   </SelectTrigger>
-                   <SelectContent>
-                     <SelectItem value="all">All Categories</SelectItem>
-                     {categories.map((category) => (
-                       <SelectItem key={category} value={category}>{category}</SelectItem>
-                     ))}
-                   </SelectContent>
-                 </Select>
-               </div>
-               
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
                {/* Status Filter */}
                <div className="space-y-2">
                  <label htmlFor="status" className="block text-sm font-semibold text-black">
-                   Status
-                 </label>
-                 <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  Status
+                </label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
                    <SelectTrigger className="h-12 bg-gradient-to-r from-white to-gray-50 border-gray-300 focus:border-green-600 focus:ring-green-600 focus:bg-white">
-                     <SelectValue placeholder="All Statuses" />
-                   </SelectTrigger>
-                   <SelectContent>
-                     <SelectItem value="all">All Statuses</SelectItem>
-                     <SelectItem value="open">Open for Sponsorship</SelectItem>
-                     <SelectItem value="sponsored">Fully Sponsored</SelectItem>
-                     <SelectItem value="waitlist">Waitlist Available</SelectItem>
-                   </SelectContent>
-                 </Select>
-               </div>
+                    <SelectValue placeholder="All Statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="open">Open for Sponsorship</SelectItem>
+                    <SelectItem value="sponsored">Fully Sponsored</SelectItem>
+                    <SelectItem value="waitlist">Waitlist Available</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
                          {/* Active Filters Display */}

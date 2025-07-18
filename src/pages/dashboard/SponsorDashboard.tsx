@@ -289,8 +289,8 @@ interface Sponsorship {
           <CardHeader className="pb-2 relative">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium text-gray-600">
-                Total Contributed
-              </CardTitle>
+              Total Contributed
+            </CardTitle>
               <DollarSign className="h-5 w-5 text-green-600" />
             </div>
           </CardHeader>
@@ -305,8 +305,8 @@ interface Sponsorship {
           <CardHeader className="pb-2 relative">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium text-gray-600">
-                Approved Sponsorships
-              </CardTitle>
+              Approved Sponsorships
+            </CardTitle>
               <CheckCircle className="h-5 w-5 text-blue-600" />
             </div>
           </CardHeader>
@@ -321,8 +321,8 @@ interface Sponsorship {
           <CardHeader className="pb-2 relative">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium text-gray-600">
-                Total Totes
-              </CardTitle>
+              Total Totes
+            </CardTitle>
               <Package className="h-5 w-5 text-purple-600" />
             </div>
           </CardHeader>
@@ -395,28 +395,28 @@ interface Sponsorship {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                           <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                             <DollarSign className="h-4 w-4 text-gray-500" />
-                            <div>
+                          <div>
                               <p className="text-xs text-gray-500">Contribution</p>
                               <p className="font-semibold text-gray-800">${sponsorship.totalAmount?.toLocaleString()}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                             <Package className="h-4 w-4 text-gray-500" />
-                            <div>
+                          <div>
                               <p className="text-xs text-gray-500">Totes</p>
                               <p className="font-semibold text-gray-800">{sponsorship.toteQuantity}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                             <Building2 className="h-4 w-4 text-gray-500" />
-                            <div>
+                          <div>
                               <p className="text-xs text-gray-500">Organization</p>
                               <p className="font-semibold text-gray-800">{sponsorship.organizationName}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                             <Calendar className="h-4 w-4 text-gray-500" />
-                            <div>
+                          <div>
                               <p className="text-xs text-gray-500">Date</p>
                               <p className="font-semibold text-gray-800">{new Date(sponsorship.createdAt).toLocaleDateString()}</p>
                             </div>
@@ -524,22 +524,22 @@ interface Sponsorship {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                         <div className="absolute top-4 left-4 flex gap-2">
-                          <Badge variant="outline" className={
+                            <Badge variant="outline" className={
                             cause.status === 'approved' && cause.isOnline ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-100' :
                             cause.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-100' :
                             'bg-red-100 text-red-800 border-red-300 hover:bg-red-100'
-                          }>
-                            {cause.status === 'approved' && cause.isOnline ? 'Active' : 
-                             cause.status === 'pending' ? 'Pending Approval' :
-                             cause.status === 'rejected' ? 'Rejected' : 'Inactive'}
-                          </Badge>
-                          {cause.claimedTotes === cause.totalTotes && cause.totalTotes > 0 && (
-                            <Badge className="bg-green-100 text-green-800 border-green-300 hover:bg-green-100">
-                              All Totes Claimed
+                            }>
+                              {cause.status === 'approved' && cause.isOnline ? 'Active' : 
+                               cause.status === 'pending' ? 'Pending Approval' :
+                               cause.status === 'rejected' ? 'Rejected' : 'Inactive'}
                             </Badge>
-                          )}
+                            {cause.claimedTotes === cause.totalTotes && cause.totalTotes > 0 && (
+                            <Badge className="bg-green-100 text-green-800 border-green-300 hover:bg-green-100">
+                                All Totes Claimed
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                      </div>
                       <div className="md:w-2/3 p-6">
                         <div className="flex justify-between items-start mb-4">
                           <h3 className="text-xl font-semibold text-gray-800 group-hover:text-green-700 transition-colors">{cause.title}</h3>
@@ -574,28 +574,28 @@ interface Sponsorship {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                           <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                             <Package className="h-4 w-4 text-gray-500" />
-                            <div>
+                          <div>
                               <p className="text-xs text-gray-500">Total Totes</p>
                               <p className="font-semibold text-gray-800">{cause.totalTotes}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                             <Users className="h-4 w-4 text-gray-500" />
-                            <div>
+                          <div>
                               <p className="text-xs text-gray-500">Claimed Totes</p>
                               <p className="font-semibold text-gray-800">{cause.claimedTotes}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                             <CheckCircle className="h-4 w-4 text-gray-500" />
-                            <div>
+                          <div>
                               <p className="text-xs text-gray-500">Shipped/Delivered</p>
                               <p className="font-semibold text-gray-800">{cause.shippedClaims}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                             <Target className="h-4 w-4 text-gray-500" />
-                            <div>
+                          <div>
                               <p className="text-xs text-gray-500">Category</p>
                               <p className="font-semibold text-gray-800">{cause.category}</p>
                             </div>
@@ -661,12 +661,12 @@ interface Sponsorship {
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-4">
                         <div className="relative">
-                          <img 
-                            src={getImageUrl(causeData.causeImageUrl)} 
-                            alt={causeData.causeTitle} 
+                        <img 
+                          src={getImageUrl(causeData.causeImageUrl)} 
+                          alt={causeData.causeTitle} 
                             className="w-16 h-16 object-cover rounded-lg"
-                            onError={(e) => handleImageError(e)}
-                          />
+                          onError={(e) => handleImageError(e)}
+                        />
                           <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                             <CheckCircle className="h-3 w-3 text-white" />
                           </div>

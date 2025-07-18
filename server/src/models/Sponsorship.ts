@@ -52,6 +52,7 @@ export interface ISponsorship extends Document {
   totalAmount: number;
   logoUrl: string;
   mockupUrl?: string;
+  qrCodeUrl?: string; // Add QR code URL field
   message: string;
   distributionType: DistributionType;
   selectedCities: string[];
@@ -136,6 +137,10 @@ const sponsorshipSchema = new Schema<ISponsorship>(
     },
     mockupUrl: {
       type: String
+    },
+    qrCodeUrl: {
+      type: String,
+      required: false
     },
     message: {
       type: String,

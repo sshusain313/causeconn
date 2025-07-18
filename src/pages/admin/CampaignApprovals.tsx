@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { Search, ChevronDown, ChevronRight, Download, Check, X, Eye, AlertTriangle } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, Download, Check, X, Eye, AlertTriangle, Copy } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import authAxios from '@/utils/authAxios';
 import { AxiosResponse } from 'axios';
+import { Button } from '@/components/ui/button';
 
 interface Cause {
   _id: string;
@@ -27,6 +28,7 @@ interface Sponsorship {
   unitPrice: number;
   totalAmount: number;
   logoUrl: string;
+  qrCodeUrl?: string; // Add QR code URL field
   toteDetails?: {
     totalAmount?: number;
   };
@@ -339,6 +341,67 @@ const CampaignCard = ({ sponsorship, onApprove, onReject, onEndCampaign }: {
                 <span className="text-sm text-gray-600">
                   Online distribution - totes will be shipped directly to the organization.
                 </span>
+              </div>
+            )}
+          </div>
+        </ExpandableSection>
+        
+        {/* QR Code Section */}
+        <ExpandableSection
+          title="QR Code"
+          isExpanded={expandedSections.includes('qr')}
+          onToggle={() => toggleSection('qr')}
+        >
+          <div className="space-y-4">
+            {sponsorship.qrCodeUrl ? (
+              <div className="flex flex-col items-center space-y-4">
+                <div className="bg-white p-4 rounded-lg shadow-sm border">
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(sponsorship.qrCodeUrl)}`}
+                    alt="QR Code"
+                    className="w-48 h-48"
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-2">
+                    This QR code links to the cause page for claiming totes.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(sponsorship.qrCodeUrl)}`;
+                        link.download = `qr-code-${sponsorship.organizationName.replace(/\s+/g, '-')}.png`;
+                        link.click();
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-1"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download QR Code
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        navigator.clipboard.writeText(sponsorship.qrCodeUrl);
+                        toast({
+                          title: "QR Code URL Copied",
+                          description: "The QR code URL has been copied to clipboard.",
+                        });
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-1"
+                    >
+                      <Copy className="h-4 w-4" />
+                      Copy URL
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-500">No QR code available for this sponsorship.</p>
               </div>
             )}
           </div>

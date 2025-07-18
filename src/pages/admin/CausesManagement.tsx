@@ -187,7 +187,7 @@ const CausesManagement = () => {
       <AdminLayout title="Causes Management" subtitle="Loading causes...">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Causes Management</h1>
+            <h1 className="text-2xl font-bold bg-red-500">Causes Management</h1>
           </div>
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

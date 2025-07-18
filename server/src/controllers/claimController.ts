@@ -53,7 +53,7 @@ export const createClaim = async (req: Request, res: Response): Promise<void> =>
     // For QR code claims, start with PENDING status and verify after OTP
     // For regular claims, use PENDING status
     const initialStatus = ClaimStatus.PENDING;
-
+    
     // Create the claim
     const claim = new Claim({
       causeId,

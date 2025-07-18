@@ -38,7 +38,12 @@ const SponsorFormContainer: React.FC<SponsorFormContainerProps> = ({ causeId }) 
         console.log('Removed large logo data URL from submission payload');
       }
       
+      // Generate QR code URL for this sponsorship
+      const qrCodeUrl = `${window.location.origin}/claim/${causeId}?source=qr&ref=sponsor-form&sponsor=${encodeURIComponent(formData.organizationName)}`;
+      submissionData.qrCodeUrl = qrCodeUrl;
+      
       console.log('Submitting data with size:', JSON.stringify(submissionData).length, 'bytes');
+      console.log('QR Code URL:', qrCodeUrl);
       
       // Send data to the server using config.apiUrl to ensure consistency
       // This will properly handle both development and production environments

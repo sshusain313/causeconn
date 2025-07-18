@@ -184,6 +184,7 @@ export const getPendingSponsorships = async (req: Request, res: Response): Promi
     console.log('About to query pending sponsorships...');
     const sponsorships = await Sponsorship.find({ status: SponsorshipStatus.PENDING })
       .populate('cause', 'title') // Populate cause with just the title field
+      .select('_id status logoStatus cause organizationName contactName email phone toteQuantity unitPrice totalAmount logoUrl qrCodeUrl toteDetails selectedCities distributionType distributionLocations distributionStartDate distributionEndDate documents createdAt updatedAt isOnline')
       .sort({ createdAt: -1 });
     
     console.log('Found pending sponsorships:', sponsorships.length);
@@ -220,7 +221,7 @@ export const getApprovedSponsorships = async (req: Request, res: Response): Prom
     
     const sponsorships = await Sponsorship.find({ status: SponsorshipStatus.APPROVED })
       .populate('cause', 'title description category targetAmount currentAmount imageUrl status')
-      .select('_id status logoStatus cause organizationName contactName email phone toteQuantity unitPrice totalAmount logoUrl toteDetails selectedCities distributionType distributionLocations distributionStartDate distributionEndDate documents createdAt updatedAt isOnline')
+      .select('_id status logoStatus cause organizationName contactName email phone toteQuantity unitPrice totalAmount logoUrl qrCodeUrl toteDetails selectedCities distributionType distributionLocations distributionStartDate distributionEndDate documents createdAt updatedAt isOnline')
       .sort({ createdAt: -1 });
     
     console.log('Found approved sponsorships:', sponsorships.length);

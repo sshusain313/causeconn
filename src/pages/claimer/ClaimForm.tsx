@@ -342,15 +342,15 @@ const ClaimFormPage = () => {
         // For regular claims, send data to server and navigate to verification
         console.log('Submitting claim data:', claimDataToSubmit);
         const response = await axios.post(`${config.apiUrl}/claims`, claimDataToSubmit);
-        
-        console.log('Claim submission response:', response.data);
-        
-        if (response.status !== 201) {
-          throw new Error(response.data.message || 'Failed to submit claim');
-        }
-        
+      
+      console.log('Claim submission response:', response.data);
+      
+      if (response.status !== 201) {
+        throw new Error(response.data.message || 'Failed to submit claim');
+      }
+      
         // Navigate to verification page for regular claims
-        navigate('/claim/verify');
+      navigate('/claim/verify');
       }
     } catch (error: any) {
       console.error('Error submitting claim:', error);
@@ -579,7 +579,7 @@ const ClaimFormPage = () => {
                 QR Code Claim
               </div>
             )}
-          </div>
+              </div>
           
           <p className="text-lg text-gray-700 mb-6">
             {isQrCodeClaim 
@@ -680,67 +680,67 @@ const ClaimFormPage = () => {
                     
                     {/* Only show shipping address for regular claims */}
                     {!isQrCodeClaim && (
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Shipping Address</h3>
-                        
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Shipping Address</h3>
+                      
+                      <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Street Address</FormLabel>
+                            <FormControl>
+                              <Input placeholder="123 Main St" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <FormField
                           control={form.control}
-                          name="address"
+                          name="city"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Street Address</FormLabel>
+                              <FormLabel>City</FormLabel>
                               <FormControl>
-                                <Input placeholder="123 Main St" {...field} />
+                                <Input placeholder="Anytown" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <FormField
-                            control={form.control}
-                            name="city"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>City</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="Anytown" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="state"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>State</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="CA" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="zipCode"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>ZIP Code</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="12345" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        <FormField
+                          control={form.control}
+                          name="state"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>State</FormLabel>
+                              <FormControl>
+                                <Input placeholder="CA" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="zipCode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>ZIP Code</FormLabel>
+                              <FormControl>
+                                <Input placeholder="12345" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
+                    </div>
                     )}
                     
                     <div className="flex justify-end">
@@ -820,10 +820,10 @@ const ClaimFormPage = () => {
                     </div>
                     
                     {!isQrCodeClaim && (
-                      <div className="flex justify-between font-medium mt-4">
-                        <span>Shipping:</span>
-                        <span>Free</span>
-                      </div>
+                    <div className="flex justify-between font-medium mt-4">
+                      <span>Shipping:</span>
+                      <span>Free</span>
+                    </div>
                     )}
                   </div>
                   
@@ -835,17 +835,17 @@ const ClaimFormPage = () => {
                     </div>
                   ) : (
                     <>
-                      <div className="bg-yellow-50 border border-yellow-100 rounded p-4 text-sm text-yellow-800">
-                        <p>
-                          <span className="font-semibold">Note:</span> After submission, you'll need to verify your email and phone to complete your claim.
-                        </p>
-                      </div>
-                      
-                      <div className="bg-blue-50 border border-blue-100 rounded p-4 mt-4 text-sm text-blue-800">
-                        <p>
-                          <span className="font-semibold">Claim Process:</span> Your claim will be reviewed by an admin. The available totes count will only update after your claim is approved.
-                        </p>
-                      </div>
+                  <div className="bg-yellow-50 border border-yellow-100 rounded p-4 text-sm text-yellow-800">
+                    <p>
+                      <span className="font-semibold">Note:</span> After submission, you'll need to verify your email and phone to complete your claim.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-blue-50 border border-blue-100 rounded p-4 mt-4 text-sm text-blue-800">
+                    <p>
+                      <span className="font-semibold">Claim Process:</span> Your claim will be reviewed by an admin. The available totes count will only update after your claim is approved.
+                    </p>
+                  </div>
                     </>
                   )}
                 </div>
