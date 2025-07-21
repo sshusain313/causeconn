@@ -242,135 +242,150 @@ const CausesPage = () => {
 
   return (
     <Layout>
-      <div className="bg-gradient-to-br from-green-500 via-green-200 to-white">
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-black to-gray-800 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-white mb-4 shadow-lg">
-              <Search className="h-4 w-4" />
-              Discover & Support
+      <div className="relative bg-gradient-to-br from-green-600 via-green-300 to-white min-h-[400px]">
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.3' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='1'/%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundSize: '20px 20px'
+          }}></div>
+        </div>
+        
+        <div className="container mx-auto px-4 py-20 relative z-10">
+          <div className="text-center">
+            {/* Discover & Support button in top right */}
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex items-center gap-2 bg-black/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-white border border-white/20 shadow-lg">
+                <Search className="h-4 w-4" />
+                Discover & Support
+              </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
-              Browse <span className="bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">Causes</span>
+            
+            {/* Main title and subtitle */}
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6">
+              Browse <span className="text-green-500">Causes</span>
             </h1>
-            <p className="text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-800 max-w-2xl mx-auto leading-relaxed">
               Find and support causes aligned with your organization's values. 
               Every sponsorship creates real impact.
-          </p>
+            </p>
+          </div>
+        </div>
+      </div>
+      
+            <div className="container mx-auto px-4 -mt-8 relative z-20">
+        {/* Enhanced Filters section */}
+        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200 mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <Filter className="h-5 w-5 text-green-600" />
+            <h3 className="text-lg font-semibold text-gray-900">Refine Your Search</h3>
           </div>
           
-          {/* Enhanced Filters section */}
-          <div className="bg-gradient-to-br from-white via-gray-50 to-white p-8 rounded-2xl shadow-xl border border-gray-200 mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Filter className="h-5 w-5 text-green-600" />
-              <h3 className="text-lg font-semibold text-black">Refine Your Search</h3>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Search Input */}
-              <div className="space-y-2">
-                                 <label htmlFor="search" className="block text-sm font-semibold text-black">
-                   Search Causes
-                </label>
-                 <div className="relative">
-                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Search Input */}
+            <div className="space-y-2">
+              <label htmlFor="search" className="block text-sm font-semibold text-gray-700">
+                Search Causes
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
                   id="search"
-                     placeholder="Search by title, description..."
+                  placeholder="Search by title, description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                     className="pl-10 h-12 bg-gradient-to-r from-white to-gray-50 border-gray-300 focus:border-green-600 focus:ring-green-600 focus:bg-white"
+                  className="pl-10 h-12 bg-white border-gray-300 focus:border-green-600 focus:ring-green-600"
                 />
-                 </div>
-              </div>
-              
-               {/* Category Filter */}
-               <div className="space-y-2">
-                 <label htmlFor="category" className="block text-sm font-semibold text-black">
-                  Category
-                </label>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                   <SelectTrigger className="h-12 bg-gradient-to-r from-white to-gray-50 border-gray-300 focus:border-green-600 focus:ring-green-600 focus:bg-white">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>{category}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-               {/* Status Filter */}
-               <div className="space-y-2">
-                 <label htmlFor="status" className="block text-sm font-semibold text-black">
-                  Status
-                </label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                   <SelectTrigger className="h-12 bg-gradient-to-r from-white to-gray-50 border-gray-300 focus:border-green-600 focus:ring-green-600 focus:bg-white">
-                    <SelectValue placeholder="All Statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="open">Open for Sponsorship</SelectItem>
-                    <SelectItem value="sponsored">Fully Sponsored</SelectItem>
-                    <SelectItem value="waitlist">Waitlist Available</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
             
-                         {/* Active Filters Display */}
-             {(searchTerm || categoryFilter !== 'all' || statusFilter !== 'all') && (
-               <div className="mt-6 pt-6 border-t border-gray-200">
-                 <div className="flex items-center gap-2 mb-3">
-                   <Tag className="h-4 w-4 text-gray-600" />
-                   <span className="text-sm font-medium text-black">Active Filters:</span>
-                 </div>
-                 <div className="flex flex-wrap gap-2">
-                   {searchTerm && (
-                     <Badge variant="secondary" className="bg-gradient-to-r from-green-100 to-green-50 text-green-800 hover:from-green-200 hover:to-green-100 border border-green-200 shadow-sm">
-                       Search: "{searchTerm}"
-                       <X 
-                         className="h-3 w-3 ml-1 cursor-pointer" 
-                         onClick={() => setSearchTerm('')}
-                       />
-                     </Badge>
-                   )}
-                   {categoryFilter !== 'all' && (
-                     <Badge variant="secondary" className="bg-gradient-to-r from-black to-gray-800 text-white hover:from-gray-800 hover:to-black border border-black shadow-sm">
-                       Category: {categoryFilter}
-                       <X 
-                         className="h-3 w-3 ml-1 cursor-pointer" 
-                         onClick={() => setCategoryFilter('all')}
-                       />
-                     </Badge>
-                   )}
-                   {statusFilter !== 'all' && (
-                     <Badge variant="secondary" className="bg-gradient-to-r from-gray-100 to-gray-50 text-gray-800 hover:from-gray-200 hover:to-gray-100 border border-gray-300 shadow-sm">
-                       Status: {statusFilter}
-                       <X 
-                         className="h-3 w-3 ml-1 cursor-pointer" 
-                         onClick={() => setStatusFilter('all')}
-                       />
-                     </Badge>
-                   )}
-                   <Button 
-                     variant="ghost" 
-                     size="sm" 
-                     onClick={() => {
-                       setSearchTerm('');
-                       setCategoryFilter('all');
-                       setStatusFilter('all');
-                     }}
-                     className="text-gray-600 hover:text-black bg-gradient-to-r from-transparent to-gray-50 hover:from-gray-50 hover:to-gray-100"
-                   >
-                     Clear All
-                   </Button>
-                 </div>
-               </div>
-             )}
+            {/* Category Filter */}
+            <div className="space-y-2">
+              <label htmlFor="category" className="block text-sm font-semibold text-gray-700">
+                Category
+              </label>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="h-12 bg-white border-gray-300 focus:border-green-600 focus:ring-green-600">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Status Filter */}
+            <div className="space-y-2">
+              <label htmlFor="status" className="block text-sm font-semibold text-gray-700">
+                Status
+              </label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-12 bg-white border-gray-300 focus:border-green-600 focus:ring-green-600">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="open">Open for Sponsorship</SelectItem>
+                  <SelectItem value="sponsored">Fully Sponsored</SelectItem>
+                  <SelectItem value="waitlist">Waitlist Available</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+          
+          {/* Active Filters Display */}
+          {(searchTerm || categoryFilter !== 'all' || statusFilter !== 'all') && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center gap-2 mb-3">
+                <Tag className="h-4 w-4 text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">Active Filters:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {searchTerm && (
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200 border border-green-200">
+                    Search: "{searchTerm}"
+                    <X 
+                      className="h-3 w-3 ml-1 cursor-pointer" 
+                      onClick={() => setSearchTerm('')}
+                    />
+                  </Badge>
+                )}
+                {categoryFilter !== 'all' && (
+                  <Badge variant="secondary" className="bg-gray-800 text-white hover:bg-gray-700 border border-gray-800">
+                    Category: {categoryFilter}
+                    <X 
+                      className="h-3 w-3 ml-1 cursor-pointer" 
+                      onClick={() => setCategoryFilter('all')}
+                    />
+                  </Badge>
+                )}
+                {statusFilter !== 'all' && (
+                  <Badge variant="secondary" className="bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300">
+                    Status: {statusFilter}
+                    <X 
+                      className="h-3 w-3 ml-1 cursor-pointer" 
+                      onClick={() => setStatusFilter('all')}
+                    />
+                  </Badge>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => {
+                    setSearchTerm('');
+                    setCategoryFilter('all');
+                    setStatusFilter('all');
+                  }}
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Clear All
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

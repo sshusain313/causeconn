@@ -10,6 +10,8 @@ import axios from 'axios';
 import config from '@/config';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { getImageUrl, handleImageError } from '@/utils/imageUtils';
+import { Star } from "lucide-react";
+
 
 interface Cause {
   _id: string;
@@ -85,6 +87,63 @@ const journeySteps = [
     // image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop",
     image: "/images/track.png",
     imageAlt: "Analytics dashboard showing impact metrics"
+  }
+];
+
+const testimonials = [
+  {
+    id: 1,
+    name: "Sarah Johnson",
+    role: "Environmental Activist",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+    content: "This initiative has transformed how our community thinks about plastic waste. The tote bags are not just practical but also beautiful conversation starters about sustainability.",
+    rating: 5,
+    company: "Eco Warriors Collective"
+  },
+  {
+    id: 2,
+    name: "Michael Chen",
+    role: "Corporate Sustainability Manager",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+    content: "As a corporate partner, we've seen incredible engagement from our employees. The transparency in how funds are used and the regular impact updates make this partnership truly meaningful.",
+    rating: 5,
+    company: "GreenTech Solutions"
+  },
+  {
+    id: 3,
+    name: "Priya Patel",
+    role: "Local Business Owner",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+    content: "I've been using these tote bags in my store for months now. Customers love them and often ask about the cause behind them. It's a win-win for business and the environment.",
+    rating: 5,
+    company: "Organic Market"
+  },
+  {
+    id: 4,
+    name: "David Rodriguez",
+    role: "Community Leader",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+    content: "The impact on our local community has been remarkable. We've reduced plastic waste by 40% and created awareness about environmental issues. This is exactly what we needed.",
+    rating: 5,
+    company: "Neighborhood Association"
+  },
+  {
+    id: 5,
+    name: "Emma Thompson",
+    role: "School Principal",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+    content: "Our students are excited about the environmental lessons we've integrated using these tote bags. It's a practical way to teach sustainability and community responsibility.",
+    rating: 5,
+    company: "Green Valley School"
+  },
+  {
+    id: 6,
+    name: "Rajesh Kumar",
+    role: "Restaurant Owner",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+    content: "We switched to these tote bags for our takeaway orders and our customers appreciate the eco-friendly approach. It's helped us build a stronger connection with our community.",
+    rating: 5,
+    company: "Spice Garden Restaurant"
   }
 ];
 
@@ -252,7 +311,7 @@ const Index = () => {
         <p className="text-lg text-gray-600 mb-16">
           We provide everything you need to launch, manage, and scale your cause effectively.
         </p>
-        <div className="flex flex-col md:flex-row justify-center items-stretch gap-8">
+        <div className="flex flex-col md:flex-row justify-center items-stretch gap-8 px-6">
           {benefits.map((benefit, idx) => (
             <div
               key={idx}
@@ -416,39 +475,7 @@ const Index = () => {
           {/* Mobile: Enhanced horizontal stepper */}
           <div className="block md:hidden">
             {/* Progress Bar */}
-            <div className="mb-6 md:mb-8 px-4">
-              <div className="flex justify-between items-center mb-4">
-                {journeySteps.map((step, index) => (
-                  <div key={step.id} className="flex flex-col items-center flex-1">
-                    <div 
-                      className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-300 ${
-                        activeStep === step.id 
-                          ? 'bg-green-600 text-white shadow-lg scale-110' 
-                          : index < journeySteps.findIndex(s => s.id === activeStep)
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-200 text-gray-600'
-                      }`}
-                    >
-                      {step.step}
-                    </div>
-                    <div className="text-xs text-center mt-2 font-medium text-gray-600 max-w-16 md:max-w-20 leading-tight">
-                      {step.title}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {/* Progress Line */}
-              <div className="relative">
-                <div className="h-1 bg-gray-200 rounded-full">
-                  <div 
-                    className="h-1 bg-green-600 rounded-full transition-all duration-500"
-                    style={{ 
-                      width: `${((journeySteps.findIndex(s => s.id === activeStep) + 1) / journeySteps.length) * 100}%` 
-                    }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+            
 
             {/* Current Step Content */}
             <div className="bg-white rounded-2xl shadow-xl border border-green-100 overflow-hidden mx-4">
@@ -462,15 +489,15 @@ const Index = () => {
                   }}
                 />
                 <div className="absolute top-3 left-3 md:top-4 md:left-4">
-                  <div className="bg-green-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-full font-bold text-xs md:text-sm">
+                  {/* <div className="bg-green-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-full font-bold text-xs md:text-sm">
                     Step {currentStep.step}
-                  </div>
+                  </div> */}
                 </div>
               </div>
-              <div className="p-4 md:p-6">
+              {/* <div className="p-4 md:p-6">
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 md:mb-3">{currentStep.title}</h3>
                 <p className="text-gray-600 text-sm md:text-lg leading-relaxed">{currentStep.description}</p>
-              </div>
+              </div> */}
             </div>
 
             {/* Navigation Dots */}
@@ -721,6 +748,61 @@ const Index = () => {
     </section>
   );
 
+  const Testimonials = () => (
+    <section className="py-20 bg-white">
+      <div className="container mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-5xl font-bold mb-6 text-gray-900">What People Are Saying</h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Real stories from our community about the impact of this initiative
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {testimonials.map((testimonial) => (
+            <Card key={testimonial.id} className="hover:shadow-lg transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <img 
+                    src={testimonial.avatar} 
+                    alt={testimonial.name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">{testimonial.name}</h3>
+                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                    <p className="text-xs text-gray-500">{testimonial.company}</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                </div>
+                <blockquote className="text-gray-700 italic">
+                  "{testimonial.content}"
+                </blockquote>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        
+        {/* <div className="text-center mt-12">
+          <div className="inline-flex items-center gap-4 bg-gray-50 px-8 py-4 rounded-full">
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+              ))}
+            </div>
+            <span className="text-gray-700 font-medium">4.9/5 Average Rating</span>
+            <span className="text-gray-500">•</span>
+            <span className="text-gray-600">{testimonials.length} Verified Reviews</span>
+          </div>
+        </div> */}
+      </div>
+    </section>
+  );
+
   // Join the Movement CTA
   const JoinCTASection = () => (
     <section className="w-full min-h-[300px]  bg-gradient-to-br from-green-500 via-green-600 to-black py-16 flex items-center justify-center">
@@ -747,8 +829,10 @@ const Index = () => {
       <WhySponsorSection />
       <FeaturedCausesSection />
       <JourneySection />
-      <SpreadSection />
+      {/* <SpreadSection /> */}
       <JoinCTASection />
+      <Testimonials />
+      
     </Layout>
   );
 };
