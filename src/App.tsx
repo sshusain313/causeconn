@@ -26,6 +26,7 @@ import LogoReuploadPage from "./pages/sponsor/LogoReupload";
 
 // Legal & Support Pages
 import HelpCenter from "./pages/HelpCenter";
+import Documentation from "./pages/Documentation";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
@@ -110,6 +111,7 @@ const App: React.FC = () => {
                 
                 {/* Legal & Support Pages */}
                 <Route path="/help-center" element={<HelpCenter />} />
+                <Route path="/documentation" element={<Documentation />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-of-service" element={<TermsOfService />} />
                 <Route path="/cookie-policy" element={<CookiePolicy />} />

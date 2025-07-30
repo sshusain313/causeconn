@@ -1,6 +1,7 @@
 import { Story } from '@/models/Story';
 import { Cause } from '@/types';
 import config from '../config';
+import { sponsorStories, claimStories, mockStories } from '@/data/mockStories';
 
 // Mock data for development - would be replaced with real API calls
 const mockStats = {
@@ -25,35 +26,7 @@ const mockDashboardMetrics = {
   }
 };
 
-const mockStories: Story[] = [
-  {
-    id: '1',
-    title: 'How my sponsored bags helped a local shelter',
-    authorName: 'Sarah Johnson',
-    imageUrl: '/stories/story1.png',
-    content: 'When I decided to sponsor 100 tote bags for the homeless shelter in my community, I had no idea what impact it would make. The shelter director told me that having quality, durable bags allowed many of their clients to carry their belongings with dignity. One woman even used her bag for job interviews, carrying her resume and a change of clothes. Three months later, she secured stable employment.',
-    excerpt: 'When I decided to sponsor 100 tote bags for the homeless shelter in my community, I had no idea what impact it would make...',
-    createdAt: new Date('2025-04-15'),
-  },
-  {
-    id: '2',
-    title: 'My eco-friendly journey with CauseConnect',
-    authorName: 'Miguel Rodriguez',
-    imageUrl: '/stories/story2.png',
-    content: 'I claimed my first CauseConnect tote bag six months ago, and it changed how I shop. No more plastic bags at the grocery store! I carry my tote everywhere, and so many people have asked about it. I love explaining how it supports the ocean cleanup initiative. The QR code on the bag has even led three of my friends to claim their own bags.',
-    excerpt: 'I claimed my first CauseConnect tote bag six months ago, and it changed how I shop. No more plastic bags at the grocery store!...',
-    createdAt: new Date('2025-05-02'),
-  },
-  {
-    id: '3',
-    title: 'Small business, big impact',
-    authorName: 'Taylor Williams',
-    imageUrl: '/stories/story3.png',
-    content: 'As a small coffee shop owner, I wasn\'t sure if sponsoring tote bags would be worth the investment. But seeing our brand carried around town by people who care about the same causes we do has been incredible marketing. We\'ve had new customers come in specifically because they saw our logo on a bag and looked us up. The ROI has exceeded our expectations!',
-    excerpt: 'As a small coffee shop owner, I wasn\'t sure if sponsoring tote bags would be worth the investment. But seeing our brand carried around town...',
-    createdAt: new Date('2025-04-22'),
-  }
-];
+// Using imported mock stories from data file
 
 // Mock causes data
 const mockCauses: Cause[] = [
@@ -118,6 +91,34 @@ export const fetchStories = async (): Promise<Story[]> => {
     console.error('Error fetching stories:', error);
     // Fallback to mock data if API call fails
     return mockStories;
+  }
+};
+
+export const fetchSponsorStories = async (): Promise<Story[]> => {
+  try {
+    const response = await fetch(`${config.apiUrl}/stories/sponsor`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch sponsor stories');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching sponsor stories:', error);
+    // Fallback to mock sponsor stories if API call fails
+    return sponsorStories;
+  }
+};
+
+export const fetchClaimStories = async (): Promise<Story[]> => {
+  try {
+    const response = await fetch(`${config.apiUrl}/stories/claim`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch claim stories');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching claim stories:', error);
+    // Fallback to mock claim stories if API call fails
+    return claimStories;
   }
 };
 

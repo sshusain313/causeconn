@@ -10,6 +10,13 @@ import axios from 'axios';
 import config from '@/config';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { getImageUrl, handleImageError } from '@/utils/imageUtils';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { faqs } from '@/data/faqs';
 import { Star } from "lucide-react";
 
 
@@ -27,6 +34,56 @@ interface Cause {
 }
 
 const HERO_IMAGE = "/images/zero.jpg"; // Placeholder, replace with actual illustration if available
+
+const marketingMethods = [
+  {
+    method: "Billboard (1 Month)",
+    impressions: "4-8 lakh",
+    duration: "30 Days",
+    cpm: "₹15-₹125",
+    engagement: "Passive Viewing",
+    sustainability: "❌ None",
+    icon: "📺"
+  },
+  {
+    method: "Digital Ads (Google, FB, IG)",
+    impressions: "20-30 lakh",
+    duration: "2-3 Weeks",
+    cpm: "₹33",
+    engagement: "Click-Based, Temporary",
+    sustainability: "❌ None",
+    icon: "💻"
+  },
+  {
+    method: "TV/Print Ads (Single Run)",
+    impressions: "5-20 lakh",
+    duration: "1 Day/One-Time",
+    cpm: "₹50-₹75",
+    engagement: "Short-Term Visibility",
+    sustainability: "❌ None",
+    icon: "📺"
+  },
+  {
+    method: "Event Sponsorships",
+    impressions: "3-10 lakh",
+    duration: "1-2 Days",
+    cpm: "₹15-₹125",
+    engagement: "Temporary Engagement",
+    sustainability: "❌ None",
+    icon: "🎪"
+  },
+  {
+    method: "Change Bag Tote Sponsorship",
+    impressions: "1 Crore+ (10K Bags x 1K uses)",
+    duration: "Years (Long-Term)",
+    cpm: "₹8-₹15 (Lowest)",
+    engagement: "Direct, High Retention",
+    sustainability: "✅ High (Plastic-Free, Reusable)",
+    icon: "🛍️",
+    highlighted: true
+  }
+];
+
 
 const benefits = [
   {
@@ -145,6 +202,17 @@ const testimonials = [
     rating: 5,
     company: "Spice Garden Restaurant"
   }
+];
+
+const partners = [
+  { name: "PayPal", logo: "/images/paypal.png" },
+  { name: "PhonePe", logo: "/images/phonepe.png" },
+  { name: "Puma", logo: "/images/puma.png" },
+  { name: "Rockefeller Foundation", logo: "/images/rockefeller.png" },
+  { name: "Salesforce", logo: "/images/salesforce.png" },
+  { name: "walmart", logo: "/images/wallmart.png" },
+  { name: "bmw", logo: "/images/bmw.jpeg" },
+  { name: "ikea", logo: "/images/ikea.png" }
 ];
 
 const Index = () => {
@@ -301,6 +369,41 @@ const Index = () => {
   </section>
   );
 
+  const RaiseFundsSection=()=>(
+    <section className="bg-[#f8faf8] py-16 px-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-800 leading-tight">
+              Raise funds for your cause!
+            </h1>
+            
+            <p className="text-lg text-gray-600 leading-relaxed">
+              Onboard on Give.do and create impact by raising funds for your initiatives
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <Button size="lg" className="bg-green-500 hover:bg-green-600 text-white text-base px-8 py-3 rounded-lg">
+                Enroll your NGO on give
+              </Button>
+              <Button size="lg" variant="outline" className="border-gray-400 text-gray-700 hover:bg-gray-50 text-base px-8 py-3 rounded-lg">
+                Raise funds for a listed NGO
+              </Button>
+            </div>
+          </div>
+          
+                      <div className='h-full'>
+              <img 
+                src="/images/header.png" 
+                alt="Children fundraising activities" 
+                className="w-full h-full object-cover"
+              />
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+
   // Why Brands Sponsor Section
   const WhySponsorSection = () => (
     <section className="bg-white border-b border-gray-100 py-20">
@@ -453,6 +556,39 @@ const Index = () => {
           </div>
         </div>
       </section>
+  );
+
+  const PartnersSection = () => (
+    <section id="partners" className="py-20 bg-gray-50">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16 animate-fade-in">
+          <h2 className="text-4xl font-bold text-foreground mb-4">
+            Our Corporate Partners
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Trusted by the largest brands and corporations, and the most impactful foundations around the world
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-8 items-center">
+          {partners.map((partner, index) => (
+            <div 
+              key={partner.name}
+              className="bg-background rounded-lg p-6 shadow-card hover:shadow-lg transition-smooth text-center animate-fade-in flex items-center justify-center"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              {/* <div className="text-4xl mb-2">{partner.logo}</div> */}
+              <img 
+                src={partner.logo} 
+                alt={partner.name} 
+                className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain" 
+              />
+              {/* <div className="text-sm font-medium text-muted-foreground">{partner.name}</div> */}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 
   // Journey/How It Works Section (Enhanced for Mobile)
@@ -656,7 +792,7 @@ const Index = () => {
       </section>
     );
   };
-
+  
   // How Change Spreads Section (Enhanced for Mobile)
   const SpreadSection = () => (
     <section className="bg-white py-20 border-b border-gray-100">
@@ -822,6 +958,109 @@ const Index = () => {
       </section>
   );
 
+  const StoriesSection = () => (
+    <section className="py-20 bg-background">
+    <div className="container mx-auto px-4">
+      <div className="text-center mb-16 animate-fade-in">
+        <h2 className="text-4xl font-bold text-green-600 mb-4">
+          The Most Budget-Friendly CSR & Brand Awareness Strategy
+        </h2>
+        <p className="text-lg text-muted-foreground max-w-4xl mx-auto">
+          With ChangeBag.org's tote sponsorship, brands achieve enduring visibility, enhanced consumer 
+          engagement, and cost-effective marketing while promoting sustainability. Unlike temporary ads, 
+          tote bags serve as daily-use items, providing years of continuous brand promotion and generating 
+          millions of impressions from a single investment.
+        </p>
+      </div>
+
+      <div className="overflow-x-auto mb-12">
+        <table className="w-full bg-card rounded-lg shadow-card overflow-hidden">
+          <thead>
+            <tr className="bg-green-600 text-white">
+              <th className="px-6 py-4 text-left font-semibold">Marketing Method</th>
+              <th className="px-6 py-4 text-left font-semibold">Impressions</th>
+              <th className="px-6 py-4 text-left font-semibold">Duration</th>
+              <th className="px-6 py-4 text-left font-semibold">CPM</th>
+              <th className="px-6 py-4 text-left font-semibold">Engagement</th>
+              <th className="px-6 py-4 text-left font-semibold">Sustainability Impact</th>
+            </tr>
+          </thead>
+          <tbody>
+            {marketingMethods.map((method, index) => (
+              <tr 
+                key={index}
+                className={`border-b border-border ${
+                  method.highlighted 
+                    ? 'bg-accent/10 border-accent' 
+                    : 'bg-background hover:bg-muted/50'
+                } transition-smooth`}
+              >
+                <td className="px-6 py-4">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">{method.icon}</span>
+                    <span className='font-medium text-foreground'>
+                      {method.method}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-muted-foreground">{method.impressions}</td>
+                <td className="px-6 py-4 text-muted-foreground">{method.duration}</td>
+                <td className="px-6 py-4 text-muted-foreground">{method.cpm}</td>
+                <td className="px-6 py-4 text-muted-foreground">{method.engagement}</td>
+                <td className="px-6 py-4 text-muted-foreground">{method.sustainability}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* <div className="text-center">
+        <Button size="lg" className="bg-primary hover:bg-accent text-lg px-8 py-3">
+          Partner with Us for Sustainable Impact
+        </Button>
+      </div> */}
+    </div>
+  </section>
+);
+
+ const FaqSection = () => (
+  <section id="faq" className="py-20">
+  <div className="container mx-auto px-4">
+    <div className="max-w-6xl mx-auto">
+      <div className="mb-16 animate-fade-in">
+        <h2 className="text-4xl font-bold text-foreground mb-6">FAQs</h2>
+        <p className="text-lg text-muted-foreground mb-4">
+          Everything you need to know about our initiatives. If you have any other questions please reach out to us at:{" "}
+          <a href="mailto:support@shelfmerch.com" className="text-primary hover:text-accent transition-smooth">
+            support@shelfmerch.com
+          </a>
+        </p>
+      </div>
+
+      <Accordion type="single" collapsible className="space-y-4">
+        {faqs.map((faq, index) => (
+          <AccordionItem 
+            key={index} 
+            value={`item-${index}`}
+            className="bg-background rounded-lg shadow-card border-0 animate-fade-in"
+            style={{ animationDelay: `${index * 0.1}s` }}
+          >
+            <AccordionTrigger className="px-6 py-4 text-left hover:no-underline hover:bg-muted/50 rounded-lg transition-smooth">
+              <span className="text-lg font-medium text-foreground pr-4">
+                {faq.question}
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-4 text-muted-foreground leading-relaxed">
+              {faq.answer}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </div>
+  </div>
+</section>
+);
+
   // --- Render ---
   return (
     <Layout>
@@ -829,9 +1068,13 @@ const Index = () => {
       <WhySponsorSection />
       <FeaturedCausesSection />
       <JourneySection />
-      {/* <SpreadSection /> */}
+      <StoriesSection />
+      <RaiseFundsSection />
       <JoinCTASection />
       <Testimonials />
+      <PartnersSection />
+      <hr />
+      <FaqSection />
       
     </Layout>
   );

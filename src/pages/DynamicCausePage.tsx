@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { AlertCircle, AlertTriangle, Briefcase, Eye, Clock, Smartphone, Factory, HouseIcon, DollarSignIcon, Recycle, Shield, TreePine, Thermometer, MapPin, Scale, TrendingDown, Gift, Megaphone, Globe, Leaf, Users, Heart, ShoppingBag, TrendingUp } from "lucide-react";
+import { AlertCircle, AlertTriangle, Briefcase, Eye, Clock, Smartphone, Factory, HouseIcon, DollarSignIcon, Recycle, Shield, TreePine, Thermometer, MapPin, Scale, TrendingDown, Gift, Megaphone, Globe, Leaf, Users, Heart, ShoppingBag, TrendingUp, Star } from "lucide-react";
 import { fetchCause } from '@/services/apiServices';
 import { getFullUrl } from '@/utils/apiUtils';
 import { useToast } from '@/components/ui/use-toast';
@@ -186,6 +186,116 @@ const DynamicCausePage = () => {
     }
   ];
 
+  // Mock partners gallery data
+  // const partners = [
+  //   {
+  //     id: 1,
+  //     name: "EcoCorp",
+  //     logo: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
+  //     description: "Leading environmental solutions provider",
+  //     contribution: "₹50,000",
+  //     category: "Platinum Partner"
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "GreenTech Solutions",
+  //     logo: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
+  //     description: "Sustainable technology innovations",
+  //     contribution: "₹35,000",
+  //     category: "Gold Partner"
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "NatureFirst",
+  //     logo: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
+  //     description: "Conservation and wildlife protection",
+  //     contribution: "₹25,000",
+  //     category: "Silver Partner"
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "CleanWater Initiative",
+  //     logo: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
+  //     description: "Water conservation and purification",
+  //     contribution: "₹20,000",
+  //     category: "Bronze Partner"
+  //   },
+  //   {
+  //     id: 5,
+  //     name: "Sustainable Living Co.",
+  //     logo: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
+  //     description: "Eco-friendly lifestyle products",
+  //     contribution: "₹15,000",
+  //     category: "Supporting Partner"
+  //   },
+  //   {
+  //     id: 6,
+  //     name: "Community Care",
+  //     logo: "https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
+  //     description: "Local community development",
+  //     contribution: "₹10,000",
+  //     category: "Community Partner"
+  //   }
+  // ];
+
+  // // Mock testimonials data
+  // const testimonials = [
+  //   {
+  //     id: 1,
+  //     name: "Sarah Johnson",
+  //     role: "Environmental Activist",
+  //     avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+  //     content: "This initiative has transformed how our community thinks about plastic waste. The tote bags are not just practical but also beautiful conversation starters about sustainability.",
+  //     rating: 5,
+  //     company: "Eco Warriors Collective"
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Michael Chen",
+  //     role: "Corporate Sustainability Manager",
+  //     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+  //     content: "As a corporate partner, we've seen incredible engagement from our employees. The transparency in how funds are used and the regular impact updates make this partnership truly meaningful.",
+  //     rating: 5,
+  //     company: "GreenTech Solutions"
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Priya Patel",
+  //     role: "Local Business Owner",
+  //     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+  //     content: "I've been using these tote bags in my store for months now. Customers love them and often ask about the cause behind them. It's a win-win for business and the environment.",
+  //     rating: 5,
+  //     company: "Organic Market"
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "David Rodriguez",
+  //     role: "Community Leader",
+  //     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+  //     content: "The impact on our local community has been remarkable. We've reduced plastic waste by 40% and created awareness about environmental issues. This is exactly what we needed.",
+  //     rating: 5,
+  //     company: "Neighborhood Association"
+  //   },
+  //   {
+  //     id: 5,
+  //     name: "Emma Thompson",
+  //     role: "School Principal",
+  //     avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+  //     content: "Our students are excited about the environmental lessons we've integrated using these tote bags. It's a practical way to teach sustainability and community responsibility.",
+  //     rating: 5,
+  //     company: "Green Valley School"
+  //   },
+  //   {
+  //     id: 6,
+  //     name: "Rajesh Kumar",
+  //     role: "Restaurant Owner",
+  //     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+  //     content: "We switched to these tote bags for our takeaway orders and our customers appreciate the eco-friendly approach. It's helped us build a stronger connection with our community.",
+  //     rating: 5,
+  //     company: "Spice Garden Restaurant"
+  //   }
+  // ];
+
   // Get category-specific icon and color
   const getCategoryIcon = (category: string) => {
     switch (category.toLowerCase()) {
@@ -215,7 +325,7 @@ const DynamicCausePage = () => {
     <Layout>
             <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className={`relative ${categoryInfo.bgColor} py-20 bg-gradient-to-br from-green-500 via-green-200 to-white`}>
+        <section className={`relative ${categoryInfo.bgColor} py-20 bg-gradient-to-br from-green-500 via-green-300 to-black`}>
           <div className="container mx-auto px-6">
             
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -490,6 +600,60 @@ const DynamicCausePage = () => {
         </div>
       </section>
 
+        {/* Testimonials */}
+        {/* <section className="py-20 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-6 text-gray-900">What People Are Saying</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Real stories from our community about the impact of this initiative
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {testimonials.map((testimonial) => (
+              <Card key={testimonial.id} className="hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <img 
+                      src={testimonial.avatar} 
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">{testimonial.name}</h3>
+                      <p className="text-sm text-gray-600">{testimonial.role}</p>
+                      <p className="text-xs text-gray-500">{testimonial.company}</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                  </div>
+                  <blockquote className="text-gray-700 italic">
+                    "{testimonial.content}"
+                  </blockquote>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          <div className="text-center mt-12">
+            <div className="inline-flex items-center gap-4 bg-gray-50 px-8 py-4 rounded-full">
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <span className="text-gray-700 font-medium">4.9/5 Average Rating</span>
+              <span className="text-gray-500">•</span>
+              <span className="text-gray-600">{testimonials.length} Verified Reviews</span>
+            </div>
+          </div>
+        </div>
+      </section> */}
+
       {/* FAQs */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
@@ -513,6 +677,61 @@ const DynamicCausePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Partners Gallery */}
+      {/* <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-6 text-gray-900">Our Trusted Partners</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Leading organizations and businesses supporting this cause with their commitment to sustainability
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {partners.map((partner) => (
+              <Card key={partner.id} className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={partner.logo} 
+                        alt={partner.name}
+                        className="w-12 h-12 rounded-lg object-cover"
+                      />
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{partner.name}</h3>
+                        <p className="text-sm text-gray-600">{partner.description}</p>
+                      </div>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${categoryInfo.bgLight} ${categoryInfo.textColor}`}>
+                      {partner.category}
+                    </div>
+                  </div>
+                  <div className="border-t pt-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Contribution</span>
+                      <span className={`font-bold ${categoryInfo.textColor}`}>{partner.contribution}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          <div className="text-center mt-12">
+            <Button 
+              variant="outline" 
+              className={`${categoryInfo.borderColor} ${categoryInfo.textColor} hover:${categoryInfo.bgColor} px-8 py-3`}
+              onClick={handleSponsor}
+            >
+              Become a Partner
+            </Button>
+          </div>
+        </div>
+      </section> */}
+
+    
 
       {/* Final CTA */}
       <section className="w-full min-h-[300px] bg-gradient-to-r from-green-500 via-green-600 to-black py-16 flex text-white relative overflow-hidden">

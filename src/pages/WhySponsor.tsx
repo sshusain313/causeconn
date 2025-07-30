@@ -21,7 +21,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
-import { fetchStats, fetchStories } from '@/services/apiServices';
+import { fetchStats, fetchSponsorStories } from '@/services/apiServices';
 import { Story } from '@/models/Story';
 
 // Sample data for the growth chart (fallback if API data is not available)
@@ -40,9 +40,9 @@ const WhySponsor = () => {
     queryFn: fetchStats
   });
 
-  const { data: stories, isLoading: storiesLoading } = useQuery({
-    queryKey: ['stories'],
-    queryFn: fetchStories
+  const { data: stories, isLoading: storiesLoading } = useQuery<Story[]>({
+    queryKey: ['sponsor-stories'],
+    queryFn: fetchSponsorStories
   });
 
   // Use real growth data from API or fallback to sample data
@@ -499,7 +499,7 @@ const WhySponsor = () => {
         
         {/* Featured Stories Carousel */}
         {!storiesLoading && stories?.length > 0 && (
-          <section className="space-y-8">
+          <section className="space-y-8 bg-[#f7f6f4] py-16 px-8 rounded-lg">
             <motion.h2 
               className="text-3xl font-bold text-center"
               initial="hidden"
@@ -524,13 +524,13 @@ const WhySponsor = () => {
                 <CarouselContent>
                   {stories.map((story: Story) => (
                     <CarouselItem key={story.id} className="md:basis-1/3">
-                      <Card className="h-full">
+                      <Card className="h-full bg-[#f7f6f4] border-[#f7f6f4]">
                         {story.imageUrl && (
                           <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                             <img 
                               src={story.imageUrl} 
                               alt={story.title} 
-                              className="h-full w-full object-cover transition-all hover:scale-105"
+                              className="h-full w-full object-cover object-top transition-all hover:scale-105"
                               onError={(e) => {
                                 // Fallback if image fails to load
                                 const target = e.target as HTMLImageElement;
@@ -551,8 +551,8 @@ const WhySponsor = () => {
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                <CarouselPrevious className="left-0" />
-                <CarouselNext className="right-0" />
+                {/* <CarouselPrevious className="left-0" />
+                <CarouselNext className="right-0" /> */}
               </Carousel>
             </motion.div>
           </section>

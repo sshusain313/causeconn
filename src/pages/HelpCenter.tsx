@@ -1,11 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Search, Mail, MessageCircle, BookOpen, Users, Shield, Zap } from 'lucide-react';
+import { Search, Mail, BookOpen, Users, Shield, Zap } from 'lucide-react';
 
 const HelpCenter = () => {
+  const navigate = useNavigate();
   const faqData = [
     {
       category: "Getting Started",
@@ -86,22 +88,25 @@ const HelpCenter = () => {
       title: "Email Support",
       description: "Get help via email within 24 hours",
       icon: <Mail className="h-6 w-6" />,
-      action: "support@causeconnect.org",
-      link: "mailto:support@causeconnect.org"
+      action: "Contact Support",
+      link: "mailto:support@shelfmerch.com",
+      mailto: "support@shelfmerch.com",
+      type: "email"
     },
     {
-      title: "Live Chat",
-      description: "Chat with our support team in real-time",
-      icon: <MessageCircle className="h-6 w-6" />,
-      action: "Start Chat",
-      link: "#"
+      title: "Terms of Service",
+      description: "View our Terms of Service",
+      icon: <Shield className="h-6 w-6" />,
+      action: "View Terms",
+      link: "/terms-of-service"
     },
     {
       title: "Documentation",
       description: "Browse our comprehensive guides",
       icon: <BookOpen className="h-6 w-6" />,
       action: "View Docs",
-      link: "#"
+      link: "/documentation",
+      type: "navigate"
     }
   ];
 
@@ -147,7 +152,38 @@ const HelpCenter = () => {
                   <Button 
                     variant="outline" 
                     className="w-full"
-                    onClick={() => window.open(option.link, '_blank')}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (option.type === "email") {
+                        // Try multiple methods to open email client
+                        const emailAddress = 'support@shelfmerch.com';
+                        const mailtoLink = `mailto:${emailAddress}`;
+                        
+                        // Method 1: Create and click a temporary link
+                        const tempLink = document.createElement('a');
+                        tempLink.href = mailtoLink;
+                        tempLink.style.display = 'none';
+                        document.body.appendChild(tempLink);
+                        tempLink.click();
+                        document.body.removeChild(tempLink);
+                        
+                        // Method 2: Fallback to window.location.href
+                        setTimeout(() => {
+                          try {
+                            window.location.href = mailtoLink;
+                          } catch (error) {
+                            console.error('Failed to open email client:', error);
+                            // Method 3: Copy to clipboard as final fallback
+                            navigator.clipboard.writeText(emailAddress);
+                            alert(`Email copied to clipboard: ${emailAddress}`);
+                          }
+                        }, 100);
+                      } else if (option.type === "navigate") {
+                        navigate(option.link);
+                      } else {
+                        window.open(option.link, '_blank');
+                      }
+                    }}
                   >
                     {option.action}
                   </Button>
@@ -195,12 +231,40 @@ const HelpCenter = () => {
                 Can't find what you're looking for? Our support team is here to help you with any questions or concerns.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3">
+                <Button 
+                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    // Try multiple methods to open email client
+                    const emailAddress = 'support@shelfmerch.com';
+                    const mailtoLink = `mailto:${emailAddress}`;
+                    
+                    // Method 1: Create and click a temporary link
+                    const tempLink = document.createElement('a');
+                    tempLink.href = mailtoLink;
+                    tempLink.style.display = 'none';
+                    document.body.appendChild(tempLink);
+                    tempLink.click();
+                    document.body.removeChild(tempLink);
+                    
+                    // Method 2: Fallback to window.location.href
+                    setTimeout(() => {
+                      try {
+                        window.location.href = mailtoLink;
+                      } catch (error) {
+                        console.error('Failed to open email client:', error);
+                        // Method 3: Copy to clipboard as final fallback
+                        navigator.clipboard.writeText(emailAddress);
+                        alert(`Email copied to clipboard: ${emailAddress}`);
+                      }
+                    }, 100);
+                  }}
+                >
                   Contact Support
                 </Button>
-                <Button variant="outline" className="px-8 py-3">
+                {/* <Button variant="outline" className="px-8 py-3">
                   Schedule a Call
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>

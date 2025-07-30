@@ -21,7 +21,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { fetchStats, fetchStories } from '@/services/apiServices';
+import { fetchStats, fetchClaimStories } from '@/services/apiServices';
 import { Story } from '@/models/Story';
 
 // Sample data for the impact chart (fallback if API data is not available)
@@ -39,9 +39,9 @@ const WhyClaim = () => {
     queryFn: fetchStats
   });
 
-  const { data: stories, isLoading: storiesLoading } = useQuery({
-    queryKey: ['stories'],
-    queryFn: fetchStories
+  const { data: stories, isLoading: storiesLoading } = useQuery<Story[]>({
+    queryKey: ['claim-stories'],
+    queryFn: fetchClaimStories
   });
 
   // Use real impact data from API or fallback to sample data
@@ -512,8 +512,8 @@ const WhyClaim = () => {
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                <CarouselPrevious className="left-0" />
-                <CarouselNext className="right-0" />
+                {/* <CarouselPrevious className="left-0" />
+                <CarouselNext className="right-0" /> */}
               </Carousel>
             </motion.div>
           </section>
