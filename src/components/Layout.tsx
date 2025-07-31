@@ -81,6 +81,12 @@ const Layout = ({ children }: LayoutProps) => {
               >
                 Why Claim?
               </Link>
+              <Link
+                to="/csr"
+                className={`${isActive('/csr')} px-4 py-2 font-medium transition-all duration-200 hover:border-b-2 hover:border-green-500`}
+              >
+                CSR
+              </Link>
             </nav>
 
             {/* Enhanced User Section */}

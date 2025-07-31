@@ -34,6 +34,55 @@ const fallbackGrowthData = [
   { month: 'Jun', sponsors: 45, impact: 840 },
 ];
 
+const marketingMethods = [
+  {
+    method: "Billboard (1 Month)",
+    impressions: "4-8 lakh",
+    duration: "30 Days",
+    cpm: "₹15-₹125",
+    engagement: "Passive Viewing",
+    sustainability: "❌ None",
+    icon: "📺"
+  },
+  {
+    method: "Digital Ads (Google, FB, IG)",
+    impressions: "20-30 lakh",
+    duration: "2-3 Weeks",
+    cpm: "₹33",
+    engagement: "Click-Based, Temporary",
+    sustainability: "❌ None",
+    icon: "💻"
+  },
+  {
+    method: "TV/Print Ads (Single Run)",
+    impressions: "5-20 lakh",
+    duration: "1 Day/One-Time",
+    cpm: "₹50-₹75",
+    engagement: "Short-Term Visibility",
+    sustainability: "❌ None",
+    icon: "📺"
+  },
+  {
+    method: "Event Sponsorships",
+    impressions: "3-10 lakh",
+    duration: "1-2 Days",
+    cpm: "₹15-₹125",
+    engagement: "Temporary Engagement",
+    sustainability: "❌ None",
+    icon: "🎪"
+  },
+  {
+    method: "Change Bag Tote Sponsorship",
+    impressions: "1 Crore+ (10K Bags x 1K uses)",
+    duration: "Years (Long-Term)",
+    cpm: "₹8-₹15 (Lowest)",
+    engagement: "Direct, High Retention",
+    sustainability: "✅ High (Plastic-Free, Reusable)",
+    icon: "🛍️",
+    highlighted: true
+  }
+];
+
 const WhySponsor = () => {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['stats'],
@@ -415,7 +464,7 @@ const WhySponsor = () => {
         </section>
         
         {/* Growth Chart */}
-        <section className="space-y-8">
+        {/* <section className="space-y-8">
           <motion.h2 
             className="text-3xl font-bold text-center"
             initial="hidden"
@@ -495,8 +544,72 @@ const WhySponsor = () => {
           <p className="text-center text-muted-foreground">
             Monthly growth of sponsors and total bags in circulation
           </p>
+        </ Mareketing Section> */}
+        <section className="py-20 bg-background">
+    <div className="container mx-auto px-4">
+      <div className="text-center mb-16 animate-fade-in">
+        <h2 className="text-4xl font-bold text-green-600 mb-4">
+          The Most Budget-Friendly CSR & Brand Awareness Strategy
+        </h2>
+        <p className="text-lg text-muted-foreground max-w-4xl mx-auto">
+          With ChangeBag.org's tote sponsorship, brands achieve enduring visibility, enhanced consumer 
+          engagement, and cost-effective marketing while promoting sustainability. Unlike temporary ads, 
+          tote bags serve as daily-use items, providing years of continuous brand promotion and generating 
+          millions of impressions from a single investment.
+        </p>
+      </div>
+
+      <div className="overflow-x-auto mb-12">
+        <div className="border-2 border-black-200 rounded-2xl shadow-xl overflow-hidden">
+          <table className="w-full bg-white">
+            <thead>
+              <tr className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+                <th className="px-6 py-4 text-left font-semibold border-r border-green-500">Marketing Method</th>
+                <th className="px-6 py-4 text-left font-semibold border-r border-green-500">Impressions</th>
+                <th className="px-6 py-4 text-left font-semibold border-r border-green-500">Duration</th>
+                <th className="px-6 py-4 text-left font-semibold border-r border-green-500">CPM</th>
+                <th className="px-6 py-4 text-left font-semibold border-r border-green-500">Engagement</th>
+                <th className="px-6 py-4 text-left font-semibold">Sustainability Impact</th>
+              </tr>
+            </thead>
+            <tbody>
+              {marketingMethods.map((method, index) => (
+                <tr 
+                  key={index}
+                  className={`border-b border-black-200 ${
+                    method.highlighted 
+                      ? 'bg-black-50/80 border-black-200' 
+                      : 'bg-white hover:bg-black-50/30'
+                  } transition-all duration-300`}
+                >
+                  <td className="px-6 py-4 border-r border-black-200">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">{method.icon}</span>
+                      <span className='font-medium text-gray-900'>
+                        {method.method}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-gray-600 border-r border-black-100">{method.impressions}</td>
+                  <td className="px-6 py-4 text-gray-600 border-r border-black-100">{method.duration}</td>
+                  <td className="px-6 py-4 text-gray-600 border-r border-black-100">{method.cpm}</td>
+                  <td className="px-6 py-4 text-gray-600 border-r border-black-100">{method.engagement}</td>
+                  <td className="px-6 py-4 text-gray-600">{method.sustainability}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* <div className="text-center">
+        <Button size="lg" className="bg-primary hover:bg-accent text-lg px-8 py-3">
+          Partner with Us for Sustainable Impact
+        </Button>
+      </div> */}
+    </div>
         </section>
-        
+
         {/* Featured Stories Carousel */}
         {!storiesLoading && stories?.length > 0 && (
           <section className="space-y-8 bg-[#f7f6f4] py-16 px-8 rounded-lg">

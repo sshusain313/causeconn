@@ -4,7 +4,7 @@ import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Heart, Target, Sparkles, Users } from 'lucide-react';
+import { Loader2, Heart, Target, Sparkles, Users, Search, Star, TrendingUp, Share2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import axios from 'axios';
 import config from '@/config';
@@ -17,8 +17,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { faqs } from '@/data/faqs';
-import { Star } from "lucide-react";
-
 
 interface Cause {
   _id: string;
@@ -231,6 +229,33 @@ const partners = [
   { name: 'uber', logo: '/images/uber.png' },
 ];
 
+const steps = [
+  {
+    number: "01",
+    icon: <Search className="h-8 w-8" />,
+    title: "Pick a Cause",
+    description: "Choose from 3,000+ verified NGOs and causes that align with your brand values."
+  },
+  {
+    number: "02",
+    icon: <Heart className="h-8 w-8" />,
+    title: "Sponsor Bags",
+    description: "Fund eco-friendly tote bags with your brand logo supporting your chosen cause."
+  },
+  {
+    number: "03",
+    icon: <TrendingUp className="h-8 w-8" />,
+    title: "Track Impact",
+    description: "Monitor real-time distribution and impact through custom dashboards and reports."
+  },
+  {
+    number: "04",
+    icon: <Share2 className="h-8 w-8" />,
+    title: "Share Your Story",
+    description: "Showcase your CSR impact with compelling content and transparent reporting."
+  }
+];
+
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -398,40 +423,40 @@ const Index = () => {
     </section>
   );
 
-  const RaiseFundsSection=()=>(
-    <section className="bg-[#f8faf8] py-16 px-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-800 leading-tight">
-              Raise funds for your cause!
-            </h1>
+  // const RaiseFundsSection=()=>(
+  //   <section className="bg-[#f8faf8] py-16 px-8">
+  //     <div className="max-w-6xl mx-auto">
+  //       <div className="grid md:grid-cols-2 gap-12 items-center">
+  //         <div className="space-y-6">
+  //           <h1 className="text-5xl md:text-6xl font-bold text-gray-800 leading-tight">
+  //             Raise funds for your cause!
+  //           </h1>
             
-            <p className="text-lg text-gray-600 leading-relaxed">
-              Onboard on Give.do and create impact by raising funds for your initiatives
-            </p>
+  //           <p className="text-lg text-gray-600 leading-relaxed">
+  //             Onboard on Give.do and create impact by raising funds for your initiatives
+  //           </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button size="lg" className="bg-green-500 hover:bg-green-600 text-white text-base px-8 py-3 rounded-lg">
-                Enroll your NGO on give
-              </Button>
-              <Button size="lg" variant="outline" className="border-gray-400 text-gray-700 hover:bg-gray-50 text-base px-8 py-3 rounded-lg">
-                Raise funds for a listed NGO
-              </Button>
-            </div>
-          </div>
+  //           <div className="flex flex-col sm:flex-row gap-4 pt-4">
+  //             <Button size="lg" className="bg-green-500 hover:bg-green-600 text-white text-base px-8 py-3 rounded-lg">
+  //               Enroll your NGO on give
+  //             </Button>
+  //             <Button size="lg" variant="outline" className="border-gray-400 text-gray-700 hover:bg-gray-50 text-base px-8 py-3 rounded-lg">
+  //               Raise funds for a listed NGO
+  //             </Button>
+  //           </div>
+  //         </div>
           
-                      <div className='h-full'>
-              <img 
-                src="/images/header.png" 
-                alt="Children fundraising activities" 
-                className="w-full h-full object-cover"
-              />
-          </div>
-        </div>
-      </div>
-    </section>
-  )
+  //                     <div className='h-full'>
+  //             <img 
+  //               src="/images/header.png" 
+  //               alt="Children fundraising activities" 
+  //               className="w-full h-full object-cover"
+  //             />
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </section>
+  // )
 
   // Why Brands Sponsor Section
   const WhySponsorSection = () => (
@@ -1210,6 +1235,47 @@ const Index = () => {
     </section>
   );
 
+  const HowItWorksSection = () => (
+    <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            How It <span className="text-[#008037]">Works</span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Simple, transparent process from cause selection to impact measurement
+          </p>
+        </div>
+        
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {steps.map((step, index) => (
+              <div key={index} className="relative">
+                <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 text-center">
+                  <div className="text-[#008037] text-6xl font-bold mb-4 opacity-20">
+                    {step.number}
+                  </div>
+                  <div className="text-[#008037] mb-6 flex justify-center">
+                    {step.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    {step.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
+                {index < steps.length - 1 && (
+                  <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-green-300 transform -translate-y-1/2"></div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+
   // --- Render ---
   return (
     <Layout>
@@ -1218,8 +1284,9 @@ const Index = () => {
       <FeaturedCausesSection />
       <WhySponsorSection />
       <JourneySection />
-      <RaiseFundsSection />
-      <StoriesSection />
+      {/* <RaiseFundsSection /> */}
+      <HowItWorksSection />
+      {/* <StoriesSection /> */}
       <JoinCTASection />
       <Testimonials />
       <PartnersSection />

@@ -23,6 +23,7 @@ import CreateCausePage from "./pages/CreateCause";
 import WhySponsorPage from "./pages/WhySponsor";
 import WhyClaimPage from "./pages/WhyClaim";
 import LogoReuploadPage from "./pages/sponsor/LogoReupload";
+import {CsrPage} from "./pages/CsrPage";
 
 // Legal & Support Pages
 import HelpCenter from "./pages/HelpCenter";
@@ -107,6 +108,7 @@ const App: React.FC = () => {
                 {/* Public Information Pages */}
                 <Route path="/why-sponsor" element={<WhySponsorPage />} />
                 <Route path="/why-claim" element={<WhyClaimPage />} />
+                <Route path="/csr" element={<CsrPage />} />
                 <Route path="/sponsor/logo-reupload/:sponsorshipId" element={<LogoReuploadPage />} />
                 
                 {/* Legal & Support Pages */}
