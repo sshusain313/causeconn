@@ -466,7 +466,7 @@ const WhyClaim = () => {
         
         {/* Featured Stories Carousel */}
         {!storiesLoading && stories?.length > 0 && (
-          <section className="space-y-8">
+          <section className="space-y-8 bg-[#f7f6f4] py-16 px-8 rounded-lg">
             <motion.h2 
               className="text-3xl font-bold text-center"
               initial="hidden"

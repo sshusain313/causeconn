@@ -35,6 +35,13 @@ interface Cause {
 
 const HERO_IMAGE = "/images/zero.jpg"; // Placeholder, replace with actual illustration if available
 
+const stats = [
+  { number: "2.7M+", label: "Donations" },
+  { number: "15M+", label: "Lives Impacted" },
+  { number: "3000+", label: "Verified Non Profits" },
+  { number: "300+", label: "Corporate Partners" },
+];
+
 const marketingMethods = [
   {
     method: "Billboard (1 Month)",
@@ -205,14 +212,23 @@ const testimonials = [
 ];
 
 const partners = [
-  { name: "PayPal", logo: "/images/paypal.png" },
-  { name: "PhonePe", logo: "/images/phonepe.png" },
-  { name: "Puma", logo: "/images/puma.png" },
-  { name: "Rockefeller Foundation", logo: "/images/rockefeller.png" },
-  { name: "Salesforce", logo: "/images/salesforce.png" },
-  { name: "walmart", logo: "/images/wallmart.png" },
+  { name: "bentley", logo: "/images/bentley.webp" },
+  { name: "trustpilot", logo: "/images/trust.svg" },
+  { name: "puma", logo: "/images/puma.png" },
+  { name: "rubix", logo: "/images/rubix.webp" },
+  { name: "salesforce", logo: "/images/salesforce.png" },
+  { name: "jpmorgan", logo: "/images/jp.webp" },
+  { name: "cocacola", logo: "/images/cola.webp" },
   { name: "bmw", logo: "/images/bmw.jpeg" },
-  { name: "ikea", logo: "/images/ikea.png" }
+  { name: "walmart", logo: "/images/wallmart.png" },
+  { name: "Dr. Reddy's", logo: "/images/reddy.webp" },
+  { name: 'google', logo: '/images/google.webp' },
+  { name: 'dominos', logo: '/images/dominos.png' },
+  { name: 'amazon', logo: '/images/amazon.png' },
+  { name: 'apple', logo: '/images/apple.png' },
+  { name: 'meta', logo: '/images/meta.jpg' },
+  { name: 'tesla', logo: '/images/tesla.png' },
+  { name: 'uber', logo: '/images/uber.png' },
 ];
 
 const Index = () => {
@@ -295,78 +311,91 @@ const Index = () => {
 
   // Hero Section
   const HeroSection = () => (
-    // <section className="bg-white border-b border-gray-100 py-16">
-    //   <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-10">
-    //     {/* Left: Text */}
-    //     <div className="flex-1 max-w-xl">
-    //       <div className="mb-2 text-sm text-gray-500 font-medium">Sponsor Change – Make an Impact</div>
-    //       <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-    //         A New-Age Promotional Platform for <span className="text-green-600">Purpose-Driven Brands</span>
-    //           </h1>
-    //       <p className="text-lg text-gray-700 mb-8">
-    //         At ChangeBag, we offer brands a sustainable, high-visibility marketing medium that creates impact. No more TV ads, billboards, or print ads – this is real-world branding with real engagement.
-    //           </p>
-    //             <Button 
-    //         className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition"
-    //               onClick={() => navigate('/causes')} 
-    //         aria-label="Sponsor a cause"
-    //             >
-    //         Sponsor
-    //             </Button>
-    //           </div>
-    //     {/* Right: Illustration */}
-    //     <div className="flex-1 flex justify-center items-center relative">
-    //       <div className="rounded-full bg-green-50 w-[340px] h-[340px] flex items-center justify-center relative">
-    //         <img 
-    //           src={HERO_IMAGE}
-    //           alt="Hero Illustration"
-    //           className="w-full h-56 md:h-96 max-w-xs md:max-w-lg object-contain drop-shadow-xl mx-auto"
-    //           aria-hidden="true"
-    //         />
-    //         {/* Callouts (simulate with positioned badges) */}
-    //         <span className="absolute left-2 top-8 bg-white text-xs px-2 py-1 rounded-full shadow border">Just You</span>
-    //         <span className="absolute right-2 top-8 bg-white text-xs px-2 py-1 rounded-full shadow border">Your Skill</span>
-    //         <span className="absolute left-0 bottom-10 bg-white text-xs px-2 py-1 rounded-full shadow border">No corporate politics.</span>
-    //         <span className="absolute right-0 bottom-10 bg-white text-xs px-2 py-1 rounded-full shadow border">No endless job applications.</span>
-    //         <span className="absolute left-1/2 -top-4 -translate-x-1/2 bg-white text-xs px-2 py-1 rounded-full shadow border">A role. An income to earn.</span>
-    //       </div>
-    //     </div>
-    //   </div>
-    // </section>
-    <section className="px-6 py-16 bg-neutral-50">
-    <div className="max-w-7xl mx-auto">
-      <div className="grid lg:grid-cols-2 gap-12 items-center">
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <p className="text-neutral-600 text-lg">Sponsor Change – Make an Impact</p>
-            <h1 className="text-5xl lg:text-6xl font-bold text-neutral-800 leading-tight">
-              A New-Age Promotional Platform for{" "}
-              <span className="text-brand-primary">Purpose-Driven Brands</span>
-            </h1>
+    <section className="relative overflow-hidden bg-gradient-to-br from-green-50 via-white to-emerald-50 py-20 lg:py-24">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 bg-gradient-to-r from-green-100/10 to-emerald-100/10"></div>
+      <div className="absolute top-0 left-0 w-64 h-64 bg-green-200/20 rounded-full -translate-x-32 -translate-y-32 animate-pulse"></div>
+      <div className="absolute bottom-0 right-0 w-80 h-80 bg-emerald-200/20 rounded-full translate-x-40 translate-y-40 animate-pulse" style={{animationDelay: '1s'}}></div>
+      <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-green-300/20 rounded-full animate-bounce" style={{animationDelay: '0.5s'}}></div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-full text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                Sponsor Change – Make an Impact
+              </div>
+              <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 leading-tight">
+                A New-Age Promotional Platform for{" "}
+                <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                  Purpose-Driven Brands
+                </span>
+              </h1>
+            </div>
+            
+            <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">
+              At CauseConnect, we offer brands a sustainable, high-visibility marketing 
+              medium that creates real impact. No more TV ads, billboards, or print ads – 
+              this is real-world branding with genuine engagement and lasting value.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button 
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 text-lg rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" 
+                onClick={() => navigate('/causes')}
+              >  
+                Start Sponsoring
+              </Button>
+              <Button 
+                variant="outline"
+                className="border-2 border-green-600 text-green-600 hover:bg-green-50 px-8 py-4 text-lg rounded-xl font-semibold transition-all duration-300 hover:border-green-700"
+                onClick={() => navigate('/why-sponsor')}
+              >
+                Learn More
+              </Button>
+            </div>
+            
+            {/* Trust indicators */}
+            {/* <div className="flex items-center gap-8 pt-4">
+              <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-gray-700">Trusted by 300+ Brands</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
+                <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                <span className="text-sm font-medium text-gray-700">1M+ Impressions</span>
+              </div>
+            </div> */}
           </div>
           
-          <p className="text-lg text-neutral-700 leading-relaxed max-w-lg">
-            At CauseBag, we offer brands a sustainable, high-visibility marketing 
-            medium that creates impact. No more TV ads, billboards, or print ads – 
-            this is real-world branding with real engagement.
-          </p>
-          
-          {/* <Button className="bg-brand-primary hover:bg-brand-accent text-brand-primary-foreground px-8 py-3 text-lg rounded-lg"> */}
-          <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg rounded-lg" onClick={()=>navigate('/causes')}>  
-            Sponsor
-          </Button>
-        </div>
-        
-        <div className="relative">
-          <img 
-            src={HERO_IMAGE} 
-            alt="Woman holding a sustainable no plastic bag"
-            className="w-full h-auto rounded-2xl shadow-lg"
-          />
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
+            <div className="relative bg-white rounded-3xl shadow-2xl border border-green-100 overflow-hidden transform group-hover:scale-105 transition-all duration-500">
+              <img 
+                src={HERO_IMAGE} 
+                alt="Woman holding a sustainable no plastic bag"
+                className="w-full h-auto object-cover group-hover:scale-110 transition-transform duration-700"
+              />
+              <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
+                <span className="text-sm font-medium text-gray-800">Sustainable Impact</span>
+              </div>
+              <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
+                Eco-Friendly
+              </div>
+            </div>
+            
+            {/* Floating elements around the image */}
+            <div className="absolute -top-4 -left-4 bg-yellow-400 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg animate-bounce">
+              Free Totes
+            </div>
+            <div className="absolute -bottom-4 -right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg animate-bounce" style={{animationDelay: '0.5s'}}>
+              Brand Visibility
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
   );
 
   const RaiseFundsSection=()=>(
@@ -406,30 +435,37 @@ const Index = () => {
 
   // Why Brands Sponsor Section
   const WhySponsorSection = () => (
-    <section className="bg-white border-b border-gray-100 py-20">
-      <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold text-gray-900 mb-4">
-        Why brands sponsor <span className="text-green-600">changebag.org</span>
-        </h2>
-        <p className="text-lg text-gray-600 mb-16">
-          We provide everything you need to launch, manage, and scale your cause effectively.
-        </p>
-        <div className="flex flex-col md:flex-row justify-center items-stretch gap-8 px-6">
+    <section className="bg-gradient-to-br from-white via-green-50/30 to-white py-24 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 bg-gradient-to-r from-green-100/5 to-emerald-100/5"></div>
+      <div className="absolute top-1/2 left-0 w-32 h-32 bg-green-200/20 rounded-full -translate-x-16 -translate-y-16"></div>
+      <div className="absolute bottom-0 right-1/4 w-24 h-24 bg-emerald-200/20 rounded-full translate-x-12 translate-y-12"></div>
+      
+      <div className="relative z-10 container mx-auto px-4">
+        <div className="text-center mb-16">
+          {/* <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-2 rounded-full text-sm font-medium mb-6 shadow-lg">
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+            Why Choose CauseConnect
+          </div> */}
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Why brands sponsor <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">CauseConnect</span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            We provide everything you need to launch, manage, and scale your cause effectively with sustainable, long-term impact.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {benefits.map((benefit, idx) => (
             <div
               key={idx}
-              className={`
-                flex-1 bg-white rounded-2xl p-8 flex flex-col items-center
-                shadow-md transition-all duration-200
-                hover:shadow-xl hover:-translate-y-2
-              `}
-              style={{ minWidth: 220, maxWidth: 320 }}
+              className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 flex flex-col items-center text-center shadow-lg border border-green-100/50 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 hover:border-green-200"
             >
-              <div className={`mb-4 flex items-center justify-center rounded-full ${idx === 1 ? 'bg-green-100' : 'bg-green-50'} w-16 h-16`}>
-                {React.cloneElement(benefit.icon, { className: 'h-10 w-10 text-green-600' })}
+              <div className="mb-6 flex items-center justify-center rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 w-20 h-20 group-hover:scale-110 transition-transform duration-300">
+                {React.cloneElement(benefit.icon, { className: 'h-12 w-12 text-green-600 group-hover:text-emerald-600 transition-colors duration-300' })}
               </div>
-              <h3 className="font-bold text-xl mb-2 text-center text-gray-900">{benefit.title}</h3>
-              <p className="text-gray-600 text-base text-center">{benefit.description}</p>
+              <h3 className="font-bold text-xl mb-4 text-gray-900 group-hover:text-green-700 transition-colors duration-300">{benefit.title}</h3>
+              <p className="text-gray-600 text-base leading-relaxed">{benefit.description}</p>
             </div>
           ))}
         </div>
@@ -559,33 +595,40 @@ const Index = () => {
   );
 
   const PartnersSection = () => (
-    <section id="partners" className="py-20 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl font-bold text-foreground mb-4">
-            Our Corporate Partners
+    <section id="partners" className="bg-gradient-to-br from-gray-50 via-white to-green-50/30 py-24 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 bg-gradient-to-r from-green-100/5 to-emerald-100/5"></div>
+      <div className="absolute top-1/2 left-0 w-32 h-32 bg-green-200/20 rounded-full -translate-x-16 -translate-y-16"></div>
+      <div className="absolute bottom-0 right-1/4 w-24 h-24 bg-emerald-200/20 rounded-full translate-x-12 translate-y-12"></div>
+      
+      <div className="relative z-10 container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Our <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Corporate Partners</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Trusted by the largest brands and corporations, and the most impactful foundations around the world
           </p>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-8 items-center">
-          {partners.map((partner, index) => (
-            <div 
-              key={partner.name}
-              className="bg-background rounded-lg p-6 shadow-card hover:shadow-lg transition-smooth text-center animate-fade-in flex items-center justify-center"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              {/* <div className="text-4xl mb-2">{partner.logo}</div> */}
-              <img 
-                src={partner.logo} 
-                alt={partner.name} 
-                className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain" 
-              />
-              {/* <div className="text-sm font-medium text-muted-foreground">{partner.name}</div> */}
-            </div>
-          ))}
+        {/* Infinite Carousel */}
+        <div className="relative">
+          {/* First row - moving left */}
+          <div className="flex animate-scroll-left">
+            {[...partners, ...partners].map((partner, index) => (
+              <div 
+                key={`${partner.name}-${index}`}
+                className="group bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 text-center flex items-center justify-center hover:scale-105 flex-shrink-0 mx-4"
+                style={{ minWidth: '200px' }}
+              >
+                <img 
+                  src={partner.logo} 
+                  alt={partner.name} 
+                  className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain group-hover:scale-110 transition-transform duration-300" 
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -941,21 +984,53 @@ const Index = () => {
 
   // Join the Movement CTA
   const JoinCTASection = () => (
-    <section className="w-full min-h-[300px]  bg-gradient-to-br from-green-500 via-green-600 to-black py-16 flex items-center justify-center">
-        <div className="container mx-auto px-4 text-center">
-        <h2 className="text-4xl md:text-4xl font-bold text-white mb-4">Ready to join the movement?</h2>
-        <p className="text-xl text-green-100 mb-8">
-          Whether you're a brand looking for authentic reach or someone who loves free, useful things that matter – ChangeBag is for you.
-        </p>
+    <section className="relative overflow-hidden bg-gradient-to-br from-green-600 via-emerald-600 to-green-800 py-8 lg:py-12">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20"></div>
+      <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-32 -translate-y-32 animate-pulse"></div>
+      <div className="absolute bottom-0 right-0 w-80 h-80 bg-white/10 rounded-full translate-x-40 translate-y-40 animate-pulse" style={{animationDelay: '1s'}}></div>
+      <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-white/5 rounded-full animate-bounce" style={{animationDelay: '0.5s'}}></div>
+      
+      {/* Floating particles */}
+      <div className="absolute top-20 left-20 w-2 h-2 bg-white/30 rounded-full animate-ping"></div>
+      <div className="absolute top-40 right-32 w-1 h-1 bg-white/40 rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
+      <div className="absolute bottom-32 left-1/3 w-1.5 h-1.5 bg-white/25 rounded-full animate-ping" style={{animationDelay: '1s'}}></div>
+      
+      <div className="relative z-10 container mx-auto px-4 text-center">
+        <div className="max-w-4xl mx-auto">
+          {/* <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-6 py-2 rounded-full text-sm font-medium mb-8 shadow-lg">
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+            Join the Movement
+          </div> */}
+          
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+            Ready to join the <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">movement?</span>
+          </h2>
+          
+          <p className="text-xl lg:text-2xl text-green-100 mb-10 max-w-3xl mx-auto leading-relaxed">
+            Whether you're a brand looking for authentic reach or someone who loves free, useful things that matter – CauseConnect is for you.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button 
-          className="bg-white text-green-600 hover:bg-green-50 text-lg px-8 py-3 rounded-lg font-bold shadow-md transition"
-          onClick={() => navigate('/causes')}
-          aria-label="Join Now"
-        >
-          Join Now
+              className="bg-white text-green-600 hover:bg-green-50 text-lg px-8 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              onClick={() => navigate('/causes')}
+              aria-label="Join Now"
+            >
+              Sponsor Now
             </Button>
+            <Button 
+              variant="outline"
+              className="bg-white text-green-600 hover:bg-green-50 text-lg px-8 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              
+              onClick={() => navigate('/why-sponsor')}
+            >
+              Learn More
+            </Button>
+          </div>
         </div>
-      </section>
+      </div>
+    </section>
   );
 
   const StoriesSection = () => (
@@ -974,44 +1049,46 @@ const Index = () => {
       </div>
 
       <div className="overflow-x-auto mb-12">
-        <table className="w-full bg-card rounded-lg shadow-card overflow-hidden">
-          <thead>
-            <tr className="bg-green-600 text-white">
-              <th className="px-6 py-4 text-left font-semibold">Marketing Method</th>
-              <th className="px-6 py-4 text-left font-semibold">Impressions</th>
-              <th className="px-6 py-4 text-left font-semibold">Duration</th>
-              <th className="px-6 py-4 text-left font-semibold">CPM</th>
-              <th className="px-6 py-4 text-left font-semibold">Engagement</th>
-              <th className="px-6 py-4 text-left font-semibold">Sustainability Impact</th>
-            </tr>
-          </thead>
-          <tbody>
-            {marketingMethods.map((method, index) => (
-              <tr 
-                key={index}
-                className={`border-b border-border ${
-                  method.highlighted 
-                    ? 'bg-accent/10 border-accent' 
-                    : 'bg-background hover:bg-muted/50'
-                } transition-smooth`}
-              >
-                <td className="px-6 py-4">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{method.icon}</span>
-                    <span className='font-medium text-foreground'>
-                      {method.method}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-muted-foreground">{method.impressions}</td>
-                <td className="px-6 py-4 text-muted-foreground">{method.duration}</td>
-                <td className="px-6 py-4 text-muted-foreground">{method.cpm}</td>
-                <td className="px-6 py-4 text-muted-foreground">{method.engagement}</td>
-                <td className="px-6 py-4 text-muted-foreground">{method.sustainability}</td>
+        <div className="border-2 border-black-200 rounded-2xl shadow-xl overflow-hidden">
+          <table className="w-full bg-white">
+            <thead>
+              <tr className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+                <th className="px-6 py-4 text-left font-semibold border-r border-green-500">Marketing Method</th>
+                <th className="px-6 py-4 text-left font-semibold border-r border-green-500">Impressions</th>
+                <th className="px-6 py-4 text-left font-semibold border-r border-green-500">Duration</th>
+                <th className="px-6 py-4 text-left font-semibold border-r border-green-500">CPM</th>
+                <th className="px-6 py-4 text-left font-semibold border-r border-green-500">Engagement</th>
+                <th className="px-6 py-4 text-left font-semibold">Sustainability Impact</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {marketingMethods.map((method, index) => (
+                <tr 
+                  key={index}
+                  className={`border-b border-black-200 ${
+                    method.highlighted 
+                      ? 'bg-black-50/80 border-black-200' 
+                      : 'bg-white hover:bg-black-50/30'
+                  } transition-all duration-300`}
+                >
+                  <td className="px-6 py-4 border-r border-black-200">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">{method.icon}</span>
+                      <span className='font-medium text-gray-900'>
+                        {method.method}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-gray-600 border-r border-black-100">{method.impressions}</td>
+                  <td className="px-6 py-4 text-gray-600 border-r border-black-100">{method.duration}</td>
+                  <td className="px-6 py-4 text-gray-600 border-r border-black-100">{method.cpm}</td>
+                  <td className="px-6 py-4 text-gray-600 border-r border-black-100">{method.engagement}</td>
+                  <td className="px-6 py-4 text-gray-600">{method.sustainability}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* <div className="text-center">
@@ -1023,53 +1100,126 @@ const Index = () => {
   </section>
 );
 
- const FaqSection = () => (
-  <section id="faq" className="py-20">
-  <div className="container mx-auto px-4">
-    <div className="max-w-6xl mx-auto">
-      <div className="mb-16 animate-fade-in">
-        <h2 className="text-4xl font-bold text-foreground mb-6">FAQs</h2>
-        <p className="text-lg text-muted-foreground mb-4">
-          Everything you need to know about our initiatives. If you have any other questions please reach out to us at:{" "}
-          <a href="mailto:support@shelfmerch.com" className="text-primary hover:text-accent transition-smooth">
-            support@shelfmerch.com
-          </a>
-        </p>
-      </div>
+  const FaqSection = () => (
+    <section id="faq" className="bg-gradient-to-br from-white via-green-50/20 to-white py-24 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 bg-gradient-to-r from-green-100/5 to-emerald-100/5"></div>
+      <div className="absolute top-0 right-0 w-40 h-40 bg-green-200/20 rounded-full translate-x-20 -translate-y-20"></div>
+      <div className="absolute bottom-0 left-1/4 w-32 h-32 bg-emerald-200/20 rounded-full -translate-x-16 translate-y-16"></div>
+      
+      <div className="relative z-10 container mx-auto px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            {/* <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-2 rounded-full text-sm font-medium mb-6 shadow-lg">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+              Frequently Asked Questions
+            </div> */}
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Got <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Questions?</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Everything you need to know about our initiatives. If you have any other questions please reach out to us at:{" "}
+              <a href="mailto:support@shelfmerch.com" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-300">
+                support@shelfmerch.com
+              </a>
+            </p>
+          </div>
 
-      <Accordion type="single" collapsible className="space-y-4">
-        {faqs.map((faq, index) => (
-          <AccordionItem 
-            key={index} 
-            value={`item-${index}`}
-            className="bg-background rounded-lg shadow-card border-0 animate-fade-in"
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
-            <AccordionTrigger className="px-6 py-4 text-left hover:no-underline hover:bg-muted/50 rounded-lg transition-smooth">
-              <span className="text-lg font-medium text-foreground pr-4">
-                {faq.question}
-              </span>
-            </AccordionTrigger>
-            <AccordionContent className="px-6 pb-4 text-muted-foreground leading-relaxed">
-              {faq.answer}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
-    </div>
-  </div>
-</section>
-);
+          <Accordion type="single" collapsible className="space-y-4">
+            {faqs.map((faq, index) => (
+              <AccordionItem 
+                key={index} 
+                value={`item-${index}`}
+                className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-green-100/50 animate-fade-in hover:shadow-xl transition-all duration-300"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <AccordionTrigger className="px-6 py-4 text-left hover:no-underline hover:bg-green-50/50 rounded-xl transition-all duration-300">
+                  <span className="text-lg font-medium text-gray-900 pr-4 group-hover:text-green-700 transition-colors duration-300">
+                    {faq.question}
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-4 text-gray-600 leading-relaxed">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </div>
+    </section>
+  );
+
+  const StatsSection=()=>(
+    <section className="bg-gradient-to-br from-green-50 via-white to-emerald-50 py-20 px-8 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 bg-gradient-to-r from-green-100/20 to-emerald-100/20"></div>
+      <div className="absolute top-0 left-0 w-32 h-32 bg-green-200/30 rounded-full -translate-x-16 -translate-y-16"></div>
+      <div className="absolute bottom-0 right-0 w-40 h-40 bg-emerald-200/30 rounded-full translate-x-20 translate-y-20"></div>
+      
+      <div className="max-w-6xl mx-auto text-center relative z-10">
+        <div className="mb-12">
+          {/* <div className="inline-flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-full text-lg font-bold mb-8 shadow-lg">
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+            give.do
+          </div> */}
+          <h2 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
+            India's most trusted online<br />
+            <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+              donation platform
+            </span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Empowering millions to make a difference through secure, transparent, and impactful giving
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">
+          {stats.map((stat, index) => (
+            <div key={index} className="text-center group">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-green-100/50 hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                <div className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">
+                  {stat.number}
+                </div>
+                <div className="text-gray-600 text-sm md:text-base font-medium">
+                  {stat.label}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Trust indicators */}
+        {/* <div className="mt-16 pt-8 border-t border-green-200/50">
+          <p className="text-sm text-gray-500 mb-4">Trusted by millions across India</p>
+          <div className="flex items-center justify-center gap-8 opacity-60">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <span className="text-sm font-medium">SSL Secured</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <span className="text-sm font-medium">PCI Compliant</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+              <span className="text-sm font-medium">24/7 Support</span>
+            </div>
+          </div>
+        </div> */}
+      </div>
+    </section>
+  );
 
   // --- Render ---
   return (
     <Layout>
       <HeroSection />
-      <WhySponsorSection />
+      <StatsSection />
       <FeaturedCausesSection />
+      <WhySponsorSection />
       <JourneySection />
-      <StoriesSection />
       <RaiseFundsSection />
+      <StoriesSection />
       <JoinCTASection />
       <Testimonials />
       <PartnersSection />
