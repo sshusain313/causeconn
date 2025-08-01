@@ -180,7 +180,7 @@ const WhySponsor = () => {
               </>
             ) : (
               <>
-                <motion.div variants={fadeIn}>
+                <motion.div>
                   <Card className="hover:shadow-lg transition-shadow">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-lg font-medium">Total Sponsors</CardTitle>
@@ -194,7 +194,7 @@ const WhySponsor = () => {
                     </CardContent>
                   </Card>
                 </motion.div>
-                <motion.div variants={fadeIn}>
+                <motion.div>
                   <Card className="hover:shadow-lg transition-shadow">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-lg font-medium">Active Campaigns</CardTitle>
@@ -208,7 +208,7 @@ const WhySponsor = () => {
                     </CardContent>
                   </Card>
                 </motion.div>
-                <motion.div variants={fadeIn}>
+                <motion.div>
                   <Card className="hover:shadow-lg transition-shadow">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-lg font-medium">Bags Sponsored</CardTitle>
@@ -296,25 +296,28 @@ const WhySponsor = () => {
         </section>
         
         {/* Benefits Showcase with Tabs */}
-        <section className="space-y-8">
-          <motion.h2 
-            className="text-3xl font-bold text-center"
+        <section className="space-y-8 bg-[#f7f6f4] py-16 px-8 rounded-lg">
+          <motion.div 
+            className="text-center space-y-4"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
           >
-            Benefits of Sponsorship
-          </motion.h2>
+            <h2 className="text-3xl font-bold">Benefits of Sponsorship</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Discover how sponsoring causes through ChangeBag.org delivers exceptional value across impact, efficiency, and brand recognition
+            </p>
+          </motion.div>
           
           <Tabs defaultValue="impact" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="impact">Impact</TabsTrigger>
-              <TabsTrigger value="efficiency">Efficiency</TabsTrigger>
-              <TabsTrigger value="recognition">Recognition</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 mb-8 h-12 bg-[#f7f6f4]">
+              <TabsTrigger value="impact" className="text-sm font-medium">Impact & ROI</TabsTrigger>
+              <TabsTrigger value="efficiency" className="text-sm font-medium">Efficiency & Cost</TabsTrigger>
+              <TabsTrigger value="recognition" className="text-sm font-medium">Brand Recognition</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="impact">
+            <TabsContent value="impact" className="space-y-6">
               <motion.div 
                 className="grid grid-cols-1 md:grid-cols-3 gap-6"
                 initial="hidden"
@@ -322,48 +325,118 @@ const WhySponsor = () => {
                 variants={staggerContainer}
               >
                 <motion.div variants={fadeIn}>
-                  <Card>
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
                     <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Award className="mr-2 h-5 w-5 text-primary-500" />
-                        Real Change
-                      </CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center text-lg">
+                          <Award className="mr-3 h-6 w-6 text-green-600" />
+                          Real Change
+                        </CardTitle>
+                        <div className="text-2xl font-bold text-green-600">95%</div>
+                      </div>
                     </CardHeader>
-                    <CardContent>
-                      <p>Support vetted causes with tangible outcomes you can track in real-time.</p>
+                    <CardContent className="space-y-3">
+                      <p className="text-muted-foreground">Support vetted causes with tangible outcomes you can track in real-time.</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Cause Verification</span>
+                          <span className="font-medium">100%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Impact Tracking</span>
+                          <span className="font-medium">Real-time</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Transparency</span>
+                          <span className="font-medium">Full</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
                 <motion.div variants={fadeIn}>
-                  <Card>
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
                     <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <TrendingUp className="mr-2 h-5 w-5 text-primary-500" />
-                        Measurable ROI
-                      </CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center text-lg">
+                          <TrendingUp className="mr-3 h-6 w-6 text-green-600" />
+                          Measurable ROI
+                        </CardTitle>
+                        <div className="text-2xl font-bold text-green-600">3.2x</div>
+                      </div>
                     </CardHeader>
-                    <CardContent>
-                      <p>See exactly how your sponsorship translates to bags claimed and community impact.</p>
+                    <CardContent className="space-y-3">
+                      <p className="text-muted-foreground">See exactly how your sponsorship translates to bags claimed and community impact.</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>ROI vs Traditional Ads</span>
+                          <span className="font-medium">3.2x Higher</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Brand Exposure</span>
+                          <span className="font-medium">Years vs Days</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Cost per Impression</span>
+                          <span className="font-medium">₹8-₹15</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
                 <motion.div variants={fadeIn}>
-                  <Card>
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
                     <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Gift className="mr-2 h-5 w-5 text-primary-500" />
-                        Sustainable Products
-                      </CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center text-lg">
+                          <Gift className="mr-3 h-6 w-6 text-green-600" />
+                          Sustainable Products
+                        </CardTitle>
+                        <div className="text-2xl font-bold text-green-600">100%</div>
+                      </div>
                     </CardHeader>
-                    <CardContent>
-                      <p>Your brand on eco-friendly tote bags that reduce plastic waste while promoting your values.</p>
+                    <CardContent className="space-y-3">
+                      <p className="text-muted-foreground">Your brand on eco-friendly tote bags that reduce plastic waste while promoting your values.</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Eco-friendly Material</span>
+                          <span className="font-medium">100%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Plastic Reduction</span>
+                          <span className="font-medium">500+ bags/year</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Lifespan</span>
+                          <span className="font-medium">3-5 years</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
               </motion.div>
+              
+              {/* <motion.div 
+                className="bg-white p-6 rounded-lg border border-green-200"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                      <TrendingUp className="h-6 w-6 text-green-600" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Proven Impact Metrics</h3>
+                    <p className="text-muted-foreground">Our sponsors see an average of 3.2x higher ROI compared to traditional advertising, with 95% of causes achieving their funding goals within 30 days.</p>
+                  </div>
+                </div>
+              </motion.div> */}
             </TabsContent>
             
-            <TabsContent value="efficiency">
+            <TabsContent value="efficiency" className="space-y-6">
               <motion.div 
                 className="grid grid-cols-1 md:grid-cols-3 gap-6"
                 initial="hidden"
@@ -371,48 +444,118 @@ const WhySponsor = () => {
                 variants={staggerContainer}
               >
                 <motion.div variants={fadeIn}>
-                  <Card>
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
                     <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <BadgeCheck className="mr-2 h-5 w-5 text-primary-500" />
-                        Simple Process
-                      </CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center text-lg">
+                          <BadgeCheck className="mr-3 h-6 w-6 text-green-600" />
+                          Simple Process
+                        </CardTitle>
+                        <div className="text-2xl font-bold text-green-600">5min</div>
+                      </div>
                     </CardHeader>
-                    <CardContent>
-                      <p>Our streamlined sponsorship process takes just minutes, with full support at every step.</p>
+                    <CardContent className="space-y-3">
+                      <p className="text-muted-foreground">Our streamlined sponsorship process takes just minutes, with full support at every step.</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Setup Time</span>
+                          <span className="font-medium">5 minutes</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Support Available</span>
+                          <span className="font-medium">24/7</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Documentation</span>
+                          <span className="font-medium">Auto-generated</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
                 <motion.div variants={fadeIn}>
-                  <Card>
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
                     <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <TrendingUp className="mr-2 h-5 w-5 text-primary-500" />
-                        Cost Effective
-                      </CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center text-lg">
+                          <TrendingUp className="mr-3 h-6 w-6 text-green-600" />
+                          Cost Effective
+                        </CardTitle>
+                        <div className="text-2xl font-bold text-green-600">60%</div>
+                      </div>
                     </CardHeader>
-                    <CardContent>
-                      <p>Get more brand exposure per dollar compared to traditional advertising channels.</p>
+                    <CardContent className="space-y-3">
+                      <p className="text-muted-foreground">Get more brand exposure per dollar compared to traditional advertising channels.</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Cost Savings</span>
+                          <span className="font-medium">60% Less</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>CPM Rate</span>
+                          <span className="font-medium">₹8-₹15</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Volume Discounts</span>
+                          <span className="font-medium">Up to 25%</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
                 <motion.div variants={fadeIn}>
-                  <Card>
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
                     <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <CircleDollarSign className="mr-2 h-5 w-5 text-primary-500" />
-                        Transparent Pricing
-                      </CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center text-lg">
+                          <CircleDollarSign className="mr-3 h-6 w-6 text-green-600" />
+                          Transparent Pricing
+                        </CardTitle>
+                        <div className="text-2xl font-bold text-green-600">0%</div>
+                      </div>
                     </CardHeader>
-                    <CardContent>
-                      <p>Clear, upfront pricing with no hidden fees and volume discounts available.</p>
+                    <CardContent className="space-y-3">
+                      <p className="text-muted-foreground">Clear, upfront pricing with no hidden fees and volume discounts available.</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Hidden Fees</span>
+                          <span className="font-medium">0%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Setup Costs</span>
+                          <span className="font-medium">Free</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Payment Terms</span>
+                          <span className="font-medium">Flexible</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
               </motion.div>
+              
+              {/* <motion.div 
+                className="bg-white p-6 rounded-lg border border-green-200"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                      <BadgeCheck className="h-6 w-6 text-green-600" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Streamlined Experience</h3>
+                    <p className="text-muted-foreground">From initial setup to campaign completion, our platform reduces administrative overhead by 80% while providing comprehensive tracking and analytics.</p>
+                  </div>
+                </div>
+              </motion.div> */}
             </TabsContent>
             
-            <TabsContent value="recognition">
+            <TabsContent value="recognition" className="space-y-6">
               <motion.div 
                 className="grid grid-cols-1 md:grid-cols-3 gap-6"
                 initial="hidden"
@@ -420,45 +563,115 @@ const WhySponsor = () => {
                 variants={staggerContainer}
               >
                 <motion.div variants={fadeIn}>
-                  <Card>
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
                     <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Award className="mr-2 h-5 w-5 text-primary-500" />
-                        Brand Visibility
-                      </CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center text-lg">
+                          <Award className="mr-3 h-6 w-6 text-green-600" />
+                          Brand Visibility
+                        </CardTitle>
+                        <div className="text-2xl font-bold text-green-600">1M+</div>
+                      </div>
                     </CardHeader>
-                    <CardContent>
-                      <p>Your logo on quality tote bags that travel with users for years, creating ongoing exposure.</p>
+                    <CardContent className="space-y-3">
+                      <p className="text-muted-foreground">Your logo on quality tote bags that travel with users for years, creating ongoing exposure.</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Daily Impressions</span>
+                          <span className="font-medium">1M+</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Brand Lifespan</span>
+                          <span className="font-medium">3-5 years</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Geographic Reach</span>
+                          <span className="font-medium">Pan-India</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
                 <motion.div variants={fadeIn}>
-                  <Card>
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
                     <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <BadgeCheck className="mr-2 h-5 w-5 text-primary-500" />
-                        Digital Badge
-                      </CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center text-lg">
+                          <BadgeCheck className="mr-3 h-6 w-6 text-green-600" />
+                          Digital Badge
+                        </CardTitle>
+                        <div className="text-2xl font-bold text-green-600">100%</div>
+                      </div>
                     </CardHeader>
-                    <CardContent>
-                      <p>Display your impact badge on your website and social media to showcase your commitment.</p>
+                    <CardContent className="space-y-3">
+                      <p className="text-muted-foreground">Display your impact badge on your website and social media to showcase your commitment.</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Badge Availability</span>
+                          <span className="font-medium">100%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Social Sharing</span>
+                          <span className="font-medium">Auto-generated</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>SEO Benefits</span>
+                          <span className="font-medium">Included</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
                 <motion.div variants={fadeIn}>
-                  <Card>
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
                     <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <TrendingUp className="mr-2 h-5 w-5 text-primary-500" />
-                        Social Proof
-                      </CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center text-lg">
+                          <TrendingUp className="mr-3 h-6 w-6 text-green-600" />
+                          Social Proof
+                        </CardTitle>
+                        <div className="text-2xl font-bold text-green-600">500+</div>
+                      </div>
                     </CardHeader>
-                    <CardContent>
-                      <p>Featured in our sponsors directory and PR materials with option for case study highlights.</p>
+                    <CardContent className="space-y-3">
+                      <p className="text-muted-foreground">Featured in our sponsors directory and PR materials with option for case study highlights.</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Featured Sponsors</span>
+                          <span className="font-medium">500+</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>PR Coverage</span>
+                          <span className="font-medium">Monthly</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Case Studies</span>
+                          <span className="font-medium">Available</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
               </motion.div>
+              
+              {/* <motion.div 
+                className="bg-white p-6 rounded-lg border border-green-200"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                      <Award className="h-6 w-6 text-green-600" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Enhanced Brand Recognition</h3>
+                    <p className="text-muted-foreground">Join 500+ recognized brands that have increased their social impact visibility by an average of 300% through our platform's comprehensive recognition program.</p>
+                  </div>
+                </div>
+              </motion.div> */}
             </TabsContent>
           </Tabs>
         </section>

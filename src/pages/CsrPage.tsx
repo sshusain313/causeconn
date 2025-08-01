@@ -5,6 +5,7 @@ import heroImage from "/images/hero-community-impact.jpg";
 import {Card} from '../components/ui/card'
 import grassrootsImage from "/images/grassroots-scene.jpg";
 import dashboardImage from "/images/csr-dashboard.jpg";
+import { Link } from 'react-router-dom';
 
 import { Users, Heart, Building2, Globe, Search, BarChart, Target, Handshake, TrendingUp, Share2, Quote, Star } from "lucide-react";
 
@@ -202,12 +203,14 @@ export const CsrPage = () => {
             </p>
             
             <div className="pt-4">
+            <Link to='/why-sponsor'>
               <Button 
                 size="lg" 
                 className="bg-green-500 hover:bg-brand-green/90 text-white font-semibold px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
               >
                 Become a Sponsor
               </Button>
+            </Link>
             </div>
           </div>
           
