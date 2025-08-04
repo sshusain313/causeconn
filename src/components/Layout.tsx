@@ -42,7 +42,7 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
               <div className="ml-3">
                 <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                  CauseConnect
+                  ChangeBag
                 </span>
                 <div className="text-xs text-gray-500 font-medium">Empowering Change</div>
               </div>
