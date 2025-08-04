@@ -208,7 +208,7 @@ const Layout = ({ children }: LayoutProps) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   <div>
-                    <a href='mailto:support@causeconnect.org' className="text-green-400 font-medium">support@causeconnect.org</a>
+                    <a href='mailto:support@shelfmerch.com' className="text-green-400 font-medium">support@causeconnect.org</a>
                     <p className="text-sm text-gray-300">We typically respond within 24 hours</p>
                   </div>
                 </div>

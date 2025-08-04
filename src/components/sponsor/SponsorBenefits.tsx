@@ -44,7 +44,7 @@ const SponsorBenefits: React.FC = () => {
           <p className="text-sm text-gray-600 mb-4">
             Our team is here to help you find the perfect cause for your organization.
           </p>
-          <Button variant="outline" className="w-full" onClick={() => window.location.href = 'mailto:support@causeconnect.org'}>
+          <Button variant="outline" className="w-full" onClick={() => window.location.href = 'mailto:support@shelfmerch.com'}>
             Contact Support
           </Button>
         </div>

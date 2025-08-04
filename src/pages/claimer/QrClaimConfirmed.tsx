@@ -183,7 +183,7 @@ const QrClaimConfirmedPage = () => {
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-500">
                 Questions about your claim? Contact us at{' '}
-                <a href="mailto:support@changebag.org" className="text-green-600 hover:text-green-700">
+                <a href="mailto:support@shelfmerch.com" className="text-green-600 hover:text-green-700">
                   support@changebag.org
                 </a>
               </p>
