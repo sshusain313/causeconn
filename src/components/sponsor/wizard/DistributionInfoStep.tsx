@@ -409,10 +409,16 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                       <Calendar
                         mode="single"
                         selected={formData.campaignStartDate}
-                        onSelect={(date) => updateFormData({ campaignStartDate: date })}
+                        onSelect={(date) => updateFormData({ campaignStartDate: date, campaignEndDate: undefined })}
                         initialFocus
                         className="p-3"
-                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        disabled={(date) => {
+                          // Only allow dates 4 days after today
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          const minStartDate = new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000);
+                          return date < minStartDate;
+                        }}
                       />
                     </PopoverContent>
                   </Popover>
@@ -441,10 +447,23 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                       <Calendar
                         mode="single"
                         selected={formData.campaignEndDate}
-                        onSelect={(date) => updateFormData({ campaignEndDate: date })}
+                        onSelect={(date) => {
+                          if (
+                            formData.campaignStartDate &&
+                            date &&
+                            date > formData.campaignStartDate
+                          ) {
+                            updateFormData({ campaignEndDate: date });
+                          }
+                        }}
                         initialFocus
                         className="p-3"
-                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        disabled={(date) => {
+                          // End date must be at least 1 day after start date
+                          if (!formData.campaignStartDate) return true;
+                          const minEndDate = new Date(formData.campaignStartDate.getTime() + 24 * 60 * 60 * 1000);
+                          return date < minEndDate;
+                        }}
                       />
                     </PopoverContent>
                   </Popover>
@@ -490,10 +509,16 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                         <Calendar
                           mode="single"
                           selected={formData.campaignStartDate}
-                          onSelect={(date) => updateFormData({ campaignStartDate: date })}
+                          onSelect={(date) => updateFormData({ campaignStartDate: date, campaignEndDate: undefined })}
                           initialFocus
                           className="p-3"
-                          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                          disabled={(date) => {
+                            // Only allow dates 4 days after today
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            const minStartDate = new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000);
+                            return date < minStartDate;
+                          }}
                         />
                       </PopoverContent>
                     </Popover>
@@ -522,10 +547,23 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                         <Calendar
                           mode="single"
                           selected={formData.campaignEndDate}
-                          onSelect={(date) => updateFormData({ campaignEndDate: date })}
+                          onSelect={(date) => {
+                            if (
+                              formData.campaignStartDate &&
+                              date &&
+                              date > formData.campaignStartDate
+                            ) {
+                              updateFormData({ campaignEndDate: date });
+                            }
+                          }}
                           initialFocus
                           className="p-3"
-                          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                          disabled={(date) => {
+                            // End date must be at least 1 day after start date
+                            if (!formData.campaignStartDate) return true;
+                            const minEndDate = new Date(formData.campaignStartDate.getTime() + 24 * 60 * 60 * 1000);
+                            return date < minEndDate;
+                          }}
                         />
                       </PopoverContent>
                     </Popover>
@@ -655,87 +693,62 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                               const cityPoints = formData.distributionPoints?.[cityName];
                               const categoryPoints = cityPoints?.[category._id!] || [];
                               const selectedCount = categoryPoints.filter(point => point.selected).length;
-                              const isOpen = openCategory?.city === cityName && openCategory?.category === category._id;
+                              // const isOpen = openCategory?.city === cityName && openCategory?.category === category._id;
                               
                               return (
-                                <div key={category._id} className="border rounded-lg">
-                                  {/* Category Header */}
-                                  <button
-                                    onClick={() => handleCategoryAccordionToggle(cityName, category._id!)}
-                                    className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
-                                    aria-expanded={isOpen}
-                                    aria-controls={`category-${cityName}-${category._id}-content`}
-                                  >
-                                    <div className="flex items-center space-x-2">
-                                      <ChevronDown 
-                                        className={cn(
-                                          "h-3 w-3 transition-transform",
-                                          isOpen && "rotate-180"
-                                        )}
-                                      />
-                                      <Icon className={`h-4 w-4 ${category.color}`} />
-                                      <span className="text-sm font-medium">{category.name}</span>
-                                    </div>
-                                    <Badge variant="outline" className="text-xs">
-                                      {selectedCount} selected
-                                    </Badge>
-                                  </button>
-
-                                  {/* Category Content */}
-                                  {isOpen && (
-                                    <div id={`category-${cityName}-${category._id}-content`} className="px-3 pb-3 space-y-2">
-                                      {categoryPoints.map((point, index) => (
-                                        <div key={index} className={cn(
-                                          "flex items-center justify-between p-2 border rounded",
-                                          point.selected ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'
-                                        )}>
-                                          <div className="flex items-center space-x-2">
-                                            <Checkbox 
-                                              id={`${cityName}-${category._id}-${index}`}
-                                              checked={point.selected}
-                                              onCheckedChange={() => handleLocationToggle(cityName, category._id!, index)}
-                                            />
-                                            <Label
-                                              htmlFor={`${cityName}-${category._id}-${index}`}
-                                              className="text-xs cursor-pointer"
-                                            >
-                                              {point.name}
-                                            </Label>
-                                          </div>
-                                          {point.selected && (
-                                            <div className="flex items-center space-x-1">
-                                              <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleToteChange(cityName, category._id!, index, point.totes - 50)}
-                                                disabled={point.totes <= category.defaultToteCount}
-                                                className="h-6 w-6 p-0"
-                                              >
-                                                <Minus className="h-2 w-2" />
-                                              </Button>
-                                              <Input
-                                                type="number"
-                                                value={point.totes}
-                                                onChange={(e) => handleToteChange(cityName, category._id!, index, parseInt(e.target.value) || category.defaultToteCount)}
-                                                className="w-16 h-6 text-xs text-center p-1"
-                                                min={category.defaultToteCount}
-                                              />
-                                              <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleToteChange(cityName, category._id!, index, point.totes + 50)}
-                                                className="h-6 w-6 p-0"
-                                              >
-                                                <Plus className="h-2 w-2" />
-                                              </Button>
-                                            </div>
-                                          )}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              );
+  <div key={category._id} className="border rounded-lg">
+    <div id={`category-${cityName}-${category._id}-content`} className="px-3 pb-3 space-y-2">
+      {categoryPoints.map((point, index) => (
+        <div key={index} className={cn(
+          "flex items-center justify-between p-2 border rounded",
+          point.selected ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'
+        )}>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id={`${cityName}-${category._id}-${index}`}
+              checked={point.selected}
+              onCheckedChange={() => handleLocationToggle(cityName, category._id!, index)}
+            />
+            <Label
+              htmlFor={`${cityName}-${category._id}-${index}`}
+              className="text-xs cursor-pointer"
+            >
+              {point.name}
+            </Label>
+          </div>
+          {point.selected && (
+            <div className="flex items-center space-x-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleToteChange(cityName, category._id!, index, point.totes - 50)}
+                disabled={point.totes <= category.defaultToteCount}
+                className="h-6 w-6 p-0"
+              >
+                <Minus className="h-2 w-2" />
+              </Button>
+              <Input
+                type="number"
+                value={point.totes}
+                onChange={(e) => handleToteChange(cityName, category._id!, index, parseInt(e.target.value) || category.defaultToteCount)}
+                className="w-16 h-6 text-xs text-center p-1"
+                min={category.defaultToteCount}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleToteChange(cityName, category._id!, index, point.totes + 50)}
+                className="h-6 w-6 p-0"
+              >
+                <Plus className="h-2 w-2" />
+              </Button>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+);
                             })}
                           </div>
                         )}

@@ -29,9 +29,9 @@ const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQua
   const totalPrice = formData.toteQuantity * unitPrice;
 
   const impactStatistics = {
-    trees: Math.round(formData.toteQuantity * 0.2),
-    plastic: Math.round(formData.toteQuantity * 0.5),
-    carbon: Math.round(formData.toteQuantity * 0.3)
+    trees: Math.round(formData.toteQuantity * 0.0125),
+    plastic: Math.round(formData.toteQuantity * 0.55),
+    carbon: Math.round(formData.toteQuantity * 0.16)
   };
 
   const handleQuantityChange = (newQuantity: number) => {

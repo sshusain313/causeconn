@@ -22,6 +22,8 @@ const CauseImageUpload = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [uploadMethod, setUploadMethod] = useState<'url' | 'file'>('url');
   const [causeTitle, setCauseTitle] = useState('');
+  const [originalFileType, setOriginalFileType] = useState<string>('');
+  const [hasTransparency, setHasTransparency] = useState(false);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const previewImageRef = useRef<HTMLImageElement>(null);
 
@@ -36,6 +38,34 @@ const CauseImageUpload = () => {
       drawPreviewCanvas();
     }
   }, [preview]);
+
+  // Function to detect transparency in PNG images
+  const detectTransparency = (image: HTMLImageElement): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(false);
+        return;
+      }
+
+      canvas.width = image.width;
+      canvas.height = image.height;
+      ctx.drawImage(image, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      // Check if any pixel has alpha < 255 (transparency)
+      for (let i = 3; i < data.length; i += 4) {
+        if (data[i] < 255) {
+          resolve(true);
+          return;
+        }
+      }
+      resolve(false);
+    });
+  };
 
   const validateImageFile = (file: File): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -135,11 +165,21 @@ const CauseImageUpload = () => {
 
     const isValid = await validateImageFile(file);
     if (isValid) {
+      // Track original file type
+      setOriginalFileType(file.type);
+      
       const objectUrl = URL.createObjectURL(file);
       setPreview(objectUrl);
       previewImageRef.current = new Image();
       previewImageRef.current.src = objectUrl;
-      previewImageRef.current.onload = () => {
+      previewImageRef.current.onload = async () => {
+        // Detect transparency for PNG files
+        if (file.type === 'image/png') {
+          const transparency = await detectTransparency(previewImageRef.current!);
+          setHasTransparency(transparency);
+        } else {
+          setHasTransparency(false);
+        }
         drawPreviewCanvas();
       };
     }
@@ -153,7 +193,21 @@ const CauseImageUpload = () => {
       setPreview(imageUrl);
       previewImageRef.current = new Image();
       previewImageRef.current.src = imageUrl;
-      previewImageRef.current.onload = () => {
+      previewImageRef.current.onload = async () => {
+        // Try to detect file type from URL extension
+        const urlLower = imageUrl.toLowerCase();
+        if (urlLower.endsWith('.png')) {
+          setOriginalFileType('image/png');
+          const transparency = await detectTransparency(previewImageRef.current!);
+          setHasTransparency(transparency);
+        } else if (urlLower.endsWith('.jpg') || urlLower.endsWith('.jpeg')) {
+          setOriginalFileType('image/jpeg');
+          setHasTransparency(false);
+        } else {
+          // Default to JPEG if we can't determine
+          setOriginalFileType('image/jpeg');
+          setHasTransparency(false);
+        }
         drawPreviewCanvas();
       };
     }
@@ -173,6 +227,13 @@ const CauseImageUpload = () => {
     try {
       const formData = new FormData();
 
+      // Determine output format based on transparency detection
+      // Use PNG format for transparent images to preserve transparency
+      const usePNG = hasTransparency && originalFileType === 'image/png';
+      const outputFormat = usePNG ? 'image/png' : 'image/jpeg';
+      const filename = usePNG ? 'image.png' : 'image.jpg';
+      const quality = usePNG ? 1.0 : 0.95; // PNG doesn't use quality parameter, but we set it for consistency
+
       // Handle file upload vs URL
       if (preview.startsWith('data:') || preview.startsWith('blob:')) {
         // For file uploads, convert canvas to blob
@@ -182,14 +243,14 @@ const CauseImageUpload = () => {
         canvas.toBlob(async (blob) => {
           if (!blob) throw new Error('Failed to create blob from image');
           
-          formData.append('image', blob, 'image.jpg');
+          formData.append('image', blob, filename);
           await uploadToServer(formData);
-        }, 'image/jpeg', 0.95);
+        }, outputFormat, quality);
       } else {
         // For URLs, fetch the image first and then upload as blob
         const response = await fetch(preview);
         const blob = await response.blob();
-        formData.append('image', blob, 'image.jpg');
+        formData.append('image', blob, filename);
         await uploadToServer(formData);
       }
     } catch (error: any) {

@@ -822,7 +822,7 @@ const ClaimFormPage = () => {
                     {!isQrCodeClaim && (
                     <div className="flex justify-between font-medium mt-4">
                       <span>Shipping:</span>
-                      <span>Free</span>
+                      <span>₹ 100</span>
                     </div>
                     )}
                   </div>

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -93,6 +93,20 @@ const WhySponsor = () => {
     queryKey: ['sponsor-stories'],
     queryFn: fetchSponsorStories
   });
+
+  const [expandedStories, setExpandedStories] = useState<Set<string>>(new Set());
+
+  const toggleStoryExpansion = (storyId: string) => {
+    setExpandedStories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(storyId)) {
+        newSet.delete(storyId);
+      } else {
+        newSet.add(storyId);
+      }
+      return newSet;
+    });
+  };
 
   // Use real growth data from API or fallback to sample data
   const growthData = stats?.growthData || fallbackGrowthData;
@@ -295,7 +309,7 @@ const WhySponsor = () => {
           </motion.div>
         </section>
         
-        {/* Benefits Showcase with Tabs */}
+        {/* Benefits Showcase - Simplified */}
         <section className="space-y-8 bg-[#f7f6f4] py-16 px-8 rounded-lg">
           <motion.div 
             className="text-center space-y-4"
@@ -304,9 +318,9 @@ const WhySponsor = () => {
             viewport={{ once: true }}
             variants={fadeIn}
           >
-            <h2 className="text-3xl font-bold">Benefits of Sponsorship</h2>
+            <h2 className="text-3xl font-bold">Why Sponsor with Us?</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Discover how sponsoring causes through ChangeBag.org delivers exceptional value across impact, efficiency, and brand recognition
+              Get maximum impact with minimal effort - from real community change to lasting brand recognition
             </p>
           </motion.div>
           
@@ -793,12 +807,12 @@ const WhySponsor = () => {
                     method.highlighted 
                       ? 'bg-black-50/80 border-black-200' 
                       : 'bg-white hover:bg-black-50/30'
-                  } transition-all duration-300`}
+                  } ${index === marketingMethods.length-1 ? 'bg-green-50 text-white': ''} transition-all duration-300`}
                 >
                   <td className="px-6 py-4 border-r border-black-200">
                     <div className="flex items-center space-x-3">
                       <span className="text-2xl">{method.icon}</span>
-                      <span className='font-medium text-gray-900'>
+                      <span className='font-medium text-green-800'>
                         {method.method}
                       </span>
                     </div>
@@ -825,7 +839,7 @@ const WhySponsor = () => {
 
         {/* Featured Stories Carousel */}
         {!storiesLoading && stories?.length > 0 && (
-          <section className="space-y-8 bg-[#f7f6f4] py-16 px-8 rounded-lg">
+          <section className="space-y-8space-y-8 bg-[#f7f6f4] py-16 px-8 rounded-lg">
             <motion.h2 
               className="text-3xl font-bold text-center"
               initial="hidden"
@@ -871,7 +885,16 @@ const WhySponsor = () => {
                           <CardDescription>By {story.authorName}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <p className="line-clamp-3 text-muted-foreground">{story.excerpt}</p>
+                          <p className="text-muted-foreground line-clamp-3">
+                            {expandedStories.has(story.id) ? story.content : story.excerpt}
+                          </p>
+                          <Button
+                            variant="link"
+                            className="p-0 h-auto text-sm text-primary mt-2"
+                            onClick={() => toggleStoryExpansion(story.id)}
+                          >
+                            {expandedStories.has(story.id) ? 'Read Less' : 'Read More'}
+                          </Button>
                         </CardContent>
                       </Card>
                     </CarouselItem>

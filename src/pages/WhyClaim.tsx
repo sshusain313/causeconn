@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -44,6 +44,19 @@ const WhyClaim = () => {
     queryFn: fetchClaimStories
   });
 
+  const [expandedStories, setExpandedStories] = useState<Set<string>>(new Set());
+
+  const toggleStoryExpansion = (storyId: string) => {
+    setExpandedStories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(storyId)) {
+        newSet.delete(storyId);
+      } else {
+        newSet.add(storyId);
+      }
+      return newSet;
+    });
+  };
   // Use real impact data from API or fallback to sample data
   const impactData = stats?.impactData || fallbackImpactData;
 
@@ -506,7 +519,17 @@ const WhyClaim = () => {
                           <CardDescription>By {story.authorName}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <p className="line-clamp-3 text-muted-foreground">{story.excerpt}</p>
+                          {/* <p className="line-clamp-3 text-muted-foreground">{story.excerpt}</p> */}
+                          <p className="text-muted-foreground">
+                            {expandedStories.has(story.id) ? story.content : story.excerpt}
+                          </p>
+                          <Button
+                            variant="link"
+                            className="p-0 h-auto text-sm text-primary mt-2"
+                            onClick={() => toggleStoryExpansion(story.id)}
+                          >
+                            {expandedStories.has(story.id) ? 'Read Less' : 'Read More'}
+                          </Button>
                         </CardContent>
                       </Card>
                     </CarouselItem>
@@ -514,6 +537,7 @@ const WhyClaim = () => {
                 </CarouselContent>
                 {/* <CarouselPrevious className="left-0" />
                 <CarouselNext className="right-0" /> */}
+                
               </Carousel>
             </motion.div>
           </section>
