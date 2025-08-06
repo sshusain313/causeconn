@@ -284,7 +284,7 @@ interface Sponsorship {
     >
       {/* Enhanced Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-xl transition-all duration-300">
+        <Card className="relative overflow-hidden border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-200 to-transparent rounded-full -translate-y-16 translate-x-16 opacity-20"></div>
           <CardHeader className="pb-2 relative">
             <div className="flex items-center justify-between">
@@ -295,12 +295,12 @@ interface Sponsorship {
             </div>
           </CardHeader>
           <CardContent className="relative">
-            <div className="text-3xl font-bold text-gray-800">${totalContributed.toLocaleString()}</div>
+            <div className="text-3xl font-bold text-green-700">${totalContributed.toLocaleString()}</div>
             <p className="text-sm text-gray-500 mt-1">Across all sponsorships</p>
           </CardContent>
         </Card>
         
-        <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50 hover:shadow-xl transition-all duration-300">
+        <Card className="relative overflow-hidden border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-200 to-transparent rounded-full -translate-y-16 translate-x-16 opacity-20"></div>
           <CardHeader className="pb-2 relative">
             <div className="flex items-center justify-between">
@@ -311,12 +311,12 @@ interface Sponsorship {
             </div>
           </CardHeader>
           <CardContent className="relative">
-            <div className="text-3xl font-bold text-gray-800">{approvedSponsorships}</div>
+            <div className="text-3xl font-bold text-green-700">{approvedSponsorships}</div>
             <p className="text-sm text-gray-500 mt-1">Successfully approved</p>
           </CardContent>
         </Card>
         
-        <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-purple-50 to-pink-50 hover:shadow-xl transition-all duration-300">
+        <Card className="relative overflow-hidden border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-200 to-transparent rounded-full -translate-y-16 translate-x-16 opacity-20"></div>
           <CardHeader className="pb-2 relative">
             <div className="flex items-center justify-between">
@@ -327,7 +327,7 @@ interface Sponsorship {
             </div>
           </CardHeader>
           <CardContent className="relative">
-            <div className="text-3xl font-bold text-gray-800">{totalTotes}</div>
+            <div className="text-3xl font-bold text-green-700">{totalTotes}</div>
             <p className="text-sm text-gray-500 mt-1">Distributed to causes</p>
           </CardContent>
         </Card>
@@ -335,7 +335,7 @@ interface Sponsorship {
       
       {/* Enhanced Tabs */}
       <Tabs defaultValue="sponsorships" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-xl mb-8">
+        <TabsList className="grid w-full grid-cols-3 bg-white border border-gray-200 rounded-xl mb-8">
           <TabsTrigger value="sponsorships" className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-green-700 rounded-lg transition-all duration-200">
             <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
@@ -399,6 +399,7 @@ interface Sponsorship {
                               <p className="text-xs text-gray-500">Contribution</p>
                               <p className="font-semibold text-gray-800">${sponsorship.totalAmount?.toLocaleString()}</p>
                             </div>
+
                           </div>
                           <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                             <Package className="h-4 w-4 text-gray-500" />
@@ -406,6 +407,7 @@ interface Sponsorship {
                               <p className="text-xs text-gray-500">Totes</p>
                               <p className="font-semibold text-gray-800">{sponsorship.toteQuantity}</p>
                             </div>
+
                           </div>
                           <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                             <Building2 className="h-4 w-4 text-gray-500" />
@@ -815,3 +817,5 @@ interface Sponsorship {
 };
 
 export default SponsorDashboard;
+
+
