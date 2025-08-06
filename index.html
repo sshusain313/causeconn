@@ -3,54 +3,73 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>causebags</title>
+    <meta name="description" content="Sponsor a Cause" />
+    <meta name="author" content="causebags" />
     
-    <!-- SEO Meta Tags -->
-    <title>ChangeBag - Brand for Good</title>
-    <meta name="description" content="ChangeBag - A New-Age Promotional Platform for Purpose-Driven Brands. Create sustainable impact through eco-friendly tote bag sponsorships." />
-    <meta name="author" content="ChangeBag" />
-    <meta name="keywords" content="ChangeBag, CSR, eco-friendly, tote bags, sustainable, sponsorship, brands, causes" />
-    <meta name="google-site-verification" content="dKAxJofBmmQRksXiGYZOwzXUw_iUCJHLC2noyppTwCg" />
-    
-    <!-- Enhanced Favicon Configuration -->
-    <link rel="icon" type="image/png" sizes="16x16" href="/changebag.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/changebag.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/changebag.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/changebag.png">
-    <link rel="shortcut icon" href="/changebag.png">
-    <link rel="manifest" href="/site.webmanifest">
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="ChangeBag - Brand for Good" />
-    <meta property="og:description" content="A New-Age Promotional Platform for Purpose-Driven Brands" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://changebag.org" />
-    <meta property="og:image" content="https://changebag.org/changebag.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:site_name" content="ChangeBag" />
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@changebag" />
-    <meta name="twitter:title" content="ChangeBag - Eco-Friendly CSR Platform" />
-    <meta name="twitter:description" content="A New-Age Promotional Platform for Purpose-Driven Brands" />
-    <meta name="twitter:image" content="https://changebag.org/changebag.png" />
-    
-    <!-- Structured Data for Brand Recognition -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "ChangeBag",
-      "url": "https://changebag.org",
-      "logo": "https://changebag.org/changebag.png",
-      "description": "A New-Age Promotional Platform for Purpose-Driven Brands",
-      "sameAs": [
-        "https://twitter.com/changebag",
-        "https://linkedin.com/company/changebag"
-      ]
-    }
+    <!-- Direct API Fix: Load before any other scripts to fix localhost:5000 references -->
+    <script>
+      // Inline script to immediately fix any localhost:5000 references
+      (function() {
+        console.log('Inline API Fix: Initializing...');
+        
+        // Only apply in production or on changebag.org
+        if (window.location.hostname !== 'localhost' && 
+            window.location.hostname !== '127.0.0.1' &&
+            !window.location.hostname.includes('localhost')) {
+          console.log('Inline API Fix: Running on production domain, applying fixes');
+          
+          // Override fetch and XHR
+          const originalFetch = window.fetch;
+          window.fetch = function(resource, options) {
+            if (typeof resource === 'string' && resource.includes('localhost:5000')) {
+              resource = resource.replace('http://localhost:5000', window.location.origin);
+              console.log('Inline API Fix: Redirected fetch to ' + resource);
+            }
+            return originalFetch.apply(this, arguments);
+          };
+          
+          const originalOpen = XMLHttpRequest.prototype.open;
+          XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+            if (typeof url === 'string' && url.includes('localhost:5000')) {
+              url = url.replace('http://localhost:5000', window.location.origin);
+              console.log('Inline API Fix: Redirected XHR to ' + url);
+            }
+            return originalOpen.apply(this, arguments);
+          };
+          
+          // Create global override
+          window.__API_URLS__ = {
+            apiUrl: window.location.origin + '/api',
+            uploadsUrl: window.location.origin + '/uploads'
+          };
+          
+          console.log('Inline API Fix: Initialization complete');
+        }
+      })();
     </script>
+    
+    <!-- Load external API interceptor scripts -->
+    <script src="/direct-fix.js"></script>
+    <script src="/api-interceptor.js"></script>
+
+    <!-- MSG91 OTP Widget Script -->
+    <!-- <script type="text/javascript" src="https://verify.msg91.com/otp-provider.js"></script> -->
+
+    <meta property="og:title" content="causebags" />
+    <meta property="og:description" content="Sponsor a Cause" />
+    <meta property="og:type" content="website" />
+    <!-- <meta property="og:image" content="https://changebag.org/opengraph-image.png" /> -->
+
+    <!-- <meta name="twitter:card" content="summary_large_image" /> -->
+    <!-- <meta name="twitter:site" content="@causebags" /> -->
+    <!-- <meta name="twitter:image" content="https://changebag.org/opengraph-image.png" /> -->
+
+    <!-- Favicon Configuration -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/changebag.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/changebag.png">
+    <link rel="apple-touch-icon" href="/changebag.png">
+    <link rel="shortcut icon" href="/changebag.png">
   </head>
 
   <body>

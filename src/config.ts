@@ -63,8 +63,8 @@ const config: Config = {
       ? (import.meta.env.VITE_EMAIL_PASSWORD || '')
       : 'test-password',
     from: isProduction 
-      ? (import.meta.env.VITE_EMAIL_FROM || '"changebag" <noreply@changebag.org>')
-      : '"changebag Dev" <noreply@localhost>'
+      ? (import.meta.env.VITE_EMAIL_FROM || '"CauseBags" <noreply@changebag.org>')
+      : '"CauseBags Dev" <noreply@localhost>'
   },
   security: {
     maxFileSize: 5 * 1024 * 1024, // 5MB

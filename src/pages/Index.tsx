@@ -120,7 +120,7 @@ const journeySteps = [
     title: "Sponsor a Cause",
     description: "Browse dozens of local causes that need your help.",
     // image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=500&h=300&fit=crop",
-    image: "/images/sponsoracause.png",
+    image: "/images/sponsorcause.png",
     imageAlt: "People browsing causes on laptop"
   },
   {
@@ -129,7 +129,7 @@ const journeySteps = [
     title: "Upload Your Logo",
     description: "Add your brand identity to the cause page.",
     // image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=500&h=300&fit=crop",
-    image: "/images/upload.png",
+    image: "/images/uplaod.png",
     imageAlt: "Brand logo design on computer"
   },
   {
@@ -689,7 +689,7 @@ const Index = () => {
                   alt={currentStep.imageAlt}
                   className="w-full h-48 md:h-64 object-cover"
                   onError={(e) => {
-                    e.currentTarget.src = "/images/sponsoracause.png";
+                    e.currentTarget.src = "/images/sponsorcause.png";
                   }}
                 />
                 <div className="absolute top-3 left-3 md:top-4 md:left-4">
