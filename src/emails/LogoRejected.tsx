@@ -52,7 +52,7 @@ export const LogoRejectedEmail: React.FC<LogoRejectedEmailProps> = ({
       
       <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
       
-      <p>Best regards,<br/>The CauseBags Team</p>
+      <p>Best regards,<br/>The changebag Team</p>
     </div>
   );
 };

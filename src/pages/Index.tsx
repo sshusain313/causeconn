@@ -360,7 +360,7 @@ const Index = () => {
             </div>
             
             <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">
-              At CauseConnect, we offer brands a sustainable, high-visibility marketing 
+              At ChangeBag, we offer brands a sustainable, high-visibility marketing 
               medium that creates real impact. No more TV ads, billboards, or print ads – 
               this is real-world branding with genuine engagement and lasting value.
             </p>

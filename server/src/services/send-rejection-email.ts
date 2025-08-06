@@ -30,7 +30,7 @@ export const sendRejectionEmail = async (
     const reuploadLink = `https://changebag.org/sponsor/logo-reupload/${sponsorshipData.sponsorshipId}`;
     
     const mailOptions = {
-      from: '"CauseBags" <noreply@causebags.com>',
+      from: '"changebag" <noreply@changebag.com>',
       to: email,
       subject: 'Action Required: Your Logo Needs Revision',
       html: `
@@ -58,7 +58,7 @@ export const sendRejectionEmail = async (
           
           <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
           
-          <p>Best regards,<br>The CauseBags Team</p>
+          <p>Best regards,<br>The changebag Team</p>
           
           <p style="font-size: 12px; color: #666; margin-top: 30px;">
             If the button doesn't work, copy and paste this link into your browser: ${reuploadLink}

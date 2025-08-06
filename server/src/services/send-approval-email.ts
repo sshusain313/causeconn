@@ -31,7 +31,7 @@ export const sendApprovalEmail = async (
     });
     
     const mailOptions = {
-      from: process.env.EMAIL_FROM || '"CauseBags" <noreply@causebags.com>',
+      from: process.env.EMAIL_FROM || '"changebag" <noreply@changebag.com>',
       to: email,
       subject: 'Congratulations! Your Logo Has Been Approved',
       html: `
@@ -52,7 +52,7 @@ export const sendApprovalEmail = async (
           
           <p>If you have any questions, please don't hesitate to contact us.</p>
           
-          <p>Best regards,<br>The CauseBags Team</p>
+          <p>Best regards,<br>The changebag Team</p>
         </div>
       `
     };

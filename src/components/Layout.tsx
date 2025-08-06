@@ -150,7 +150,7 @@ const Layout = ({ children }: LayoutProps) => {
                 <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-3">
                   <span className="text-white font-bold text-lg">C</span>
                 </div>
-                <span className="text-xl font-bold text-white">CauseConnect</span>
+                <span className="text-xl font-bold text-white">ChangeBag</span>
               </div>
               <p className="text-gray-300 mb-4 leading-relaxed">
                 Empowering brands to drive real change through thoughtful partnerships and sustainable impact.

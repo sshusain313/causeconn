@@ -1,6 +1,6 @@
-# CauseConnect
+# changebag
 
-CauseConnect is a web application that allows users to create, sponsor, and claim tote bags for various causes. The application uses React/TypeScript for the frontend and Node.js/Express/MongoDB for the backend.
+changebag is a web application that allows users to create, sponsor, and claim tote bags for various causes. The application uses React/TypeScript for the frontend and Node.js/Express/MongoDB for the backend.
 
 ## Features
 
@@ -89,7 +89,7 @@ This application is set up for deployment with Netlify (frontend) and Render (ba
    - Click "New site from Git"
    - Select GitHub as your Git provider
    - Authorize Netlify to access your GitHub repositories
-   - Select the `sshusain313/causeconnect` repository
+   - Select the `sshusain313/changebag` repository
 
 3. **Configure build settings**:
    - Build command: `npm run build`
@@ -107,10 +107,10 @@ This application is set up for deployment with Netlify (frontend) and Render (ba
 2. **Create a new Web Service**:
    - Click "New" and select "Web Service"
    - Connect your GitHub repository
-   - Select the `sshusain313/causeconnect` repository
+   - Select the `sshusain313/changebag` repository
 
 3. **Configure your service**:
-   - Name: `causeconnect-api`
+   - Name: `changebag-api`
    - Root Directory: `server` (since your backend is in the server directory)
    - Environment: `Node`
    - Build Command: `npm install`

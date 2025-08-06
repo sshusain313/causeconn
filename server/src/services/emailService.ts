@@ -49,7 +49,7 @@ export const sendVerificationEmail = async (email: string, otp: string) => {
     console.log(`SENDING EMAIL: Preparing to send email to ${email} with OTP ${otp}`);
     
     const mailOptions = {
-      from: '"CauseBags" <noreply@causebags.com>',
+      from: '"changebag" <noreply@changebag.com>',
       to: email,
       subject: 'Verify Your Tote Claim',
       html: `
@@ -95,7 +95,7 @@ export const sendLogoApprovalEmail = async (
     console.log(`SENDING APPROVAL EMAIL: Preparing to send email to ${email}`);
     
     const mailOptions = {
-      from: '"CauseBags" <noreply@causebags.com>',
+      from: '"changebag" <noreply@changebag.com>',
       to: email,
       subject: 'Congratulations! Your Logo Has Been Approved',
       html: `
@@ -116,7 +116,7 @@ export const sendLogoApprovalEmail = async (
           
           <p>If you have any questions, please don't hesitate to contact us.</p>
           
-          <p>Best regards,<br>The CauseBags Team</p>
+          <p>Best regards,<br>The changebag Team</p>
         </div>
       `
     };
@@ -156,7 +156,7 @@ export const sendLogoRejectionEmail = async (
     const reuploadLink = `https://changebag.org/sponsor/logo-reupload/${data.sponsorshipId}`;
     
     const mailOptions = {
-      from: '"CauseBags" <noreply@causebags.com>',
+      from: '"changebag" <noreply@changebag.com>',
       to: email,
       subject: 'Action Required: Your Logo Needs Revision',
       html: `
@@ -187,7 +187,7 @@ export const sendLogoRejectionEmail = async (
           
           <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
           
-          <p>Best regards,<br>The CauseBags Team</p>
+          <p>Best regards,<br>The changebag Team</p>
         </div>
       `
     };
@@ -241,7 +241,7 @@ export const sendCampaignCompletionEmail = async (
     }).format(data.totalAmount);
     
     const mailOptions = {
-      from: '"CauseBags" <noreply@causebags.com>',
+      from: '"changebag" <noreply@changebag.com>',
       to: email,
       subject: 'Campaign Completed: Thank You for Your Support',
       html: `
@@ -269,7 +269,7 @@ export const sendCampaignCompletionEmail = async (
           
           <p>Thank you again for your generous support!</p>
           
-          <p>Best regards,<br>The CauseBags Team</p>
+          <p>Best regards,<br>The changebag Team</p>
         </div>
       `
     };
