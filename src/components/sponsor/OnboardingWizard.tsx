@@ -47,8 +47,8 @@ const OnboardingWizard = ({
       };
     },
     selectedCities: [] as string[],
-    distributionStartDate: new Date(),
-    distributionEndDate: new Date(new Date().setDate(new Date().getDate() + 30)), // Default to 30 days from now
+    distributionStartDate: undefined,
+    distributionEndDate: undefined,
     distributionDate: undefined,
     // Add fields for physical distribution
     distributionPointName: '',

@@ -32,8 +32,8 @@ const iconMap = {
 interface DistributionInfoStepProps {
   formData: {
     distributionType?: 'online' | 'physical';
-    campaignStartDate?: Date;
-    campaignEndDate?: Date;
+    distributionStartDate?: Date;
+    distributionEndDate?: Date;
     selectedCities?: string[];
     toteQuantity: number;
     distributionPoints?: {
@@ -350,8 +350,8 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                 const currentToteQuantity = formData.toteQuantity;
                 const updatedData = {
                   distributionType: type,
-                  campaignStartDate: undefined,
-                  campaignEndDate: undefined,
+                  distributionStartDate: undefined,
+                  distributionEndDate: undefined,
                   selectedCities: [],
                   distributionPoints: {},
                   toteQuantity: currentToteQuantity
@@ -394,32 +394,46 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                         variant={"outline"}
                         className={cn(
                           "w-full justify-start text-left",
-                          !formData.campaignStartDate && "text-muted-foreground"
+                          !formData.distributionStartDate && "text-muted-foreground"
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.campaignStartDate ? (
-                          format(formData.campaignStartDate, "PPP")
+                        {formData.distributionStartDate ? (
+                          format(formData.distributionStartDate, "PPP")
                         ) : (
                           <span>Pick start date</span>
                         )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={formData.campaignStartDate}
-                        onSelect={(date) => updateFormData({ campaignStartDate: date, campaignEndDate: undefined })}
-                        initialFocus
-                        className="p-3"
-                        disabled={(date) => {
-                          // Only allow dates 4 days after today
-                          const today = new Date();
-                          today.setHours(0, 0, 0, 0);
-                          const minStartDate = new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000);
-                          return date < minStartDate;
-                        }}
-                      />
+                                              <Calendar
+                          mode="single"
+                          selected={formData.distributionStartDate}
+                          onSelect={(date) => {
+                            if (date) {
+                              // Convert to UTC at midnight
+                              const utcDate = new Date(Date.UTC(
+                                date.getFullYear(),
+                                date.getMonth(),
+                                date.getDate(),
+                                0, 0, 0, 0
+                              ));
+                              updateFormData({ 
+                                distributionStartDate: utcDate, 
+                                distributionEndDate: undefined 
+                              });
+                            }
+                          }}
+                          initialFocus
+                          className="p-3"
+                          disabled={(date) => {
+                            // Only allow dates 4 days after today
+                            const today = new Date();
+                            today.setUTCHours(0, 0, 0, 0);
+                            const minStartDate = new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000);
+                            return date < minStartDate;
+                          }}
+                        />
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -432,39 +446,46 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                         variant={"outline"}
                         className={cn(
                           "w-full justify-start text-left",
-                          !formData.campaignEndDate && "text-muted-foreground"
+                          !formData.distributionEndDate && "text-muted-foreground"
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.campaignEndDate ? (
-                          format(formData.campaignEndDate, "PPP")
+                        {formData.distributionEndDate ? (
+                          format(formData.distributionEndDate, "PPP")
                         ) : (
                           <span>Pick end date</span>
                         )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={formData.campaignEndDate}
-                        onSelect={(date) => {
-                          if (
-                            formData.campaignStartDate &&
-                            date &&
-                            date > formData.campaignStartDate
-                          ) {
-                            updateFormData({ campaignEndDate: date });
-                          }
-                        }}
-                        initialFocus
-                        className="p-3"
-                        disabled={(date) => {
-                          // End date must be at least 1 day after start date
-                          if (!formData.campaignStartDate) return true;
-                          const minEndDate = new Date(formData.campaignStartDate.getTime() + 24 * 60 * 60 * 1000);
-                          return date < minEndDate;
-                        }}
-                      />
+                                              <Calendar
+                          mode="single"
+                          selected={formData.distributionEndDate}
+                          onSelect={(date) => {
+                            if (
+                              formData.distributionStartDate &&
+                              date &&
+                              date > formData.distributionStartDate
+                            ) {
+                              // Convert to UTC at end of day
+                              const utcDate = new Date(Date.UTC(
+                                date.getFullYear(),
+                                date.getMonth(),
+                                date.getDate(),
+                                23, 59, 59, 999
+                              ));
+                              updateFormData({ distributionEndDate: utcDate });
+                            }
+                          }}
+                          initialFocus
+                          className="p-3"
+                          disabled={(date) => {
+                            // End date must be at least 1 day after start date
+                            if (!formData.distributionStartDate) return true;
+                            const minEndDate = new Date(formData.distributionStartDate.getTime() + 24 * 60 * 60 * 1000);
+                            return date < minEndDate;
+                          }}
+                        />
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -494,12 +515,12 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                           variant={"outline"}
                           className={cn(
                             "w-full justify-start text-left",
-                            !formData.campaignStartDate && "text-muted-foreground"
+                            !formData.distributionStartDate && "text-muted-foreground"
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {formData.campaignStartDate ? (
-                            format(formData.campaignStartDate, "PPP")
+                          {formData.distributionStartDate ? (
+                            format(formData.distributionStartDate, "PPP")
                           ) : (
                             <span>Pick start date</span>
                           )}
@@ -508,14 +529,28 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={formData.campaignStartDate}
-                          onSelect={(date) => updateFormData({ campaignStartDate: date, campaignEndDate: undefined })}
+                          selected={formData.distributionStartDate}
+                          onSelect={(date) => {
+                            if (date) {
+                              // Convert to UTC at midnight
+                              const utcDate = new Date(Date.UTC(
+                                date.getFullYear(),
+                                date.getMonth(),
+                                date.getDate(),
+                                0, 0, 0, 0
+                              ));
+                              updateFormData({ 
+                                distributionStartDate: utcDate, 
+                                distributionEndDate: undefined 
+                              });
+                            }
+                          }}
                           initialFocus
                           className="p-3"
                           disabled={(date) => {
                             // Only allow dates 4 days after today
                             const today = new Date();
-                            today.setHours(0, 0, 0, 0);
+                            today.setUTCHours(0, 0, 0, 0);
                             const minStartDate = new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000);
                             return date < minStartDate;
                           }}
@@ -532,12 +567,12 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                           variant={"outline"}
                           className={cn(
                             "w-full justify-start text-left",
-                            !formData.campaignEndDate && "text-muted-foreground"
+                            !formData.distributionEndDate && "text-muted-foreground"
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {formData.campaignEndDate ? (
-                            format(formData.campaignEndDate, "PPP")
+                          {formData.distributionEndDate ? (
+                            format(formData.distributionEndDate, "PPP")
                           ) : (
                             <span>Pick end date</span>
                           )}
@@ -546,22 +581,29 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={formData.campaignEndDate}
+                          selected={formData.distributionEndDate}
                           onSelect={(date) => {
                             if (
-                              formData.campaignStartDate &&
+                              formData.distributionStartDate &&
                               date &&
-                              date > formData.campaignStartDate
+                              date > formData.distributionStartDate
                             ) {
-                              updateFormData({ campaignEndDate: date });
+                              // Convert to UTC at midnight
+                              const utcDate = new Date(Date.UTC(
+                                date.getFullYear(),
+                                date.getMonth(),
+                                date.getDate(),
+                                23, 59, 59, 999
+                              ));
+                              updateFormData({ distributionEndDate: utcDate });
                             }
                           }}
                           initialFocus
                           className="p-3"
                           disabled={(date) => {
                             // End date must be at least 1 day after start date
-                            if (!formData.campaignStartDate) return true;
-                            const minEndDate = new Date(formData.campaignStartDate.getTime() + 24 * 60 * 60 * 1000);
+                            if (!formData.distributionStartDate) return true;
+                            const minEndDate = new Date(formData.distributionStartDate.getTime() + 24 * 60 * 60 * 1000);
                             return date < minEndDate;
                           }}
                         />

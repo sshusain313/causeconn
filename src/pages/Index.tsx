@@ -120,7 +120,7 @@ const journeySteps = [
     title: "Sponsor a Cause",
     description: "Browse dozens of local causes that need your help.",
     // image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=500&h=300&fit=crop",
-    image: "/images/sponsorcause.png",
+    image: "/images/sponsor.png",
     imageAlt: "People browsing causes on laptop"
   },
   {
@@ -138,7 +138,7 @@ const journeySteps = [
     title: "Choose Where to Distribute",
     description: "Select from multiple campaign channels.",
     // image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&h=300&fit=crop",
-    image: "/images/distribute.png",
+    image: "/images/distrib.png",
     imageAlt: "Distribution channels and social media"
   },
   {
@@ -147,7 +147,7 @@ const journeySteps = [
     title: "Track Your Reach & Impact",
     description: "Get detailed analytics on your campaign's success.",
     // image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop",
-    image: "/images/track.png",
+    image: "/images/crack.png",
     imageAlt: "Analytics dashboard showing impact metrics"
   }
 ];
