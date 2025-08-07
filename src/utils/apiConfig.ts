@@ -15,7 +15,7 @@ export const API_BASE_URL = config.apiUrl;
 export const UPLOADS_BASE_URL = config.uploadsUrl;
 
 // Get the site URL for absolute links
-export const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:8083';
+export const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:8085';
 
 /**
  * Creates a full API endpoint URL
