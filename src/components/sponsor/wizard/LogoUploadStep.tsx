@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -84,6 +84,16 @@ const LogoUploadStep = ({ formData, updateFormData, validationError }: LogoUploa
   const [isDragging, setIsDragging] = useState(false);
   const [logoPosition, setLogoPosition] = useState(formData.logoPosition || { x: 200, y: 200, scale: 0.25, angle: 0 });
   
+  // Performance optimization: separate drag position from saved position
+  const [dragPosition, setDragPosition] = useState(logoPosition);
+  const dragRef = useRef<{ x: number; y: number; scale: number; angle: number }>(logoPosition);
+  
+  // RAF for smooth animation
+  const rafRef = useRef<number>();
+  const lastDrawTimeRef = useRef(0);
+  const FPS = 60;
+  const FRAME_TIME = 1000 / FPS;
+  
   // Admin logo state
   const [adminLogoLoaded, setAdminLogoLoaded] = useState(false);
 
@@ -137,7 +147,10 @@ const LogoUploadStep = ({ formData, updateFormData, validationError }: LogoUploa
     ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
   };
 
-  // Update canvas drawing effect
+  // Store the background canvas state
+  const backgroundCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Initial canvas setup and background drawing
   useEffect(() => {
     const canvas = userLogoCanvasRef.current;
     if (!canvas) return;
@@ -149,38 +162,95 @@ const LogoUploadStep = ({ formData, updateFormData, validationError }: LogoUploa
     canvas.width = 400;
     canvas.height = 400;
 
-    // Clear canvas first
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Create background canvas if it doesn't exist
+    if (!backgroundCanvasRef.current) {
+      backgroundCanvasRef.current = document.createElement('canvas');
+      backgroundCanvasRef.current.width = canvas.width;
+      backgroundCanvasRef.current.height = canvas.height;
+    }
+
+    // Draw background (tote bag and admin image) only when these dependencies change
+    const bgCtx = backgroundCanvasRef.current.getContext('2d');
+    if (!bgCtx) return;
+
+    // Clear background canvas
+    bgCtx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw tote bag image
     const toteBag = new Image();
     toteBag.src = '/totebag.png';
 
     toteBag.onload = () => {
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw tote bag centered
+      // Draw tote bag centered on background canvas
       const scale = Math.min(canvas.width / toteBag.width, canvas.height / toteBag.height) * 0.9;
       const x = (canvas.width - toteBag.width * scale) / 2;
       const y = (canvas.height - toteBag.height * scale) / 2;
-      ctx.drawImage(toteBag, x, y, toteBag.width * scale, toteBag.height * scale);
+      bgCtx.drawImage(toteBag, x, y, toteBag.width * scale, toteBag.height * scale);
 
       // Draw admin image if available
       if (selectedCauseData?.adminImageUrl && adminLogoRef.current) {
-        drawAdminImage(ctx, adminLogoRef.current, canvas.width, canvas.height);
+        drawAdminImage(bgCtx, adminLogoRef.current, canvas.width, canvas.height);
       }
 
-      // Draw user logo if available
-      if (userLogoPreview && userLogoRef.current) {
-        drawLogo(ctx, userLogoRef.current, logoPosition);
-      }
+      // Initial draw of the complete canvas
+      drawCurrentState();
     };
 
     toteBag.onerror = (error) => {
       console.error('Error loading totebag image:', error);
     };
-  }, [userLogoPreview, logoPosition, selectedCauseData?.adminImageUrl]);
+  }, [selectedCauseData?.adminImageUrl]); // Only redraw background when admin image changes
+
+  // Function to draw the current state (background + logo)
+  const drawCurrentState = useCallback(() => {
+    const canvas = userLogoCanvasRef.current;
+    if (!canvas || !backgroundCanvasRef.current) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Clear main canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw background from stored canvas
+    ctx.drawImage(backgroundCanvasRef.current, 0, 0);
+
+    // Draw user logo if available
+    if (userLogoPreview && userLogoRef.current) {
+      const currentPosition = isDragging ? dragPosition : logoPosition;
+      drawLogo(ctx, userLogoRef.current, currentPosition);
+    }
+  }, [userLogoPreview, logoPosition, dragPosition, isDragging]);
+
+  // Update canvas when logo position changes
+  useEffect(() => {
+    drawCurrentState();
+  }, [drawCurrentState, logoPosition, dragPosition]);
+
+  // Separate effect for smooth drag updates - only redraws the logo, not the entire canvas
+  useEffect(() => {
+    if (!isDragging || !userLogoCanvasRef.current || !userLogoPreview || !userLogoRef.current) return;
+
+    const canvas = userLogoCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Only redraw the logo area for performance
+    const logoWidth = userLogoRef.current.width * dragPosition.scale;
+    const logoHeight = userLogoRef.current.height * dragPosition.scale;
+    
+    // Clear only the logo area (with some padding)
+    const padding = 20;
+    ctx.clearRect(
+      dragPosition.x - logoWidth/2 - padding,
+      dragPosition.y - logoHeight/2 - padding,
+      logoWidth + padding * 2,
+      logoHeight + padding * 2
+    );
+
+    // Redraw the logo at new position
+    drawLogo(ctx, userLogoRef.current, dragPosition);
+  }, [dragPosition, isDragging, userLogoPreview]);
 
   // Function to get correct image URL
   const getFullImageUrl = (imageUrl: string): string => {
@@ -334,18 +404,58 @@ const LogoUploadStep = ({ formData, updateFormData, validationError }: LogoUploa
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    setLogoPosition(prev => ({
-      ...prev,
+    // Update position in ref immediately
+    dragRef.current = {
+      ...dragRef.current,
       x,
       y
-    }));
+    };
+
+    // Cancel any pending animation frame
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+
+    // Schedule next frame
+    rafRef.current = requestAnimationFrame(() => {
+      const now = performance.now();
+      const timeSinceLastDraw = now - lastDrawTimeRef.current;
+
+      // Ensure we're not drawing too frequently
+      if (timeSinceLastDraw >= FRAME_TIME) {
+        const ctx = canvas.getContext('2d');
+        if (!ctx || !backgroundCanvasRef.current || !userLogoRef.current) return;
+
+        // Clear and redraw
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(backgroundCanvasRef.current, 0, 0);
+        drawLogo(ctx, userLogoRef.current, dragRef.current);
+
+        // Update last draw time
+        lastDrawTimeRef.current = now;
+
+        // Update React state less frequently
+        setDragPosition(dragRef.current);
+      }
+    });
   };
 
   const handleUserLogoMouseUp = () => {
     if (isDragging) {
       setIsDragging(false);
+      
+      // Cancel any pending animation frame
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = undefined;
+      }
+      
+      // Save the final drag position to the actual logo position
+      const finalPosition = dragRef.current;
+      setLogoPosition(finalPosition);
+      
       // Save position to form data
-      updateFormData({ logoPosition });
+      updateFormData({ logoPosition: finalPosition });
     }
   };
 
