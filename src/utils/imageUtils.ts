@@ -36,6 +36,20 @@ export const getImageUrl = (url: string | undefined, fallbackImage: string = '/t
       return `${config.uploadsUrl}/${filename}`;
     }
     
+    // Extract the API domain without any path
+    let apiDomain = '';
+    
+    if (config.apiUrl.includes('://')) {
+      // Get just the domain part (e.g., 'api.changebag.org')
+      const urlParts = config.apiUrl.split('://');
+      const protocol = urlParts[0]; // 'https'
+      const domainWithPath = urlParts[1].split('/')[0]; // 'api.changebag.org'
+      apiDomain = `${protocol}://${domainWithPath}`;
+    } else {
+      // Fallback if apiUrl doesn't have protocol
+      apiDomain = config.apiUrl.split('/')[0];
+    }
+    
     console.log('Using API domain for images:', apiDomain);
     return `${apiDomain}${url}`;
   }
