@@ -3,11 +3,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Gift, Award, BadgeCheck, TrendingUp, CircleDollarSign } from 'lucide-react';
+import { Gift, Award, BadgeCheck, TrendingUp, CircleDollarSign, Heart, Users, Leaf, Loader2 } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import BenefitCard from './BenefitCard';
+import {steps} from '@/data/steps';
+import { partners } from '@/data/partners';
 import {
   Carousel,
   CarouselContent,
@@ -23,6 +26,8 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { fetchStats, fetchSponsorStories } from '@/services/apiServices';
 import { Story } from '@/models/Story';
+
+import { formatCurrency } from '@/utils/formatters';
 
 // Sample data for the growth chart (fallback if API data is not available)
 const fallbackGrowthData = [
@@ -83,7 +88,139 @@ const marketingMethods = [
   }
 ];
 
+const impactBenefits = [
+  {
+    icon: Award,
+    title: "Real Change",
+    description: "Support vetted causes with tangible outcomes you can track in real-time through our comprehensive dashboard.",
+    mainMetric: "95%",
+    metrics: [
+      { label: "Cause Verification", value: "100%" },
+      { label: "Impact Tracking", value: "Real-time" },
+      { label: "Transparency", value: "Full" }
+    ]
+  },
+  {
+    icon: TrendingUp,
+    title: "Measurable ROI",
+    description: "See exactly how your sponsorship translates to bags claimed and community impact with detailed analytics.",
+    mainMetric: "3.2x",
+    metrics: [
+      { label: "ROI vs Traditional Ads", value: "3.2x Higher" },
+      { label: "Brand Exposure", value: "Years vs Days" },
+      { label: "Cost per Impression", value: "₹8-₹15" }
+    ]
+  },
+  {
+    icon: Gift,
+    title: "Sustainable Products",
+    description: "Your brand on eco-friendly tote bags that reduce plastic waste while promoting your sustainability values.",
+    mainMetric: "100%",
+    metrics: [
+      { label: "Eco-friendly Material", value: "100%" },
+      { label: "Plastic Reduction", value: "500+ bags/year" },
+      { label: "Lifespan", value: "3-5 years" }
+    ]
+  }
+];
+
+const efficiencyBenefits = [
+  {
+    icon: BadgeCheck,
+    title: "Simple Process",
+    description: "Our streamlined sponsorship process takes just minutes, with full support and guidance at every step.",
+    mainMetric: "5min",
+    metrics: [
+      { label: "Setup Time", value: "5 minutes" },
+      { label: "Support Available", value: "24/7" },
+      { label: "Documentation", value: "Auto-generated" }
+    ]
+  },
+  {
+    icon: TrendingUp,
+    title: "Cost Effective",
+    description: "Get more brand exposure per dollar compared to traditional advertising channels with long-term visibility.",
+    mainMetric: "60%",
+    metrics: [
+      { label: "Cost Savings", value: "60% Less" },
+      { label: "CPM Rate", value: "₹8-₹15" },
+      { label: "Volume Discounts", value: "Up to 25%" }
+    ]
+  },
+  {
+    icon: CircleDollarSign,
+    title: "Transparent Pricing",
+    description: "Clear, upfront pricing with no hidden fees and flexible volume discounts for larger commitments.",
+    mainMetric: "0%",
+    metrics: [
+      { label: "Hidden Fees", value: "0%" },
+      { label: "Setup Costs", value: "Free" },
+      { label: "Payment Terms", value: "Flexible" }
+    ]
+  }
+];
+
+const recognitionBenefits = [
+  {
+    icon: Award,
+    title: "Brand Visibility",
+    description: "Your logo on quality tote bags that travel with users for years, creating ongoing organic exposure.",
+    mainMetric: "1M+",
+    metrics: [
+      { label: "Daily Impressions", value: "1M+" },
+      { label: "Brand Lifespan", value: "3-5 years" },
+      { label: "Geographic Reach", value: "Pan-India" }
+    ]
+  },
+  {
+    icon: BadgeCheck,
+    title: "Digital Badge",
+    description: "Display your impact badge on your website and social media to showcase your social responsibility commitment.",
+    mainMetric: "100%",
+    metrics: [
+      { label: "Badge Availability", value: "100%" },
+      { label: "Social Sharing", value: "Auto-generated" },
+      { label: "SEO Benefits", value: "Included" }
+    ]
+  },
+  {
+    icon: TrendingUp,
+    title: "Social Proof",
+    description: "Featured in our sponsors directory and PR materials with option for detailed case study highlights.",
+    mainMetric: "500+",
+    metrics: [
+      { label: "Featured Sponsors", value: "500+" },
+      { label: "PR Coverage", value: "Monthly" },
+      { label: "Case Studies", value: "Available" }
+    ]
+  }
+];
+
+const impactAreas = [
+  {
+    title: "Environmental Conservation",
+    description: "Protecting ecosystems and wildlife through sustainable practices",
+    image: "https://images.unsplash.com/photo-1518877593221-1f28583780b4",
+    stats: ["50K+ plastic bags replaced", "25K+ trees planted"]
+  },
+  {
+    title: "Community Development", 
+    description: "Supporting rural communities and sustainable livelihoods",
+    image: "https://media.istockphoto.com/id/1395727601/photo/group-of-teenager-village-school-kids-planting-tree-while-looking-at-camera-concept-of.jpg?s=612x612&w=0&k=20&c=0WRQSt7PMNeypnshUB-M0bLjSbzZut2TygfqfWwRrVI=",
+    stats: ["500+ communities reached", "15M+ lives impacted"]
+  },
+  {
+    title: "Biodiversity Protection",
+    description: "Preserving pollinator species and ecosystem health",
+    image: "https://images.unsplash.com/photo-1498936178812-4b2e558d2937", 
+    stats: ["3K+ NGOs supported", "300+ corporate partners"]
+  }
+];
+
+
+
 const WhySponsor = () => {
+
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['stats'],
     queryFn: fetchStats
@@ -127,15 +264,18 @@ const WhySponsor = () => {
     }
   };
 
+
+
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[50vh] min-h-[600px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-black/40 z-10"></div>
-        <div 
+        {/* <div 
           className="absolute inset-0 bg-cover bg-center" 
           style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1472396961693-142e6e269027?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80)' }}
-        ></div>
+        ></div> */}
+        <img src="/images/why-sponsor.webp" alt="Why Sponsor" className="absolute inset-0 w-full h-full object-cover" />
         <div className="container relative z-20 text-center max-w-4xl mx-auto px-4 text-white">
           <motion.h1 
             className="text-5xl md:text-6xl font-bold mb-4"
@@ -158,8 +298,8 @@ const WhySponsor = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.6, duration: 0.5 }}
           >
-            <Button size="lg" asChild className="text-lg">
-              <Link to="/sponsor/new">
+            <Button size="lg" asChild className="text-lg bg-green-600 hover:bg-green-700">
+              <Link to="/causes">
                 <Gift className="mr-2" /> Start Sponsoring
               </Link>
             </Button>
@@ -167,82 +307,109 @@ const WhySponsor = () => {
         </div>
       </section>
 
-      <main className="container mx-auto py-16 px-4 space-y-20">
+      <main className="container mx-auto py-16 px-4 space-y-10">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-green-800 mb-6">
+            Our Impact in Motion
+          </h2>
+          <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Discover how every TOMS purchase creates ripples of positive change across the globe.
+          </p>
+        </div>
         {/* Stats Cards Section */}
         <section className="space-y-6">
-          <motion.h2 
+          <motion.h2
             className="text-3xl font-bold text-center"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
           >
-            Impact in Numbers
+            {/* Impact in Numbers */}
           </motion.h2>
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          <motion.div
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
           >
             {statsLoading ? (
-              <>
-                <Card className="h-36 animate-pulse bg-gray-100"></Card>
-                <Card className="h-36 animate-pulse bg-gray-100"></Card>
-                <Card className="h-36 animate-pulse bg-gray-100"></Card>
-              </>
+              <div className="flex justify-center items-center col-span-3 min-h-[200px]">
+                <Loader2 className="h-10 w-10 text-gray-400 animate-spin" />
+              </div>
             ) : (
               <>
-                <motion.div>
-                  <Card className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-lg font-medium">Total Sponsors</CardTitle>
-                      <CircleDollarSign className="h-5 w-5 text-primary-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-4xl font-bold">{stats?.totalSponsors || 0}</div>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Partnering for positive change
+                {/* Animated Card 1 */}
+                <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-green-500 p-8 text-white shadow-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+                  <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+                  <div className="relative z-10">
+                    <div className="mb-6 flex items-center justify-center">
+                      <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform duration-500">
+                        <Heart className="w-8 h-8" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4 group-hover:text-emerald-100 transition-colors duration-300 text-center">
+                      Total Sponsors
+                    </h3>
+                    <div className="flex flex-col items-center justify-between">
+                      <span className="text-7xl font-bold">{stats?.totalSponsors || 0}</span>
+                      <p className="text-emerald-100 mb-6 mt-3 leading-relaxed">
+                        Partnering for Positive Change.
                       </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div>
-                  <Card className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-lg font-medium">Active Campaigns</CardTitle>
-                      <TrendingUp className="h-5 w-5 text-primary-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-4xl font-bold">{stats?.activeCampaigns || 0}</div>
-                      <p className="text-sm text-muted-foreground mt-2">
+                    </div>
+                  </div>
+                </div>
+                {/* Animated Card 2 */}
+                <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-500 p-8 text-white shadow-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+                  <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+                  <div className="relative z-10">
+                    <div className="mb-6 flex items-center justify-center">
+                      <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform duration-500">
+                        <Users className="w-8 h-8" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4 group-hover:text-emerald-100 transition-colors duration-300 text-center">
+                      Active Campaigns
+                    </h3>
+                    <div className="flex flex-col items-center justify-between">
+                      <span className="text-7xl font-bold">{stats?.activeCampaigns || 0}</span>
+                      <p className="text-emerald-100 mb-6 mt-3 leading-relaxed">
                         Currently making an impact
                       </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div>
-                  <Card className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-lg font-medium">Bags Sponsored</CardTitle>
-                      <Gift className="h-5 w-5 text-primary-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-4xl font-bold">{stats?.totalBagsSponsored || 0}</div>
-                      <p className="text-sm text-muted-foreground mt-2">
+                    </div>
+                  </div>
+                </div>
+                {/* Animated Card 3 */}
+                <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-600 to-emerald-500 p-8 text-white shadow-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+                  <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+                  <div className="relative z-10">
+                    <div className="mb-6 flex items-center justify-center">
+                      <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform duration-500">
+                        <Leaf className="w-8 h-8" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4 group-hover:text-emerald-100 transition-colors duration-300 text-center">
+                      Bags Sponsored
+                    </h3>
+                    <div className="flex flex-col items-center justify-between">
+                      <span className="text-7xl font-bold">{stats?.totalBagsSponsored || 0}</span>
+                      <p className="text-emerald-100 mb-6 mt-3 leading-relaxed">
                         Eco-friendly totes with purpose
                       </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                    </div>
+                  </div>
+                </div>
               </>
             )}
           </motion.div>
         </section>
 
         {/* Aims & Objectives Section */}
-        <section className="space-y-8">
+        {/* <section className="space-y-8">
           <motion.h2 
             className="text-3xl font-bold text-center"
             initial="hidden"
@@ -307,388 +474,208 @@ const WhySponsor = () => {
               </Card>
             </motion.div>
           </motion.div>
-        </section>
+        </section> */}
+
+         {/* Partners Section */}
+     <section className="bg-gradient-to-br from-gray-50 via-white to-green-50/30 py-24 relative overflow-hidden">
+       <div className="relative z-10 container mx-auto px-4">
+         <div className="text-center mb-20">
+           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+             Our <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Corporate Partners</span>
+           </h2>
+           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+             Trusted by the largest brands and corporations, and the most impactful foundations around the world
+           </p>
+         </div>
+          {/* Infinite Carousel */}
+        <div className="relative">
+          {/* First row - moving left */}
+          <div className="flex animate-scroll-left">
+            {[...partners, ...partners].map((partner, index) => (
+              <div 
+                key={`${partner.name}-${index}`}
+                className="group bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 text-center flex items-center justify-center hover:scale-105 flex-shrink-0 mx-4"
+                style={{ minWidth: '200px' }}
+              >
+                <img 
+                  src={partner.logo} 
+                  alt={partner.name} 
+                  className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain group-hover:scale-110 transition-transform duration-300" 
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+       </div>
+     </section>
         
         {/* Benefits Showcase - Simplified */}
-        <section className="space-y-8 bg-[#f7f6f4] py-16 px-8 rounded-lg">
-          <motion.div 
-            className="text-center space-y-4"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-          >
-            <h2 className="text-3xl font-bold">Why Sponsor with Us?</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Get maximum impact with minimal effort - from real community change to lasting brand recognition
-            </p>
-          </motion.div>
+        <section className="relative space-y-8 bg-gradient-to-br from-gray-50 to-green-50 py-10 px-8 rounded-2xl overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-green-100 rounded-full opacity-30 blur-3xl"></div>
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-100 rounded-full opacity-20 blur-3xl"></div>
+      </div>
+
+      <motion.div 
+        className="relative text-center space-y-6"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={fadeIn}
+      >
+        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          Why 
+          <span className='text-green-600 px-2'>Sponsor</span> 
+          with Us?
+        </h2>
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          Get maximum impact with minimal effort - from real community change to lasting brand recognition
+        </p>
+      </motion.div>
+      
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={fadeIn}
+        className="relative"
+      >
+        <Tabs defaultValue="impact" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-12 h-14 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl shadow-sm">
+            <TabsTrigger 
+              value="impact" 
+              className="text-sm font-semibold data-[state=active]:bg-green-600 data-[state=active]:text-white rounded-lg transition-all duration-300"
+            >
+              <Award className="w-4 h-4 mr-2" />
+              Impact & ROI
+            </TabsTrigger>
+            <TabsTrigger 
+              value="efficiency" 
+              className="text-sm font-semibold data-[state=active]:bg-green-600 data-[state=active]:text-white rounded-lg transition-all duration-300"
+            >
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Efficiency & Cost
+            </TabsTrigger>
+            <TabsTrigger 
+              value="recognition" 
+              className="text-sm font-semibold data-[state=active]:bg-green-600 data-[state=active]:text-white rounded-lg transition-all duration-300"
+            >
+              <BadgeCheck className="w-4 h-4 mr-2" />
+              Brand Recognition
+            </TabsTrigger>
+          </TabsList>
           
-          <Tabs defaultValue="impact" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8 h-12 bg-[#f7f6f4]">
-              <TabsTrigger value="impact" className="text-sm font-medium">Impact & ROI</TabsTrigger>
-              <TabsTrigger value="efficiency" className="text-sm font-medium">Efficiency & Cost</TabsTrigger>
-              <TabsTrigger value="recognition" className="text-sm font-medium">Brand Recognition</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="impact" className="space-y-6">
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                initial="hidden"
-                animate="visible"
-                variants={staggerContainer}
-              >
-                <motion.div variants={fadeIn}>
-                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center text-lg">
-                          <Award className="mr-3 h-6 w-6 text-green-600" />
-                          Real Change
-                        </CardTitle>
-                        <div className="text-2xl font-bold text-green-600">95%</div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-muted-foreground">Support vetted causes with tangible outcomes you can track in real-time.</p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Cause Verification</span>
-                          <span className="font-medium">100%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Impact Tracking</span>
-                          <span className="font-medium">Real-time</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Transparency</span>
-                          <span className="font-medium">Full</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center text-lg">
-                          <TrendingUp className="mr-3 h-6 w-6 text-green-600" />
-                          Measurable ROI
-                        </CardTitle>
-                        <div className="text-2xl font-bold text-green-600">3.2x</div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-muted-foreground">See exactly how your sponsorship translates to bags claimed and community impact.</p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>ROI vs Traditional Ads</span>
-                          <span className="font-medium">3.2x Higher</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Brand Exposure</span>
-                          <span className="font-medium">Years vs Days</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Cost per Impression</span>
-                          <span className="font-medium">₹8-₹15</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center text-lg">
-                          <Gift className="mr-3 h-6 w-6 text-green-600" />
-                          Sustainable Products
-                        </CardTitle>
-                        <div className="text-2xl font-bold text-green-600">100%</div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-muted-foreground">Your brand on eco-friendly tote bags that reduce plastic waste while promoting your values.</p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Eco-friendly Material</span>
-                          <span className="font-medium">100%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Plastic Reduction</span>
-                          <span className="font-medium">500+ bags/year</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Lifespan</span>
-                          <span className="font-medium">3-5 years</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </motion.div>
-              
-              {/* <motion.div 
-                className="bg-white p-6 rounded-lg border border-green-200"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <TrendingUp className="h-6 w-6 text-green-600" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Proven Impact Metrics</h3>
-                    <p className="text-muted-foreground">Our sponsors see an average of 3.2x higher ROI compared to traditional advertising, with 95% of causes achieving their funding goals within 30 days.</p>
-                  </div>
-                </div>
-              </motion.div> */}
-            </TabsContent>
-            
-            <TabsContent value="efficiency" className="space-y-6">
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                initial="hidden"
-                animate="visible"
-                variants={staggerContainer}
-              >
-                <motion.div variants={fadeIn}>
-                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center text-lg">
-                          <BadgeCheck className="mr-3 h-6 w-6 text-green-600" />
-                          Simple Process
-                        </CardTitle>
-                        <div className="text-2xl font-bold text-green-600">5min</div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-muted-foreground">Our streamlined sponsorship process takes just minutes, with full support at every step.</p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Setup Time</span>
-                          <span className="font-medium">5 minutes</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Support Available</span>
-                          <span className="font-medium">24/7</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Documentation</span>
-                          <span className="font-medium">Auto-generated</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center text-lg">
-                          <TrendingUp className="mr-3 h-6 w-6 text-green-600" />
-                          Cost Effective
-                        </CardTitle>
-                        <div className="text-2xl font-bold text-green-600">60%</div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-muted-foreground">Get more brand exposure per dollar compared to traditional advertising channels.</p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Cost Savings</span>
-                          <span className="font-medium">60% Less</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>CPM Rate</span>
-                          <span className="font-medium">₹8-₹15</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Volume Discounts</span>
-                          <span className="font-medium">Up to 25%</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center text-lg">
-                          <CircleDollarSign className="mr-3 h-6 w-6 text-green-600" />
-                          Transparent Pricing
-                        </CardTitle>
-                        <div className="text-2xl font-bold text-green-600">0%</div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-muted-foreground">Clear, upfront pricing with no hidden fees and volume discounts available.</p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Hidden Fees</span>
-                          <span className="font-medium">0%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Setup Costs</span>
-                          <span className="font-medium">Free</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Payment Terms</span>
-                          <span className="font-medium">Flexible</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </motion.div>
-              
-              {/* <motion.div 
-                className="bg-white p-6 rounded-lg border border-green-200"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <BadgeCheck className="h-6 w-6 text-green-600" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Streamlined Experience</h3>
-                    <p className="text-muted-foreground">From initial setup to campaign completion, our platform reduces administrative overhead by 80% while providing comprehensive tracking and analytics.</p>
-                  </div>
-                </div>
-              </motion.div> */}
-            </TabsContent>
-            
-            <TabsContent value="recognition" className="space-y-6">
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                initial="hidden"
-                animate="visible"
-                variants={staggerContainer}
-              >
-                <motion.div variants={fadeIn}>
-                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center text-lg">
-                          <Award className="mr-3 h-6 w-6 text-green-600" />
-                          Brand Visibility
-                        </CardTitle>
-                        <div className="text-2xl font-bold text-green-600">1M+</div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-muted-foreground">Your logo on quality tote bags that travel with users for years, creating ongoing exposure.</p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Daily Impressions</span>
-                          <span className="font-medium">1M+</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Brand Lifespan</span>
-                          <span className="font-medium">3-5 years</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Geographic Reach</span>
-                          <span className="font-medium">Pan-India</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center text-lg">
-                          <BadgeCheck className="mr-3 h-6 w-6 text-green-600" />
-                          Digital Badge
-                        </CardTitle>
-                        <div className="text-2xl font-bold text-green-600">100%</div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-muted-foreground">Display your impact badge on your website and social media to showcase your commitment.</p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Badge Availability</span>
-                          <span className="font-medium">100%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Social Sharing</span>
-                          <span className="font-medium">Auto-generated</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>SEO Benefits</span>
-                          <span className="font-medium">Included</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card className="h-full hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-600 bg-white">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center text-lg">
-                          <TrendingUp className="mr-3 h-6 w-6 text-green-600" />
-                          Social Proof
-                        </CardTitle>
-                        <div className="text-2xl font-bold text-green-600">500+</div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-muted-foreground">Featured in our sponsors directory and PR materials with option for case study highlights.</p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Featured Sponsors</span>
-                          <span className="font-medium">500+</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>PR Coverage</span>
-                          <span className="font-medium">Monthly</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Case Studies</span>
-                          <span className="font-medium">Available</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </motion.div>
-              
-              {/* <motion.div 
-                className="bg-white p-6 rounded-lg border border-green-200"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <Award className="h-6 w-6 text-green-600" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Enhanced Brand Recognition</h3>
-                    <p className="text-muted-foreground">Join 500+ recognized brands that have increased their social impact visibility by an average of 300% through our platform's comprehensive recognition program.</p>
-                  </div>
-                </div>
-              </motion.div> */}
-            </TabsContent>
-          </Tabs>
+          <TabsContent value="impact" className="space-y-8">
+            <motion.div 
+              className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+            >
+              {impactBenefits.map((benefit, index) => (
+                <BenefitCard
+                  key={index}
+                  icon={benefit.icon}
+                  title={benefit.title}
+                  description={benefit.description}
+                  mainMetric={benefit.mainMetric}
+                  metrics={benefit.metrics}
+                  variants={fadeIn}
+                />
+              ))}
+            </motion.div>
+          </TabsContent>
+          
+          <TabsContent value="efficiency" className="space-y-8">
+            <motion.div 
+              className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+            >
+              {efficiencyBenefits.map((benefit, index) => (
+                <BenefitCard
+                  key={index}
+                  icon={benefit.icon}
+                  title={benefit.title}
+                  description={benefit.description}
+                  mainMetric={benefit.mainMetric}
+                  metrics={benefit.metrics}
+                  variants={fadeIn}
+                />
+              ))}
+            </motion.div>
+          </TabsContent>
+          
+          <TabsContent value="recognition" className="space-y-8">
+            <motion.div 
+              className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+            >
+              {recognitionBenefits.map((benefit, index) => (
+                <BenefitCard
+                  key={index}
+                  icon={benefit.icon}
+                  title={benefit.title}
+                  description={benefit.description}
+                  mainMetric={benefit.mainMetric}
+                  metrics={benefit.metrics}
+                  variants={fadeIn}
+                />
+              ))}
+            </motion.div>
+          </TabsContent>
+        </Tabs>
+      </motion.div>
         </section>
+
+        {/* Impact Gallery */}
+        <section className="py-20 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Impact <span className="text-[#008037]">Gallery</span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Witness the transformative power of corporate partnerships in action
+          </p>
+        </div>
+        
+        <div className="grid lg:grid-cols-3 gap-8">
+          {impactAreas.map((area, index) => (
+            <div key={index} className="group relative overflow-hidden rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300">
+              <div className="aspect-[4/5]">
+                <img 
+                  src={area.image}
+                  alt={area.title}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                
+                <div className="absolute inset-0 p-8 flex flex-col justify-end text-white">
+                  <h3 className="text-2xl font-bold mb-3 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                    {area.title}
+                  </h3>
+                  <p className="text-white mb-4 opacity-90 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-75">
+                    {area.description}
+                  </p>
+                  <div className="space-y-1 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-150">
+                    {area.stats.map((stat, statIndex) => (
+                      <div key={statIndex} className="text-sm font-semibold text-green-600">
+                        • {stat}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+       </section>
         
         {/* Growth Chart */}
         {/* <section className="space-y-8">
@@ -772,9 +759,9 @@ const WhySponsor = () => {
             Monthly growth of sponsors and total bags in circulation
           </p>
         </ Mareketing Section> */}
-        <section className="py-20 bg-background">
+        <section className="py-10 bg-background">
     <div className="container mx-auto px-4">
-      <div className="text-center mb-16 animate-fade-in">
+      <div className="text-center mb-10 animate-fade-in">
         <h2 className="text-4xl font-bold text-green-600 mb-4">
           The Most Budget-Friendly CSR & Brand Awareness Strategy
         </h2>
@@ -837,10 +824,50 @@ const WhySponsor = () => {
     </div>
         </section>
 
+         {/* How it works */}
+    <section className="py-10 bg-gradient-to-b from-gray-50 to-white">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-10">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            How It <span className="text-[#008037]">Works</span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Simple, transparent process from cause selection to impact measurement
+          </p>
+        </div>
+        
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {steps.map((step, index) => (
+              <div key={index} className="relative">
+                <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 text-center">
+                  <div className="text-[#008037] text-6xl font-bold mb-4 opacity-20">
+                    {step.number}
+                  </div>
+                  <div className="text-[#008037] mb-6 flex justify-center">
+                    {step.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    {step.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
+                {index < steps.length - 1 && (
+                  <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-green-300 transform -translate-y-1/2"></div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
         {/* Featured Stories Carousel */}
         {!storiesLoading && stories?.length > 0 && (
-          <section className="space-y-8space-y-8 bg-[#f7f6f4] py-16 px-8 rounded-lg">
-            <motion.h2 
+          <section className="space-y-8 bg-[#f7f6f4] py-16 px-8 rounded-lg">
+            {/* <motion.h2 
               className="text-3xl font-bold text-center"
               initial="hidden"
               whileInView="visible"
@@ -848,7 +875,7 @@ const WhySponsor = () => {
               variants={fadeIn}
             >
               Success Stories
-            </motion.h2>
+            </motion.h2> */}
             
             <motion.div
               initial={{ opacity: 0 }}
@@ -922,7 +949,7 @@ const WhySponsor = () => {
               Your brand can be part of positive change.
             </p>
             <Button size="lg" className="text-lg" asChild>
-              <Link to="/sponsor/new">
+              <Link to="/causes">
                 <Gift className="mr-2" /> Start Sponsoring Now
               </Link>
             </Button>

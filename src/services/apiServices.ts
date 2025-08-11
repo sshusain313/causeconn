@@ -61,6 +61,7 @@ const mockCauses: Cause[] = [
   }
 ];
 
+
 // Real API calls using the config file for the API URL
 export const fetchStats = async () => {
   try {

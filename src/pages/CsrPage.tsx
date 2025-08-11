@@ -6,37 +6,12 @@ import {Card} from '../components/ui/card'
 import grassrootsImage from "/images/grassroots-scene.jpg";
 import dashboardImage from "/images/csr-dashboard.jpg";
 import { Link } from 'react-router-dom';
-
 import { Users, Heart, Building2, Globe, Search, BarChart, Target, Handshake, TrendingUp, Share2, Quote, Star } from "lucide-react";
+import {steps} from '../data/steps'
+import { stats } from '../data/stats';
+import { partners } from '../data/partners';
 
 export const CsrPage = () => {
-
-     const stats = [
-    {
-      icon: <Heart className="h-8 w-8" />,
-      number: "2.7M+",
-      label: "Bags distributed",
-      description: "Eco-friendly tote bags distributed"
-    },
-    {
-      icon: <Users className="h-8 w-8" />,
-      number: "15M+",
-      label: "Lives reached",
-      description: "People positively impacted"
-    },
-    {
-      icon: <Building2 className="h-8 w-8" />,
-      number: "300+",
-      label: "Corporate partners",
-      description: "Companies making a difference"
-    },
-    {
-      icon: <Globe className="h-8 w-8" />,
-      number: "3,000+",
-      label: "NGOs",
-      description: "Non-profit organizations supported"
-    }
-  ];
 
      const services = [
      {
@@ -78,26 +53,6 @@ export const CsrPage = () => {
     }
   ];
 
-  const partners = [
-    { name: "bentley", logo: "/images/bentley.webp" },
-    { name: "trustpilot", logo: "/images/trust.svg" },
-    { name: "puma", logo: "/images/puma.png" },
-    { name: "rubix", logo: "/images/rubix.webp" },
-    { name: "salesforce", logo: "/images/salesforce.png" },
-    { name: "jpmorgan", logo: "/images/jp.webp" },
-    { name: "cocacola", logo: "/images/cola.webp" },
-    { name: "bmw", logo: "/images/bmw.jpeg" },
-    { name: "walmart", logo: "/images/wallmart.png" },
-    { name: "Dr. Reddy's", logo: "/images/reddy.webp" },
-    { name: 'google', logo: '/images/google.webp' },
-    { name: 'dominos', logo: '/images/dominos.png' },
-    { name: 'amazon', logo: '/images/amazon.png' },
-    { name: 'apple', logo: '/images/apple.png' },
-    { name: 'meta', logo: '/images/meta.jpg' },
-    { name: 'tesla', logo: '/images/tesla.png' },
-    { name: 'uber', logo: '/images/uber.png' },
-  ];
-
   const statistics = [
     {
       icon: <Handshake className="w-8 h-8 text-white mb-4" />,
@@ -113,33 +68,6 @@ export const CsrPage = () => {
       icon: '/images/india.png',
       number: "India's first",
       text: "A CSR tech & product platform"
-    }
-  ];
-
-  const steps = [
-    {
-      number: "01",
-      icon: <Search className="h-8 w-8" />,
-      title: "Pick a Cause",
-      description: "Choose from 3,000+ verified NGOs and causes that align with your brand values."
-    },
-    {
-      number: "02",
-      icon: <Heart className="h-8 w-8" />,
-      title: "Sponsor Bags",
-      description: "Fund eco-friendly tote bags with your brand logo supporting your chosen cause."
-    },
-    {
-      number: "03",
-      icon: <TrendingUp className="h-8 w-8" />,
-      title: "Track Impact",
-      description: "Monitor real-time distribution and impact through custom dashboards and reports."
-    },
-    {
-      number: "04",
-      icon: <Share2 className="h-8 w-8" />,
-      title: "Share Your Story",
-      description: "Showcase your CSR impact with compelling content and transparent reporting."
     }
   ];
 
@@ -344,7 +272,7 @@ export const CsrPage = () => {
           ))}
         </div>
       </div>
-         </section>
+    </section>
      
      {/* Partners Section */}
      <section className="bg-gradient-to-br from-gray-50 via-white to-green-50/30 py-24 relative overflow-hidden">

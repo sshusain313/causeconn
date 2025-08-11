@@ -648,9 +648,9 @@ const WhyClaim = () => {
     </section>
 
     {/* Stats Section */}
-    <section ref={targetRef} className="relative py-10 overflow-hidden rounded-xl my-8" id="stats">
+    <section ref={targetRef} className="relative py-10 overflow-hidden my-8" id="stats">
       {/* Background image */}
-      <div className="absolute inset-0 bg-gradient-to-br from-green-700 via-emerald-600 to-teal-600 w-full rounded-xl shadow-2xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-green-700 via-emerald-600 to-teal-600 w-full shadow-2xl">
         {/* Animated background elements */}
         <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-white/10 rounded-full animate-pulse-slow"></div>
         <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-white/10 rounded-full animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
@@ -744,10 +744,11 @@ const WhyClaim = () => {
         </div>
       </div>
     </section>
-
-     {/* Featured Stories Carousel */}
-     {!storiesLoading && stories?.length > 0 && (
-          <section className="space-y-8 bg-gradient-to-br from-[#f7f6f4] to-green-50 py-16 px-16 rounded-lg">
+    
+    <main className='container mx-auto px-4 py-4 sm:px-6 lg:px-8'>
+    {/* Featured Stories Carousel */}
+    {!storiesLoading && stories?.length > 0 && (
+          <section className="space-y-8 py-16 px-8 rounded-lg">
             {/* <motion.h2 
               className="text-3xl font-bold text-center"
               initial="hidden"
@@ -755,7 +756,7 @@ const WhyClaim = () => {
               viewport={{ once: true }}
               variants={fadeIn}
             >
-              Claimer Stories
+              Success Stories
             </motion.h2> */}
             
             <motion.div
@@ -772,13 +773,19 @@ const WhyClaim = () => {
                 <CarouselContent>
                   {stories.map((story: Story) => (
                     <CarouselItem key={story.id} className="md:basis-1/3">
-                      <Card className="h-full">
+                      <Card className="h-full bg-[#f7f6f4] border-[#f7f6f4]">
                         {story.imageUrl && (
                           <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                             <img 
                               src={story.imageUrl} 
                               alt={story.title} 
-                              className="h-full w-full object-cover transition-all hover:scale-105"
+                              className="h-full w-full object-cover object-top transition-all hover:scale-105"
+                              onError={(e) => {
+                                // Fallback if image fails to load
+                                const target = e.target as HTMLImageElement;
+                                console.error(`Failed to load image: ${target.src}`);
+                                target.src = 'https://placehold.co/600x400?text=Story+Image';
+                              }}
                             />
                           </div>
                         )}
@@ -787,8 +794,7 @@ const WhyClaim = () => {
                           <CardDescription>By {story.authorName}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          {/* <p className="line-clamp-3 text-muted-foreground">{story.excerpt}</p> */}
-                          <p className="text-muted-foreground">
+                          <p className="text-muted-foreground line-clamp-3">
                             {expandedStories.has(story.id) ? story.content : story.excerpt}
                           </p>
                           <Button
@@ -805,13 +811,13 @@ const WhyClaim = () => {
                 </CarouselContent>
                 {/* <CarouselPrevious className="left-0" />
                 <CarouselNext className="right-0" /> */}
-                
               </Carousel>
             </motion.div>
           </section>
-        )}
+    )}
+    </main>
     
-    <section className="relative py-20 bg-gradient-to-br from-green-900 via-emerald-800 to-teal-700 text-white overflow-hidden rounded-3xl mx-4 my-8">
+    <section className="relative py-20 bg-gradient-to-br from-green-900 via-emerald-800 to-teal-700 text-white overflow-hidden w-full my-8">
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-1/4 left-1/4 w-32 h-32 border border-white rounded-full animate-pulse-slow"></div>
