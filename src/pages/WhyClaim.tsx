@@ -1,5 +1,5 @@
 
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -8,6 +8,8 @@ import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { useCounterAnimation } from '@/hooks/useCounterAnimation';
 import {
   Carousel,
   CarouselContent,
@@ -24,6 +26,66 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend
 import { fetchStats, fetchClaimStories } from '@/services/apiServices';
 import { Story } from '@/models/Story';
 
+const scrollToStats = () => {
+  const element = document.getElementById('stats');
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+interface GalleryItem {
+  id: number;
+  src: string;
+  alt: string;
+  title: string;
+  description: string;
+}
+
+const galleryItems: GalleryItem[] = [
+  {
+    id: 1,
+    src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=800',
+    alt: 'Two women reading together',
+    title: 'Educational Partnership',
+    description: 'Supporting literacy programs worldwide'
+  },
+  {
+    id: 2,
+    src: 'https://images.unsplash.com/photo-1497486751825-1233686d5d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=700',
+    alt: 'Children in classroom',
+    title: 'Classroom Support',
+    description: 'Building better learning environments'
+  },
+  {
+    id: 3,
+    src: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=900',
+    alt: 'Diverse community gathering',
+    title: 'Community Building',
+    description: 'Connecting communities globally'
+  },
+  {
+    id: 4,
+    src: 'https://images.unsplash.com/photo-1544717297-fa95b6ee9643?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=750',
+    alt: 'Mother and child reading',
+    title: 'Family Support',
+    description: 'Strengthening family bonds through education'
+  },
+  {
+    id: 5,
+    src: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=800',
+    alt: 'Children playing outdoors',
+    title: 'Active Learning',
+    description: 'Promoting healthy development'
+  },
+  {
+    id: 6,
+    src: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=900',
+    alt: 'Teacher helping students',
+    title: 'Teacher Training',
+    description: 'Empowering educators globally'
+  }
+];
+
 // Sample data for the impact chart (fallback if API data is not available)
 const fallbackImpactData = [
   { cause: 'Environmental', bags: 480 },
@@ -31,6 +93,53 @@ const fallbackImpactData = [
   { cause: 'Education', bags: 260 },
   { cause: 'Animal Welfare', bags: 190 },
   { cause: 'Hunger Relief', bags: 350 },
+];
+
+const cards = [
+  {
+    id: 1,
+    bgColor: 'bg-emerald-700',
+    textColor: 'text-white',
+    accentColor: 'text-emerald-200',
+    lightTextColor: 'text-emerald-100',
+    stat: '50%+',
+    statDescription: 'of our B Corp progress is in the environmental category',
+    title: 'Commitment to the Planet',
+    description: 'Making gains on our sustainability goals.'
+  },
+  {
+    id: 2,
+    bgColor: 'bg-green-600',
+    textColor: 'text-white',
+    accentColor: 'text-green-200',
+    lightTextColor: 'text-green-100',
+    stat: '81.5K',
+    statDescription: 'TOMS Products Recycled Since 2014',
+    title: 'Threduo',
+    description: 'Our in-house resale platform.'
+  },
+  {
+    id: 3,
+    bgColor: 'bg-teal-700',
+    textColor: 'text-white',
+    accentColor: 'text-teal-200',
+    lightTextColor: 'text-teal-100',
+    stat: 'Employees Making an Impact',
+    statDescription: 'Closing our global offices annually for our team to make an impact in our communities.',
+    title: 'Volunteering',
+    description: ''
+  },
+  {
+    id: 4,
+    bgColor: 'bg-emerald-600',
+    textColor: 'text-white',
+    accentColor: 'text-emerald-200',
+    lightTextColor: 'text-emerald-100',
+    stat: 'Ongoing Commitment to Learning',
+    statDescription: 'Committed to being an ongoing anti-racist organization.',
+    title: 'Dedicated to Learning',
+    description: ''
+  }
 ];
 
 const WhyClaim = () => {
@@ -46,6 +155,19 @@ const WhyClaim = () => {
 
   const [expandedStories, setExpandedStories] = useState<Set<string>>(new Set());
 
+  const { targetRef, isIntersecting } = useIntersectionObserver({ threshold: 0.2 });
+  const [visibleItems, setVisibleItems] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (isIntersecting) {
+      galleryItems.forEach((_, index) => {
+        setTimeout(() => {
+          setVisibleItems(prev => [...prev, index]);
+        }, index * 100);
+      });
+    }
+  }, [isIntersecting]);
+
   const toggleStoryExpansion = (storyId: string) => {
     setExpandedStories(prev => {
       const newSet = new Set(prev);
@@ -59,6 +181,18 @@ const WhyClaim = () => {
   };
   // Use real impact data from API or fallback to sample data
   const impactData = stats?.impactData || fallbackImpactData;
+
+  const livesImpacted = useCounterAnimation({
+    target: 105,
+    duration: 2000,
+    isTriggered: isIntersecting,
+  });
+
+  const shoesGiven = useCounterAnimation({
+    target: 100,
+    duration: 2000,
+    isTriggered: isIntersecting,
+  });
 
   // Animation variants
   const fadeIn = {
@@ -78,409 +212,543 @@ const WhyClaim = () => {
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-black/50 z-10"></div>
+    {/* Hero Section */}
+      <section className="relative overflow-hidden h-[60vh]" id="hero">
+      {/* Parallax background */}
+      <div 
+        className="absolute inset-0 parallax-hero" 
+      >
+        <img src='/images/claim-header.png' alt='claim-header' className='w-full h-full object-cover' />
+        <div className="absolute inset-0 image-overlay"></div>
+      </div>
+      
+      {/* Floating particles animation */}
+      {/* <div className="absolute inset-0 pointer-events-none">
+        <div className="animate-float absolute top-1/4 left-1/4 w-2 h-2 bg-white opacity-30 rounded-full"></div>
         <div 
-          className="absolute inset-0 bg-cover bg-center" 
-          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1466721591366-2d5fba72006d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80)' }}
+          className="animate-float absolute top-1/3 right-1/4 w-1 h-1 bg-toms-cyan opacity-40 rounded-full" 
+          style={{ animationDelay: '1s' }}
         ></div>
-        <div className="container relative z-20 text-center max-w-4xl mx-auto px-4 text-white">
-          <motion.h1 
-            className="text-5xl md:text-6xl font-bold mb-4"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
-            Why Claim a Tote Bag?
-          </motion.h1>
-          <motion.p 
-            className="text-xl md:text-2xl mb-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.7 }}
-          >
-            Support causes you care about, get free eco-friendly bags, and join a community of changemakers.
-          </motion.p>
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-          >
-            <Button size="lg" variant="secondary" asChild className="text-lg">
-              <Link to="/causes">
-                <Heart className="mr-2" /> Browse Causes
-              </Link>
-            </Button>
-          </motion.div>
-        </div>
+        <div 
+          className="animate-float absolute bottom-1/3 left-1/3 w-3 h-3 bg-toms-green opacity-20 rounded-full" 
+          style={{ animationDelay: '2s' }}
+        ></div>
+      </div> */}
+      
+      {/* Content */}
+       <div className="relative z-10 flex-start m-10 px-4 max-w-3xl">
+        <h1  className="text-xl text-white md:text-7xl font-bold mb-6">
+          The Power of Your
+          <span className="block text-white">Claim</span>
+        </h1>
+        <p 
+          className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl">
+          Every purchase you make creates positive change. Join our community of changemakers supporting education, mental health, and equality worldwide.
+        </p>
+        <button 
+          onClick={scrollToStats}
+          className="bg-green-700 text-white px-8 py-4 rounded-full font-semibold text-lg animate-fade-in-up inline-flex items-center space-x-2" 
+          style={{ animationDelay: '0.6s' }}
+        >
+          <span>Explore Our Impact</span>
+          <i className="fas fa-arrow-down"></i>
+        </button>
+      </div>
+      
       </section>
 
-      <main className="container mx-auto py-16 px-4 space-y-20">
-        {/* Stats Cards Section */}
-        <section className="space-y-6">
-          <motion.h2 
-            className="text-3xl font-bold text-center"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-          >
-            Community in Numbers
-          </motion.h2>
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-          >
-            {statsLoading ? (
-              <>
-                <Card className="h-36 animate-pulse bg-gray-100"></Card>
-                <Card className="h-36 animate-pulse bg-gray-100"></Card>
-                <Card className="h-36 animate-pulse bg-gray-100"></Card>
-              </>
-            ) : (
-              <>
-                <motion.div variants={fadeIn}>
-                  <Card className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-lg font-medium">Total Claimers</CardTitle>
-                      <Users className="h-5 w-5 text-primary-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-4xl font-bold">{stats?.totalClaimers || 0}</div>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        People making a difference
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-lg font-medium">Bags Claimed</CardTitle>
-                      <Heart className="h-5 w-5 text-primary-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-4xl font-bold">{stats?.totalBagsClaimed || 0}</div>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Totes circulating worldwide
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-lg font-medium">Active Campaigns</CardTitle>
-                      <Award className="h-5 w-5 text-primary-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-4xl font-bold">{stats?.activeCampaigns || 0}</div>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Causes ready for your support
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </>
-            )}
-          </motion.div>
-        </section>
-
-        {/* Aims & Objectives Section */}
-        <section className="space-y-8">
-          <motion.h2 
-            className="text-3xl font-bold text-center"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-          >
-            Our Aims & Objectives
-          </motion.h2>
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-          >
-            <motion.div variants={fadeIn}>
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <Leaf className="h-8 w-8 text-primary-500 mb-2" />
-                  <CardTitle>Our Mission</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>Give individuals free, eco-friendly tote bags while raising awareness for social causes.</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-            
-            <motion.div variants={fadeIn}>
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <Users className="h-8 w-8 text-primary-500 mb-2" />
-                  <CardTitle>Community Building</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>Enable 10,000 claimers to join the movement in Year 1 and grow our impact network.</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-            
-            <motion.div variants={fadeIn}>
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <ShieldCheck className="h-8 w-8 text-primary-500 mb-2" />
-                  <CardTitle>Reliability</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>Maintain a 95% on-time shipment rate with transparent tracking for all claimers.</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-            
-            <motion.div variants={fadeIn}>
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <Award className="h-8 w-8 text-primary-500 mb-2" />
-                  <CardTitle>Recognition</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>Reward claimers with digital badges and community recognition for their participation.</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </motion.div>
-        </section>
-        
-        {/* Benefits Showcase with Tabs */}
-        <section className="space-y-8">
-          <motion.h2 
-            className="text-3xl font-bold text-center"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-          >
-            Benefits of Claiming
-          </motion.h2>
-          
-          <Tabs defaultValue="personal" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="personal">Personal Benefits</TabsTrigger>
-              <TabsTrigger value="environmental">Environmental Impact</TabsTrigger>
-              <TabsTrigger value="community">Community</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="personal">
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                initial="hidden"
-                animate="visible"
-                variants={staggerContainer}
-              >
-                <motion.div variants={fadeIn}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Heart className="mr-2 h-5 w-5 text-primary-500" />
-                        Free Quality Bags
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>Receive high-quality, durable tote bags at absolutely no cost to you.</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Award className="mr-2 h-5 w-5 text-primary-500" />
-                        Digital Badges
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>Earn shareable digital badges that showcase your commitment to causes.</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <ShieldCheck className="mr-2 h-5 w-5 text-primary-500" />
-                        Exclusive Access
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>Get early notification for new campaigns and special cause-related events.</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </motion.div>
-            </TabsContent>
-            
-            <TabsContent value="environmental">
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                initial="hidden"
-                animate="visible"
-                variants={staggerContainer}
-              >
-                <motion.div variants={fadeIn}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Leaf className="mr-2 h-5 w-5 text-primary-500" />
-                        Reduce Plastic Waste
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>Each tote bag used can prevent hundreds of single-use plastic bags from entering landfills.</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <HandHeart className="mr-2 h-5 w-5 text-primary-500" />
-                        Sustainable Materials
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>Our tote bags are made from sustainable, ethically-sourced cotton and recycled materials.</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <BadgeCheck className="mr-2 h-5 w-5 text-primary-500" />
-                        Carbon Footprint
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>Each campaign tracks and offsets the carbon footprint of production and shipping.</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </motion.div>
-            </TabsContent>
-            
-            <TabsContent value="community">
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                initial="hidden"
-                animate="visible"
-                variants={staggerContainer}
-              >
-                <motion.div variants={fadeIn}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Users className="mr-2 h-5 w-5 text-primary-500" />
-                        Join a Movement
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>Become part of a global community committed to social and environmental change.</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Award className="mr-2 h-5 w-5 text-primary-500" />
-                        Social Amplification
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>Each bag carries a message that sparks conversations and raises awareness wherever you go.</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div variants={fadeIn}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <HandHeart className="mr-2 h-5 w-5 text-primary-500" />
-                        Tangible Impact
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>Track how your participation contributes to measurable change for your chosen causes.</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </motion.div>
-            </TabsContent>
-          </Tabs>
-        </section>
-        
-        {/* Impact Chart */}
-        <section className="space-y-8">
-          <motion.h2 
-            className="text-3xl font-bold text-center"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-          >
-            Impact by Cause
-          </motion.h2>
-          
-          <motion.div
-            className="h-80 w-full"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <ChartContainer
-              className="h-full"
-              config={{
-                bags: {
-                  label: "Bags Claimed",
-                  theme: {
-                    light: "#4CAF50",
-                    dark: "#81C784",
-                  },
-                },
-              }}
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={impactData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="cause" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="bags" name="Bags Claimed" fill="#4CAF50" />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </motion.div>
-          <p className="text-center text-muted-foreground">
-            Distribution of claimed bags across different cause categories
+    {/* Impact Gallery */}
+    {/* <section ref={targetRef} className="py-20 bg-gradient-to-br from-white to-green-50" id="gallery">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-5xl md:text-6xl font-bold text-green-800 mb-6 drop-shadow-sm">
+            Measured by the Company We Keep
+          </h2>
+          <p className="text-xl font-semibold text-gray-700 max-w-4xl mx-auto leading-relaxed">
+            We carefully vet Giving Partners that are proven to help make "good" happen on the ground. Without them, our giving would not be possible. In 2024, we supported 32 Giving Partners in 7 countries. Here are a few:
           </p>
-        </section>
+        </div>
         
-        {/* Featured Stories Carousel */}
-        {!storiesLoading && stories?.length > 0 && (
-          <section className="space-y-8 bg-[#f7f6f4] py-16 px-8 rounded-lg">
-            <motion.h2 
+        Masonry Grid
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+          {galleryItems.map((item, index) => (
+            <div 
+              key={item.id}
+              className={`break-inside-avoid bg-white rounded-2xl overflow-hidden shadow-xl card-hover transition-all duration-700 transform ${
+                visibleItems.includes(index) 
+                  ? 'opacity-100 translate-y-0 scale-100' 
+                  : 'opacity-0 translate-y-8 scale-95'
+              }`}
+              style={{ transitionDelay: `${index * 150}ms` }}
+            >
+              <div className="relative overflow-hidden">
+                <img 
+                  src={item.src} 
+                  alt={item.alt} 
+                  className="w-full h-auto object-cover transition-transform duration-500 hover:scale-110"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+              <div className="p-6">
+                <h4 className="font-bold text-xl text-gray-800 mb-2">{item.title}</h4>
+                <p className="text-gray-600 leading-relaxed">{item.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section> */}
+
+     {/* Impact Data Visualization */}
+     <section className="py-20 bg-white" id="impact-data">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-6xl font-bold text-green-800 mb-6 drop-shadow-sm">
+            We Supported Multiple Causes This Year
+          </h2>
+          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Our impact spans across various causes, creating positive change in communities worldwide.
+          </p>
+        </div>
+
+        {/* Total Beneficiaries Display */}
+        {/* <div className="text-center mb-12">
+          <div className="inline-block bg-gradient-to-r from-green-600 to-emerald-500 text-white px-8 py-4 rounded-full shadow-lg">
+            <span className="text-3xl font-bold">2,64,630</span>
+            <span className="text-lg ml-2">Beneficiaries</span>
+          </div>
+        </div> */}
+
+        {/* Bubble Chart Container */}
+        <div className="relative mb-12">
+  <div className="flex justify-center items-center min-h-[400px] relative">
+    {/* Bubble Chart */}
+    <div className="relative w-full max-w-4xl h-96">
+      {/* Education - Largest (Center) */}
+      <div
+        className="absolute flex flex-col items-center"
+        style={{
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <div className="w-72 h-72 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-2xl hover:scale-110 transition-transform duration-300 cursor-pointer">
+          54.9%
+        </div>
+        <div className="text-center mt-2">
+          <p className="font-semibold text-gray-800">Education</p>
+          <p className="text-sm text-gray-600">1,45,192 Beneficiaries</p>
+        </div>
+      </div>
+
+      {/* Animals - Top Right */}
+      <div
+        className="absolute flex flex-col items-center"
+        style={{
+          top: '18%',
+          left: '72%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <div className="w-40 h-40 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-2xl hover:scale-110 transition-transform duration-300 cursor-pointer">
+          21.4%
+        </div>
+        <div className="text-center mt-2">
+          <p className="font-semibold text-gray-800">Animals</p>
+          <p className="text-sm text-gray-600">56,642 Beneficiaries</p>
+        </div>
+      </div>
+
+      {/* Social Protection - Top Left */}
+      <div
+        className="absolute flex flex-col items-center"
+        style={{
+          top: '12%',
+          left: '28%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <div className="w-24 h-24 bg-red-400 rounded-full flex items-center justify-center text-white font-bold text-base shadow-xl hover:scale-110 transition-transform duration-300 cursor-pointer">
+          9.5%
+        </div>
+        <div className="text-center mt-2">
+          <p className="font-semibold text-gray-800">Social Protection</p>
+          <p className="text-sm text-gray-600">25,036 Beneficiaries</p>
+        </div>
+      </div>
+
+      {/* Healthcare - Bottom Left */}
+      <div
+        className="absolute flex flex-col items-center"
+        style={{
+          top: '78%',
+          left: '36%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <div className="w-20 h-20 bg-green-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg hover:scale-110 transition-transform duration-300 cursor-pointer">
+          5.3%
+        </div>
+        <div className="text-center mt-2">
+          <p className="font-semibold text-gray-800">Healthcare</p>
+          <p className="text-sm text-gray-600">13,958 Beneficiaries</p>
+        </div>
+      </div>
+
+      {/* Environment - Bottom Right */}
+      <div
+        className="absolute flex flex-col items-center"
+        style={{
+          top: '80%',
+          left: '65%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <div className="w-20 h-20 bg-green-300 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg hover:scale-110 transition-transform duration-300 cursor-pointer">
+          5.2%
+        </div>
+        <div className="text-center mt-2">
+          <p className="font-semibold text-gray-800">Environment</p>
+          <p className="text-sm text-gray-600">13,717 Beneficiaries</p>
+        </div>
+      </div>
+
+      {/* Disaster Relief - Far Left */}
+      <div
+        className="absolute flex flex-col items-center"
+        style={{
+          top: '58%',
+          left: '14%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <div className="w-16 h-16 bg-orange-400 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md hover:scale-110 transition-transform duration-300 cursor-pointer">
+          3.5%
+        </div>
+        <div className="text-center mt-2">
+          <p className="font-semibold text-gray-800">Disaster Relief</p>
+          <p className="text-sm text-gray-600">9,373 Beneficiaries</p>
+        </div>
+      </div>
+
+      {/* Livelihood & Sports - Far Bottom Right */}
+      <div
+        className="absolute flex flex-col items-center"
+        style={{
+          top: '92%',
+          left: '85%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm hover:scale-110 transition-transform duration-300 cursor-pointer">
+          0.08%
+        </div>
+        <div className="text-center mt-2">
+          <p className="font-semibold text-gray-800">Livelihood & Sports</p>
+          <p className="text-sm text-gray-600">712 Beneficiaries</p>
+        </div>
+      </div>
+    </div>
+  </div>
+        </div>
+
+        {/* Legend */}
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+              <span className="font-semibold">Education: 54.9% (1,45,192)</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+              <span className="font-semibold">Healthcare: 5.3% (13,958)</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-red-600 rounded-full"></div>
+              <span className="font-semibold">Livelihood & Sports: 0.08% (712)</span>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+              <span className="font-semibold">Animals: 21.4% (56,642)</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-green-300 rounded-full"></div>
+              <span className="font-semibold">Environment: 5.2% (13,717)</span>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-red-400 rounded-full"></div>
+              <span className="font-semibold">Social Protection: 9.5% (25,036)</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-orange-400 rounded-full"></div>
+              <span className="font-semibold">Disaster Relief: 3.5% (9,373)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Time Period Selector */}
+        {/* <div className="flex justify-center">
+          <div className="bg-gray-800 rounded-lg p-1 flex">
+            <button className="px-6 py-3 text-white rounded-md transition-all duration-300 hover:bg-gray-700">
+              2024-2025
+            </button>
+            <button className="px-6 py-3 bg-red-500 text-white rounded-md transition-all duration-300 hover:bg-red-600">
+              MID YEAR
+            </button>
+            <button className="px-6 py-3 text-white rounded-md transition-all duration-300 hover:bg-gray-700">
+              YEAR-END
+            </button>
+          </div>
+        </div> */}
+      </div>
+    </section>
+
+    {/* Animated Cards Section */}
+    <section className="py-20 bg-gradient-to-br from-green-50 to-emerald-50" id="animated-cards">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-green-800 mb-6">
+            Our Impact in Motion
+          </h2>
+          <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Discover how every TOMS purchase creates ripples of positive change across the globe.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Animated Card 1 */}
+          <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-green-500 p-8 text-white shadow-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+            
+            <div className="relative z-10">
+              <div className="mb-6 flex items-center justify-center">
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform duration-500">
+                  <Heart className="w-8 h-8" />
+                </div>
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-4 group-hover:text-emerald-100 transition-colors duration-300">
+                Health & Wellness
+              </h3>
+              
+              <p className="text-emerald-100 mb-6 leading-relaxed">
+                Supporting mental health initiatives and wellness programs that create lasting positive change in communities worldwide.
+              </p>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-3xl font-bold">2.5M+</span>
+                <div className="w-12 h-1 bg-white/30 rounded-full overflow-hidden">
+                  <div className="h-full bg-white rounded-full animate-pulse" style={{ width: '75%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Animated Card 2 */}
+          <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-500 p-8 text-white shadow-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+            
+            <div className="relative z-10">
+              <div className="mb-6 flex items-center justify-center">
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform duration-500">
+                  <Users className="w-8 h-8" />
+                </div>
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-4 group-hover:text-teal-100 transition-colors duration-300">
+                Community Building
+              </h3>
+              
+              <p className="text-teal-100 mb-6 leading-relaxed">
+                Connecting communities through shared values and creating networks of support that strengthen social bonds.
+              </p>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-3xl font-bold">1.8M+</span>
+                <div className="w-12 h-1 bg-white/30 rounded-full overflow-hidden">
+                  <div className="h-full bg-white rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Animated Card 3 */}
+          <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-600 to-emerald-500 p-8 text-white shadow-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+            
+            <div className="relative z-10">
+              <div className="mb-6 flex items-center justify-center">
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform duration-500">
+                  <Leaf className="w-8 h-8" />
+                </div>
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-4 group-hover:text-green-100 transition-colors duration-300">
+                Sustainability
+              </h3>
+              
+              <p className="text-green-100 mb-6 leading-relaxed">
+                Committed to environmental responsibility with eco-friendly practices and sustainable business models.
+              </p>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-3xl font-bold">3.2M+</span>
+                <div className="w-12 h-1 bg-white/30 rounded-full overflow-hidden">
+                  <div className="h-full bg-white rounded-full animate-pulse" style={{ width: '85%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Call to Action */}
+        {/* <div className="text-center mt-16">
+          <button className="bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-700 hover:to-green-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg inline-flex items-center space-x-2">
+            <span>Join Our Mission</span>
+            <i className="fas fa-arrow-right"></i>
+          </button>
+        </div> */}
+      </div>
+    </section>
+
+    {/* Branded Impact Section */}
+    <section className="py-20 bg-white" id="branded-impact">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+      {/* Left Side - Branded Items */}
+      <div className="w-full flex justify-center mb-8 lg:mb-0">
+        <img src="/images/sponsor.png" alt="sponsor" className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl h-auto object-cover rounded-xl shadow-md" />
+      </div>
+      {/* Right Side - Content */}
+      <div className="text-center lg:text-left">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+          PUT YOUR IMPACT IN EVERYONE'S HANDS™
+        </h2>
+        <p className="text-base sm:text-lg text-gray-600 mb-8 leading-relaxed">
+          Receive meaningful connections and utilize the greatest social impact platform in the conscious consumer industry. Every TOMS purchase creates positive change.
+        </p>
+        <button className="bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-700 hover:to-green-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg inline-flex items-center space-x-2">
+          <span>Get Started Today</span>
+          <i className="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+    </section>
+
+    {/* Stats Section */}
+    <section ref={targetRef} className="relative py-10 overflow-hidden rounded-xl my-8" id="stats">
+      {/* Background image */}
+      <div className="absolute inset-0 bg-gradient-to-br from-green-700 via-emerald-600 to-teal-600 w-full rounded-xl shadow-2xl">
+        {/* Animated background elements */}
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-white/10 rounded-full animate-pulse-slow"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-white/10 rounded-full animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/5 rounded-full animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
+      </div>
+      
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Title */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
+            Nearly Two Decades of Making a Difference
+          </h2>
+          <p className="text-xl text-white/90 max-w-4xl mx-auto leading-relaxed">
+            From our groundbreaking One for One<sup>®</sup> giving model and giving ⅓ of our profits for good to now focusing on bright futures for children everywhere, TOMS has always used business to give back to our communities.
+          </p>
+        </div>
+        
+        {/* Statistics */}
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
+          {/* 105M+ Stat */}
+          <div className="text-center transform transition-all duration-500 hover:scale-105 backdrop-blur-sm rounded-2xl">
+            <div className={`counter-animation text-6xl md:text-8xl font-bold text-white mb-2 drop-shadow-lg ${
+              isIntersecting ? 'animate-counter' : ''
+            }`}>
+              {livesImpacted}M+
+            </div>
+            <p className="text-xl text-white/90 font-medium">
+              Total lives positively impacted
+            </p>
+          </div>
+          
+          {/* 100M+ Stat */}
+          <div className="text-center transform transition-all duration-500 hover:scale-105 backdrop-blur-sm rounded-2xl">
+            <div className={`counter-animation text-6xl md:text-8xl font-bold text-white mb-2 drop-shadow-lg ${
+              isIntersecting ? 'animate-counter' : ''
+            }`}>
+              {shoesGiven}M+
+            </div>
+            <p className="text-xl text-white/90 font-medium">
+              Pairs of shoes given since our start in 2006
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    {/* Beyond the Check */}
+    <section className="py-20 bg-gradient-to-br from-[#f7f6f4] to-green-50" id="beyond-check">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-6xl font-bold text-green-800 mb-6 drop-shadow-sm">
+            Beyond the Check
+          </h2>
+          <p className="text-xl font-semibold text-gray-700 max-w-4xl mx-auto leading-relaxed">
+            Through our volunteer work, product donations and lasting connections over the years, our support has grown well beyond financial contributions. Here are some of the ways we walk the walk (in stylishly comfortable shoes, of course).
+          </p>
+        </div>
+        
+        {/* Cards Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {cards.map((card) => (
+            <div 
+              key={card.id}
+              className={`${card.bgColor} ${card.textColor} p-8 rounded-3xl card-hover relative overflow-hidden shadow-2xl transition-all duration-500 hover:scale-105 hover:shadow-3xl transform`}
+            >
+              {/* Animated background elements */}
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+              
+              <div className="relative z-10">
+                <div className="text-4xl font-bold mb-4">
+                  {card.stat.includes('Employees') || card.stat.includes('Ongoing') ? (
+                    <div className="text-2xl font-bold mb-2">{card.stat}</div>
+                  ) : (
+                    card.stat
+                  )}
+                </div>
+                <p className={`text-sm ${card.accentColor} mb-6 leading-relaxed`}>
+                  {card.statDescription}
+                </p>
+                <h4 className="font-bold text-xl mb-3">{card.title}</h4>
+                {card.description && (
+                  <p className={`text-sm ${card.lightTextColor} leading-relaxed`}>
+                    {card.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+     {/* Featured Stories Carousel */}
+     {!storiesLoading && stories?.length > 0 && (
+          <section className="space-y-8 bg-gradient-to-br from-[#f7f6f4] to-green-50 py-16 px-16 rounded-lg">
+            {/* <motion.h2 
               className="text-3xl font-bold text-center"
               initial="hidden"
               whileInView="visible"
@@ -488,7 +756,7 @@ const WhyClaim = () => {
               variants={fadeIn}
             >
               Claimer Stories
-            </motion.h2>
+            </motion.h2> */}
             
             <motion.div
               initial={{ opacity: 0 }}
@@ -542,29 +810,49 @@ const WhyClaim = () => {
             </motion.div>
           </section>
         )}
+    
+    <section className="relative py-20 bg-gradient-to-br from-green-900 via-emerald-800 to-teal-700 text-white overflow-hidden rounded-3xl mx-4 my-8">
+      {/* Background pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 border border-white rounded-full animate-pulse-slow"></div>
+        <div 
+          className="absolute bottom-1/4 right-1/4 w-24 h-24 border border-white rounded-full animate-pulse-slow" 
+          style={{ animationDelay: '1s' }}
+        ></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 border border-white rounded-full animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
+      </div>
+      
+      <div className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <h2 className="text-4xl md:text-6xl font-bold mb-6 text-green-100 drop-shadow-lg">
+          Better Tomorrows Begin with You
+        </h2>
+        <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl mx-auto">
+          Every TOMS purchase is more than just a choice of style—it's a decision to make a real difference in your community. Many thanks to your trust in TOMS, we've been able to support our Giving Partners in implementing life-changing initiatives that address some of the world's most pressing challenges.
+        </p>
         
-        {/* CTA Section */}
-        <section className="py-16">
-          <motion.div 
-            className="max-w-3xl mx-auto text-center space-y-8"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold">Ready to Join the Movement?</h2>
-            <p className="text-lg text-muted-foreground">
-              Claim your free tote bag today and become part of a growing community 
-              of people making a difference with every shopping trip.
-            </p>
-            <Button variant="secondary" size="lg" className="text-lg" asChild>
-              <Link to="/causes">
-                <Heart className="mr-2" /> Browse Available Causes
-              </Link>
-            </Button>
-          </motion.div>
-        </section>
-      </main>
+        <div className="mb-8">
+          <p className="text-lg mb-6 text-white/80">
+            Celebrate another impactful year with us by downloading our 2024 Impact Report.
+          </p>
+          <button className="bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl inline-flex items-center space-x-2 shadow-lg">
+            <span>Read the 2024 Impact Report</span>
+            <i className="fas fa-download"></i>
+          </button>
+        </div>
+        
+        <p className="text-sm text-white/70 mb-6">Take a peek into the past Impact Report archive</p>
+        
+        <div className="flex flex-wrap justify-center gap-4">
+          <button className="border-2 border-white/30 text-white px-6 py-3 rounded-full hover:bg-white hover:text-green-700 transition-all duration-300 font-medium backdrop-blur-sm hover:shadow-lg">
+            2023 Impact Report
+          </button>
+          <button className="border-2 border-white/30 text-white px-6 py-3 rounded-full hover:bg-white hover:text-green-700 transition-all duration-300 font-medium backdrop-blur-sm hover:shadow-lg">
+            2022 Impact Report
+          </button>
+        </div>
+      </div>
+    </section>
+    
     </Layout>
   );
 };
