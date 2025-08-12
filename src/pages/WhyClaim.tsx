@@ -25,6 +25,8 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { fetchStats, fetchClaimStories } from '@/services/apiServices';
 import { Story } from '@/models/Story';
+import {galleryItems} from '@/data/galleryItems'; // Assuming you have a separate file for gallery items
+import Index from './Index';
 
 const scrollToStats = () => {
   const element = document.getElementById('stats');
@@ -32,59 +34,6 @@ const scrollToStats = () => {
     element.scrollIntoView({ behavior: 'smooth' });
   }
 };
-
-interface GalleryItem {
-  id: number;
-  src: string;
-  alt: string;
-  title: string;
-  description: string;
-}
-
-const galleryItems: GalleryItem[] = [
-  {
-    id: 1,
-    src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=800',
-    alt: 'Two women reading together',
-    title: 'Educational Partnership',
-    description: 'Supporting literacy programs worldwide'
-  },
-  {
-    id: 2,
-    src: 'https://images.unsplash.com/photo-1497486751825-1233686d5d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=700',
-    alt: 'Children in classroom',
-    title: 'Classroom Support',
-    description: 'Building better learning environments'
-  },
-  {
-    id: 3,
-    src: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=900',
-    alt: 'Diverse community gathering',
-    title: 'Community Building',
-    description: 'Connecting communities globally'
-  },
-  {
-    id: 4,
-    src: 'https://images.unsplash.com/photo-1544717297-fa95b6ee9643?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=750',
-    alt: 'Mother and child reading',
-    title: 'Family Support',
-    description: 'Strengthening family bonds through education'
-  },
-  {
-    id: 5,
-    src: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=800',
-    alt: 'Children playing outdoors',
-    title: 'Active Learning',
-    description: 'Promoting healthy development'
-  },
-  {
-    id: 6,
-    src: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=900',
-    alt: 'Teacher helping students',
-    title: 'Teacher Training',
-    description: 'Empowering educators globally'
-  }
-];
 
 // Sample data for the impact chart (fallback if API data is not available)
 const fallbackImpactData = [
@@ -181,15 +130,15 @@ const WhyClaim = () => {
   };
   // Use real impact data from API or fallback to sample data
   const impactData = stats?.impactData || fallbackImpactData;
-
-  const livesImpacted = useCounterAnimation({
-    target: 105,
+  
+  const totalbagsponsored = useCounterAnimation({
+    target: stats?.totalBagsSponsored || 0,
     duration: 2000,
     isTriggered: isIntersecting,
   });
 
-  const shoesGiven = useCounterAnimation({
-    target: 100,
+  const totalbagclaimed = useCounterAnimation({
+    target: stats?.totalBagsClaimed || 0,
     duration: 2000,
     isTriggered: isIntersecting,
   });
@@ -210,10 +159,17 @@ const WhyClaim = () => {
     }
   };
 
+  const formatBags = (num: number) => {
+    if (num > 999) {
+      return `${Math.floor(num / 1000).toFixed(1).replace(/\.0$/, '')}K+`;
+    }
+    return num;
+  };
+
   return (
     <Layout>
     {/* Hero Section */}
-      <section className="relative overflow-hidden h-[60vh]" id="hero">
+      <section className="relative overflow-hidden h-[90vh]" id="hero">
       {/* Parallax background */}
       <div 
         className="absolute inset-0 parallax-hero" 
@@ -236,8 +192,8 @@ const WhyClaim = () => {
       </div> */}
       
       {/* Content */}
-       <div className="relative z-10 flex-start m-10 px-4 max-w-3xl">
-        <h1  className="text-xl text-white md:text-7xl font-bold mb-6">
+       <div className="relative z-10 flex-start m-20 px-4 pt-16 max-w-3xl">
+        <h1  className="text-3xl text-white md:text-7xl font-bold mb-6">
           The Power of Your
           <span className="block text-white">Claim</span>
         </h1>
@@ -536,20 +492,16 @@ const WhyClaim = () => {
                 </div>
               </div>
               
-              <h3 className="text-2xl font-bold mb-4 group-hover:text-emerald-100 transition-colors duration-300">
-                Health & Wellness
+              <h3 className="text-2xl font-bold mb-4 group-hover:text-emerald-100 transition-colors duration-300 text-center">
+                Total Causes
               </h3>
-              
-              <p className="text-emerald-100 mb-6 leading-relaxed">
-                Supporting mental health initiatives and wellness programs that create lasting positive change in communities worldwide.
-              </p>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-bold">2.5M+</span>
-                <div className="w-12 h-1 bg-white/30 rounded-full overflow-hidden">
-                  <div className="h-full bg-white rounded-full animate-pulse" style={{ width: '75%' }}></div>
-                </div>
+              <div className="flex flex-col items-center justify-between">
+                <span className="text-7xl font-bold">{stats?.totalCauses || 0}</span>
+                  <p className="text-emerald-100 mb-6 mt-3 leading-relaxed">
+                    Partnering for Positive Change.
+                  </p>
               </div>
+              
             </div>
           </div>
 
@@ -565,19 +517,14 @@ const WhyClaim = () => {
                 </div>
               </div>
               
-              <h3 className="text-2xl font-bold mb-4 group-hover:text-teal-100 transition-colors duration-300">
-                Community Building
+              <h3 className="text-2xl font-bold mb-4 group-hover:text-emerald-100 transition-colors duration-300 text-center">
+                Total Sponsors
               </h3>
-              
-              <p className="text-teal-100 mb-6 leading-relaxed">
-                Connecting communities through shared values and creating networks of support that strengthen social bonds.
-              </p>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-bold">1.8M+</span>
-                <div className="w-12 h-1 bg-white/30 rounded-full overflow-hidden">
-                  <div className="h-full bg-white rounded-full animate-pulse" style={{ width: '60%' }}></div>
-                </div>
+              <div className="flex flex-col items-center justify-between">
+                <span className="text-7xl font-bold">{stats?.totalBagsSponsored || 0}</span>
+                  <p className="text-emerald-100 mb-6 mt-3 leading-relaxed">
+                    Currently making an impact
+                  </p>
               </div>
             </div>
           </div>
@@ -594,19 +541,14 @@ const WhyClaim = () => {
                 </div>
               </div>
               
-              <h3 className="text-2xl font-bold mb-4 group-hover:text-green-100 transition-colors duration-300">
-                Sustainability
+              <h3 className="text-2xl font-bold mb-4 group-hover:text-emerald-100 transition-colors duration-300 text-center">
+                Total Claims
               </h3>
-              
-              <p className="text-green-100 mb-6 leading-relaxed">
-                Committed to environmental responsibility with eco-friendly practices and sustainable business models.
-              </p>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-bold">3.2M+</span>
-                <div className="w-12 h-1 bg-white/30 rounded-full overflow-hidden">
-                  <div className="h-full bg-white rounded-full animate-pulse" style={{ width: '85%' }}></div>
-                </div>
+              <div className="flex flex-col items-center justify-between">
+                <span className="text-7xl font-bold">{stats?.totalBagsClaimed || 0}</span>
+                  <p className="text-emerald-100 mb-6 mt-3 leading-relaxed">
+                    Eco-friendly totes with purpose
+                  </p>
               </div>
             </div>
           </div>
@@ -639,8 +581,10 @@ const WhyClaim = () => {
           Receive meaningful connections and utilize the greatest social impact platform in the conscious consumer industry. Every TOMS purchase creates positive change.
         </p>
         <button className="bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-700 hover:to-green-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg inline-flex items-center space-x-2">
+        <Link to='/'>
           <span>Get Started Today</span>
           <i className="fas fa-arrow-right"></i>
+        </Link>
         </button>
       </div>
     </div>
@@ -659,12 +603,12 @@ const WhyClaim = () => {
       
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Title */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
-            Nearly Two Decades of Making a Difference
+          Turning Tote Bags into Social Impact
           </h2>
           <p className="text-xl text-white/90 max-w-4xl mx-auto leading-relaxed">
-            From our groundbreaking One for One<sup>®</sup> giving model and giving ⅓ of our profits for good to now focusing on bright futures for children everywhere, TOMS has always used business to give back to our communities.
+          Every bag you claim goes beyond carrying essentials—it funds education for children, supports sustainable livelihoods for artisans, and delivers hope directly into the hands of those who need it most.
           </p>
         </div>
         
@@ -675,10 +619,10 @@ const WhyClaim = () => {
             <div className={`counter-animation text-6xl md:text-8xl font-bold text-white mb-2 drop-shadow-lg ${
               isIntersecting ? 'animate-counter' : ''
             }`}>
-              {livesImpacted}M+
+              {formatBags(totalbagsponsored)}
             </div>
             <p className="text-xl text-white/90 font-medium">
-              Total lives positively impacted
+              Total Bags Sponsored
             </p>
           </div>
           
@@ -687,10 +631,10 @@ const WhyClaim = () => {
             <div className={`counter-animation text-6xl md:text-8xl font-bold text-white mb-2 drop-shadow-lg ${
               isIntersecting ? 'animate-counter' : ''
             }`}>
-              {shoesGiven}M+
+              {totalbagclaimed}
             </div>
             <p className="text-xl text-white/90 font-medium">
-              Pairs of shoes given since our start in 2006
+              Total Bags Claimed
             </p>
           </div>
         </div>
