@@ -29,7 +29,8 @@ import { fetchStats, fetchSponsorStories } from '@/services/apiServices';
 import { Story } from '@/models/Story';
 import {impactBenefits, efficiencyBenefits, recognitionBenefits} from '@/data/benefits';
 import { impactAreas } from '@/data/impactAreas';
-import { marketingMethods } from '@/data/marketingMethods';
+// import { marketingMethods } from '@/data/marketingMethods';
+import {marketingMethods} from "@/data/marketingMethods"; 
 import { formatCurrency } from '@/utils/formatters';
 
 // Sample data for the growth chart (fallback if API data is not available)

@@ -1,15 +1,17 @@
 
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Heart, Users, Award, BadgeCheck, HandHeart, Leaf, ShieldCheck } from 'lucide-react';
 import Layout from '@/components/Layout';
+import { LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useCounterAnimation } from '@/hooks/useCounterAnimation';
+import { fetchDashboardMetrics } from '@/services/apiServices';
 import {
   Carousel,
   CarouselContent,
@@ -34,6 +36,9 @@ const scrollToStats = () => {
     element.scrollIntoView({ behavior: 'smooth' });
   }
 };
+
+
+const COLORS = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#6366F1', '#F472B6', '#34D399'];
 
 // Sample data for the impact chart (fallback if API data is not available)
 const fallbackImpactData = [
@@ -92,6 +97,21 @@ const cards = [
 ];
 
 const WhyClaim = () => {
+
+  const [metrics, setMetrics] = useState<any>(null);
+  // const [stats, setStats] = useState<any>(null);
+
+  useEffect(()=>{
+  const fetchData = async () => {
+  const [metricsData, statsData] = await Promise.all([
+    fetchDashboardMetrics(),
+    fetchStats()
+  ]);
+  setMetrics(metricsData);
+  // setStats(statsData);
+  };
+  }, []);
+
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['stats'],
     queryFn: fetchStats
@@ -165,6 +185,26 @@ const WhyClaim = () => {
     }
     return num;
   };
+
+  // bubble chart logic
+  const categoryData = stats?.impactData?.map((item: any, idx: number) => ({
+    name: item.cause,
+    value: item.bags,
+    color: COLORS[idx % COLORS.length]
+  })) || [];
+
+  const clamp = (min: number, val: number, max: number) => Math.max(min, Math.min(val, max));
+  const diameterFromShare = (share: number, minD = 48, maxD = 288) => {
+  // area-proportional sizing: radius ∝ sqrt(share)
+  const minR = minD / 2, maxR = maxD / 2;
+  const r = Math.sqrt(Math.max(share, 0)) * (maxR - minR) + minR;
+  return Math.round(clamp(minD, r * 2, maxD));
+};  
+
+  const total = useMemo(
+    () => categoryData.reduce((sum, cat) => sum + Number(cat.value || 0), 0),
+    [categoryData]
+  );
 
   return (
     <Layout>
@@ -278,141 +318,64 @@ const WhyClaim = () => {
 
         {/* Bubble Chart Container */}
         <div className="relative mb-12">
-  <div className="flex justify-center items-center min-h-[400px] relative">
-    {/* Bubble Chart */}
-    <div className="relative w-full max-w-4xl h-96">
-      {/* Education - Largest (Center) */}
-      <div
-        className="absolute flex flex-col items-center"
-        style={{
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-        }}
-      >
-        <div className="w-72 h-72 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-2xl hover:scale-110 transition-transform duration-300 cursor-pointer">
-          54.9%
-        </div>
-        <div className="text-center mt-2">
-          <p className="font-semibold text-gray-800">Education</p>
-          <p className="text-sm text-gray-600">1,45,192 Beneficiaries</p>
-        </div>
-      </div>
+          <div className="flex justify-center items-center min-h-[400px] relative">
+           {/* Bubble Chart */}
+            <div className="relative w-full max-w-6xl h-96">
+           
+          <div className="relative w-full h-[400px]">
+            {categoryData.slice(0,7).map((category, index) => {
 
-      {/* Animals - Top Right */}
-      <div
-        className="absolute flex flex-col items-center"
-        style={{
-          top: '18%',
-          left: '72%',
-          transform: 'translate(-50%, -50%)',
-        }}
-      >
-        <div className="w-40 h-40 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-2xl hover:scale-110 transition-transform duration-300 cursor-pointer">
-          21.4%
-        </div>
-        <div className="text-center mt-2">
-          <p className="font-semibold text-gray-800">Animals</p>
-          <p className="text-sm text-gray-600">56,642 Beneficiaries</p>
-        </div>
-      </div>
+            const share = total ? Number(category.value) / total : 0;
+            const size = diameterFromShare(share); // px
+            const percentage = (share * 100).toFixed(1);
 
-      {/* Social Protection - Top Left */}
-      <div
-        className="absolute flex flex-col items-center"
-        style={{
-          top: '12%',
-          left: '28%',
-          transform: 'translate(-50%, -50%)',
-        }}
-      >
-        <div className="w-24 h-24 bg-red-400 rounded-full flex items-center justify-center text-white font-bold text-base shadow-xl hover:scale-110 transition-transform duration-300 cursor-pointer">
-          9.5%
-        </div>
-        <div className="text-center mt-2">
-          <p className="font-semibold text-gray-800">Social Protection</p>
-          <p className="text-sm text-gray-600">25,036 Beneficiaries</p>
-        </div>
-      </div>
+            const positions = [
+              { top: '50%', left: '50%' },
+              { top: '18%', left: '32%' },
+              { top: '34%', left: '18%' },
+              { top: '78%', left: '36%' },
+              { top: '70%', left: '65%' },
+              { top: '28%', left: '64%' },
+              { top: '40%', left: '80%' },
+            ];
 
-      {/* Healthcare - Bottom Left */}
+    return (
       <div
+        key={index}
         className="absolute flex flex-col items-center"
         style={{
-          top: '78%',
-          left: '36%',
+          top: positions[index]?.top || '50%',
+          left: positions[index]?.left || '50%',
           transform: 'translate(-50%, -50%)',
         }}
       >
-        <div className="w-20 h-20 bg-green-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg hover:scale-110 transition-transform duration-300 cursor-pointer">
-          5.3%
+        <div
+          className="rounded-full flex items-center justify-center text-white font-bold shadow-2xl hover:scale-110 transition-transform duration-300 cursor-pointer"
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            backgroundColor: category.color,
+          }}
+        >
+          {percentage}%
         </div>
         <div className="text-center mt-2">
-          <p className="font-semibold text-gray-800">Healthcare</p>
-          <p className="text-sm text-gray-600">13,958 Beneficiaries</p>
+          <p className="font-semibold text-gray-800">{category.name}</p>
+          <p className="text-sm text-gray-600">
+            {Number(category.value).toLocaleString()} Beneficiaries
+          </p>
         </div>
       </div>
-
-      {/* Environment - Bottom Right */}
-      <div
-        className="absolute flex flex-col items-center"
-        style={{
-          top: '80%',
-          left: '65%',
-          transform: 'translate(-50%, -50%)',
-        }}
-      >
-        <div className="w-20 h-20 bg-green-300 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg hover:scale-110 transition-transform duration-300 cursor-pointer">
-          5.2%
-        </div>
-        <div className="text-center mt-2">
-          <p className="font-semibold text-gray-800">Environment</p>
-          <p className="text-sm text-gray-600">13,717 Beneficiaries</p>
-        </div>
-      </div>
-
-      {/* Disaster Relief - Far Left */}
-      <div
-        className="absolute flex flex-col items-center"
-        style={{
-          top: '58%',
-          left: '14%',
-          transform: 'translate(-50%, -50%)',
-        }}
-      >
-        <div className="w-16 h-16 bg-orange-400 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md hover:scale-110 transition-transform duration-300 cursor-pointer">
-          3.5%
-        </div>
-        <div className="text-center mt-2">
-          <p className="font-semibold text-gray-800">Disaster Relief</p>
-          <p className="text-sm text-gray-600">9,373 Beneficiaries</p>
-        </div>
-      </div>
-
-      {/* Livelihood & Sports - Far Bottom Right */}
-      <div
-        className="absolute flex flex-col items-center"
-        style={{
-          top: '92%',
-          left: '85%',
-          transform: 'translate(-50%, -50%)',
-        }}
-      >
-        <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm hover:scale-110 transition-transform duration-300 cursor-pointer">
-          0.08%
-        </div>
-        <div className="text-center mt-2">
-          <p className="font-semibold text-gray-800">Livelihood & Sports</p>
-          <p className="text-sm text-gray-600">712 Beneficiaries</p>
-        </div>
-      </div>
-    </div>
-  </div>
+    );
+  })}
+</div>
+            </div>
+          </div>
         </div>
 
         {/* Legend */}
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
-          <div className="space-y-4">
+
+          {/* <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <div className="w-4 h-4 bg-red-500 rounded-full"></div>
               <span className="font-semibold">Education: 54.9% (1,45,192)</span>
@@ -447,6 +410,22 @@ const WhyClaim = () => {
               <div className="w-4 h-4 bg-orange-400 rounded-full"></div>
               <span className="font-semibold">Disaster Relief: 3.5% (9,373)</span>
             </div>
+          </div> */}
+
+          <div className='flex flex-row items-center gap-8 justify-center flex-wrap mt-8'>
+            {categoryData.slice(0, 7).map((category,index)=>{
+              return (
+                <div key={index} className="flex items-center space-x-3">
+                  <div 
+                    className="w-4 h-4 rounded-full" 
+                    style={{ backgroundColor: category.color }} 
+                  ></div>
+                  <span className="font-semibold">
+                    {category.name}: {Number(category.value).toLocaleString()} ({((category.value / total) * 100).toFixed(1)}%)
+                  </span>
+                </div>
+              )
+            })}
           </div>
         </div>
 
@@ -464,7 +443,7 @@ const WhyClaim = () => {
             </button>
           </div>
         </div> */}
-      </div>
+      
     </section>
 
     {/* Animated Cards Section */}
