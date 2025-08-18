@@ -88,6 +88,13 @@ const WhySponsor = () => {
     }
   };
 
+  // Static images for Featured Stories Carousel
+  const storyImages = [
+    '/images/story1.png',
+    '/images/story2.png',
+    '/images/story3.png',
+  ];
+
 
 
   return (
@@ -713,24 +720,22 @@ const WhySponsor = () => {
                 className="w-full"
               >
                 <CarouselContent>
-                  {stories.map((story: Story) => (
+                  {stories.map((story: Story, index: number) => (
                     <CarouselItem key={story.id} className="md:basis-1/3">
                       <Card className="h-full bg-[#f7f6f4] border-[#f7f6f4]">
-                        {story.imageUrl && (
-                          <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-                            <img 
-                              src={story.imageUrl} 
-                              alt={story.title} 
-                              className="h-full w-full object-cover object-top transition-all hover:scale-105"
-                              onError={(e) => {
-                                // Fallback if image fails to load
-                                const target = e.target as HTMLImageElement;
-                                console.error(`Failed to load image: ${target.src}`);
-                                target.src = 'https://placehold.co/600x400?text=Story+Image';
-                              }}
-                            />
-                          </div>
-                        )}
+                        <div className="aspect-video w-full overflow-hidden rounded-t-lg">
+                          <img 
+                            src={storyImages[index % storyImages.length]}
+                            alt={story.title}
+                            className="h-full w-full object-cover object-top transition-all hover:scale-105"
+                            onError={(e) => {
+                              // Fallback if image fails to load
+                              const target = e.target as HTMLImageElement;
+                              console.error(`Failed to load image: ${target.src}`);
+                              target.src = 'https://placehold.co/600x400?text=Story+Image';
+                            }}
+                          />
+                        </div>
                         <CardHeader>
                           <CardTitle className="line-clamp-2">{story.title}</CardTitle>
                           <CardDescription>By {story.authorName}</CardDescription>

@@ -179,6 +179,13 @@ const WhyClaim = () => {
     }
   };
 
+  // Static images for Featured Stories Carousel (WhyClaim)
+  const storyImages = [
+    '/images/story4.png',
+    '/images/story5.png',
+    '/images/story6.png',
+  ];
+
   const formatBags = (num: number) => {
     if (num > 999) {
       return `${Math.floor(num / 1000).toFixed(1).replace(/\.0$/, '')}K+`;
@@ -694,24 +701,22 @@ const WhyClaim = () => {
                 className="w-full"
               >
                 <CarouselContent>
-                  {stories.map((story: Story) => (
+                  {stories.map((story: Story, index: number) => (
                     <CarouselItem key={story.id} className="md:basis-1/3">
                       <Card className="h-full bg-[#f7f6f4] border-[#f7f6f4]">
-                        {story.imageUrl && (
-                          <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-                            <img 
-                              src={story.imageUrl} 
-                              alt={story.title} 
-                              className="h-full w-full object-cover object-top transition-all hover:scale-105"
-                              onError={(e) => {
-                                // Fallback if image fails to load
-                                const target = e.target as HTMLImageElement;
-                                console.error(`Failed to load image: ${target.src}`);
-                                target.src = 'https://placehold.co/600x400?text=Story+Image';
-                              }}
-                            />
-                          </div>
-                        )}
+                        <div className="aspect-video w-full overflow-hidden rounded-t-lg">
+                          <img 
+                            src={storyImages[index % storyImages.length]}
+                            alt={story.title}
+                            className="h-full w-full object-cover object-top transition-all hover:scale-105"
+                            onError={(e) => {
+                              // Fallback if image fails to load
+                              const target = e.target as HTMLImageElement;
+                              console.error(`Failed to load image: ${target.src}`);
+                              target.src = 'https://placehold.co/600x400?text=Story+Image';
+                            }}
+                          />
+                        </div>
                         <CardHeader>
                           <CardTitle className="line-clamp-2">{story.title}</CardTitle>
                           <CardDescription>By {story.authorName}</CardDescription>
