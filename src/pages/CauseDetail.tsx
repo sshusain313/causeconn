@@ -137,19 +137,6 @@ const CauseDetail = () => {
   return (
     <Layout>
       <div className="min-h-screen">
-        <HeroSection
-          title={cause.title}
-          tagline={cause.description}
-          heroImageUrl={cause.imageUrl}
-          onAction={handleAction}
-          onSponsor={handleSponsor}
-          onShare={handleShare}
-          isSharing={isSharing}
-          status={cause.status}
-          targetAmount={cause.targetAmount}
-          currentAmount={cause.currentAmount}
-          hasSponsorship={hasSponsorship}
-        />
 
         <OverviewCards cause={cause} />
         

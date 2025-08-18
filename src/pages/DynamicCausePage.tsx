@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { AlertCircle, AlertTriangle, Briefcase, Eye, Clock, Smartphone, Factory, HouseIcon, DollarSignIcon, Recycle, Shield, TreePine, Thermometer, MapPin, Scale, TrendingDown, Gift, Megaphone, Globe, Leaf, Users, Heart, ShoppingBag, TrendingUp, Star } from "lucide-react";
+import { AlertCircle, AlertTriangle, Briefcase, Eye, CheckCircle, Brain, Clock, Smartphone, Factory, HouseIcon, DollarSignIcon, Recycle, Shield, TreePine, Thermometer, MapPin, Scale, TrendingDown, Gift, Megaphone, Globe, Leaf, Users, Heart, ShoppingBag, TrendingUp, Star } from "lucide-react";
 import { fetchCause } from '@/services/apiServices';
 import { getFullUrl } from '@/utils/apiUtils';
 import { useToast } from '@/components/ui/use-toast';
@@ -325,13 +325,20 @@ const DynamicCausePage = () => {
     <Layout>
             <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className={`relative ${categoryInfo.bgColor} py-20 bg-gradient-to-br from-green-500 via-green-300 to-black`}>
-          <div className="container mx-auto px-6">
-            
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className={`inline-flex items-center gap-2 ${categoryInfo.bgLight} ${categoryInfo.textColor} px-6 py-3 rounded-full text-sm font-medium`}>
+        <section className="relative bg-gradient-to-b from-primary-50 to-white h-[70vh] flex items-center justify-center">
+          {/* Background Image */}
+          <img 
+            src={getFullUrl(cause.heroImageUrl || cause.imageUrl) || "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
+            alt={cause.heroTitle || cause.title}
+            className="absolute inset-0 w-full h-full object-cover z-0"
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
+          />
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/40 z-10" />
+          {/* Content */}
+          <div className="relative z-20 container mx-auto px-4 py-16 md:py-24 flex flex-col items-center justify-center text-center">
+            <div className="flex items-center justify-between mb-6">
+                  <div className={`inline-flex items-center gap-2 bg-gray-800 text-white px-6 py-3 rounded-full text-sm font-medium`}>
                     <categoryInfo.icon className="h-4 w-4" />
                     {cause.category}
                   </div>
@@ -343,28 +350,28 @@ const DynamicCausePage = () => {
                       disabled={isSharing}
                       className="text-gray-600 hover:text-gray-900"
                     >
-                      {isSharing ? (
+                      {/* {isSharing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <Megaphone className="h-4 w-4" />
                       )}
-                      <span className="ml-2">Share</span>
+                      <span className="ml-2">Share</span> */}
                     </Button>
                   </div>
                 </div>
-                <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900">
+                <h1 className="text-4xl md:text-5xl font-bold text-green-600 mb-6">
                   {cause.heroTitle || cause.title}
                 </h1>
-                <p className="text-xl text-gray-700 mb-8 leading-relaxed">
+                <p className="text-xl text-white/90 mb-8 leading-relaxed">
                   {cause.heroSubtitle || cause.description}
                 </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              {/* <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   size="lg" 
                   className={`${categoryInfo.buttonColor} ${categoryInfo.hoverColor} px-8 py-4 text-lg font-semibold`}
                   onClick={handleClaim}
                 >
-                  {/* <Gift className="mr-2 h-5 w-5" /> */}
+                 
                   🎁 Claim Your Free Bag
                 </Button>
                 <Button 
@@ -373,27 +380,100 @@ const DynamicCausePage = () => {
                   className={`${categoryInfo.borderColor} ${categoryInfo.textColor} hover:${categoryInfo.bgColor} px-8 py-4 text-lg font-semibold`}
                   onClick={handleSponsor}
                 >
-                  {/* <Megaphone className="mr-2 h-5 w-5" /> */}
+                  
                   📢 Sponsor This Cause
                 </Button>
+              </div> */}
+          </div>
+        </section>
+
+       <section className="py-16 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 max-w-6xl mx-auto">
+            {/* Left: Organization Info */}
+            <div className="lg:col-span-2">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-green-100 rounded-full">
+                  <span className="h-8 w-8 text-green-600">
+                     {categoryInfo.icon && <categoryInfo.icon className={`h-8 w-8 ${categoryInfo.textColor}`} />}
+                  </span>
+                </div>
+                 <h1 className="text-4xl md:text-5xl font-bold mb-3 px-4 text-green-600">
+                  {cause.heroTitle || cause.title}
+                </h1>
+              </div>
+              
+              <p className="text-xl mb-8 leading-relaxed">
+                  {cause.heroSubtitle || cause.description}
+                </p>
+
+              <div className="space-y-4">
+                {/* <div className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <span className="text-gray-700 font-medium">Verified Mental Health Organization</span>
+                </div> */}
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-5 w-5 text-gray-500" />
+                  <span className="text-gray-700">Nationwide, India</span>
+                </div>
               </div>
             </div>
-            <div className="relative">
-              <img 
-                src={getFullUrl(cause.heroImageUrl || cause.imageUrl) || "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
-                alt={cause.heroTitle || cause.title}
-                className="rounded-2xl shadow-2xl w-full h-96 object-cover"
-              />
-              <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-lg">
-                <div className={`text-3xl font-bold ${categoryInfo.textColor}`}>
-                  ₹{cause.currentAmount?.toLocaleString() || 0}
+
+            {/* Right: Stats */}
+            <div className="lg:col-span-1 border-l border-gray-200 p-6 rounded-lg shadow-md">
+              <div className="space-y-8">
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-green-600 mb-2">₹{cause.currentAmount?.toLocaleString() || 0}</div>
+                  <div className="text-gray-600">Raised to date</div>
                 </div>
-                <div className="text-sm text-gray-600">Raised</div>
+                
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-green-600 mb-2">
+                      {cause.claimedTotes || 0}
+                  </div>
+                  <div className="text-gray-600">Sponsors</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      <section className="py-16">
+  <div className="container mx-auto px-6">
+    <div className="group flex flex-col lg:flex-row items-center gap-12 max-w-6xl mx-auto border border-gray-200 p-6 rounded-lg shadow-sm relative overflow-hidden">
+      {/* Tote Bag Image */}
+      <div className="flex-shrink-0 animate-fade-in">
+        <img 
+          src="/images/tote-preview.png"
+          alt="Custom tote bag for fundraising"
+          className="w-80 h-80 object-contain hover:scale-105 transition-transform duration-300"
+        />
+      </div>
+      {/* Call to Action */}
+      <div className="flex-1 text-center lg:text-left animate-fade-in" style={{animationDelay: '0.2s'}}>
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Design your own Totebag
+        </h2>
+        <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+          Get started for free and start fundraising for Mental Health Matters. 
+          Create custom bags that promote mental wellness and reduce stigma around mental health.
+        </p>
+        <Button 
+          size="lg" 
+          className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold rounded-lg hover:scale-105 transition-all duration-300 shadow-lg"
+        >
+          Start Sponsor
+        </Button>
+      </div>
+      {/* Animated background elements */}
+      <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+      <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+      {/* Green circle bottom right */}
+      <div className="absolute -bottom-20 -right-10 w-60 h-60 bg-green-600 rounded-full z-10"></div>
+    </div>
+  </div>
+</section>
 
       {/* Impact Section */}
       <section className="py-20 bg-white">
@@ -809,4 +889,4 @@ const DynamicCausePage = () => {
   );
 };
 
-export default DynamicCausePage; 
+export default DynamicCausePage;
