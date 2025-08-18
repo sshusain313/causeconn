@@ -687,7 +687,7 @@ const Index = () => {
                 <img
                   src={currentStep.image}
                   alt={currentStep.imageAlt}
-                  className="w-full h-48 md:h-64 object-cover"
+                  className="w-full h-48 md:h-64 object-contain md:object-cover bg-white"
                   onError={(e) => {
                     e.currentTarget.src = "/images/sponsorcause.png";
                   }}
