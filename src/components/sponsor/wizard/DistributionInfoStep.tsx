@@ -411,15 +411,11 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                           selected={formData.distributionStartDate}
                           onSelect={(date) => {
                             if (date) {
-                              // Convert to UTC at midnight
-                              const utcDate = new Date(Date.UTC(
-                                date.getFullYear(),
-                                date.getMonth(),
-                                date.getDate(),
-                                0, 0, 0, 0
-                              ));
+                              // Normalize to local start of day (avoid timezone shift)
+                              const localDate = new Date(date);
+                              localDate.setHours(0, 0, 0, 0);
                               updateFormData({ 
-                                distributionStartDate: utcDate, 
+                                distributionStartDate: localDate, 
                                 distributionEndDate: undefined 
                               });
                             }
@@ -427,9 +423,9 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                           initialFocus
                           className="p-3"
                           disabled={(date) => {
-                            // Only allow dates 4 days after today
+                            // Only allow dates 4 days after today (local)
                             const today = new Date();
-                            today.setUTCHours(0, 0, 0, 0);
+                            today.setHours(0, 0, 0, 0);
                             const minStartDate = new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000);
                             return date < minStartDate;
                           }}
@@ -467,14 +463,10 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                               date &&
                               date > formData.distributionStartDate
                             ) {
-                              // Convert to UTC at end of day
-                              const utcDate = new Date(Date.UTC(
-                                date.getFullYear(),
-                                date.getMonth(),
-                                date.getDate(),
-                                23, 59, 59, 999
-                              ));
-                              updateFormData({ distributionEndDate: utcDate });
+                              // Normalize to local end of day (avoid timezone shift)
+                              const localDate = new Date(date);
+                              localDate.setHours(23, 59, 59, 999);
+                              updateFormData({ distributionEndDate: localDate });
                             }
                           }}
                           initialFocus
@@ -532,15 +524,11 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                           selected={formData.distributionStartDate}
                           onSelect={(date) => {
                             if (date) {
-                              // Convert to UTC at midnight
-                              const utcDate = new Date(Date.UTC(
-                                date.getFullYear(),
-                                date.getMonth(),
-                                date.getDate(),
-                                0, 0, 0, 0
-                              ));
+                              // Normalize to local start of day (avoid timezone shift)
+                              const localDate = new Date(date);
+                              localDate.setHours(0, 0, 0, 0);
                               updateFormData({ 
-                                distributionStartDate: utcDate, 
+                                distributionStartDate: localDate, 
                                 distributionEndDate: undefined 
                               });
                             }
@@ -548,9 +536,9 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                           initialFocus
                           className="p-3"
                           disabled={(date) => {
-                            // Only allow dates 4 days after today
+                            // Only allow dates 4 days after today (local)
                             const today = new Date();
-                            today.setUTCHours(0, 0, 0, 0);
+                            today.setHours(0, 0, 0, 0);
                             const minStartDate = new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000);
                             return date < minStartDate;
                           }}
@@ -588,14 +576,10 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                               date &&
                               date > formData.distributionStartDate
                             ) {
-                              // Convert to UTC at midnight
-                              const utcDate = new Date(Date.UTC(
-                                date.getFullYear(),
-                                date.getMonth(),
-                                date.getDate(),
-                                23, 59, 59, 999
-                              ));
-                              updateFormData({ distributionEndDate: utcDate });
+                              // Normalize to local end of day (avoid timezone shift)
+                              const localDate = new Date(date);
+                              localDate.setHours(23, 59, 59, 999);
+                              updateFormData({ distributionEndDate: localDate });
                             }
                           }}
                           initialFocus

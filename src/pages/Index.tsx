@@ -352,7 +352,7 @@ const Index = () => {
                 Sponsor Change – Make an Impact
               </div>
               <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 leading-tight">
-                A New-Age Promotional Platform for{" "}
+                A Old-Age Promotional Platform for{" "}
                 <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                   Purpose-Driven Brands
                 </span>
