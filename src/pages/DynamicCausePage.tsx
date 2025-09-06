@@ -680,6 +680,46 @@ const DynamicCausePage = () => {
         </div>
       </section>
 
+      {/* How Your Sponsorship Helps - Green Info Box */}
+      <section className="py-10">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="rounded-2xl bg-green-50 border border-green-100 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-9 w-9 grid place-items-center rounded-full bg-green-100 text-green-700">
+                    <Heart className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900">How will your sponsorship help?</h3>
+                </div>
+                <p className="text-gray-700 leading-relaxed py-2 w-full max-w-[52rem] text-sm sm:text-base">
+                Your support fuels impactful causes—educating children, providing meals, planting trees, and advancing sustainability. Every tote you sponsor spreads awareness while our vetted NGO partners ensure your contribution creates visible impact for society and the environment.
+                </p>
+                <div className='flex items-center justify-start gap-6 md:gap-10 mt-4 flex-wrap'>
+                <img src="/images/sevalaya.jpg" alt="Sponsorship Help" className="w-16 md:w-24 h-auto" />
+                <img src="/images/isha.jpg" alt="Sponsorship Help" className="w-16 md:w-24 h-auto" />
+                {/* <img src="/images/sapna.jpg" alt="Sponsorship Help" className="w-16 md:w-24 h-auto" />  */}
+                <img src="/images/learning.jpeg" alt="Sponsorship Help" className="w-16 md:w-24 h-auto" />
+                <img src="/images/jabala.jpg" alt="Sponsorship Help" className="hidden md:block w-16 md:w-24 h-auto" />
+                </div>
+              </div>
+              <div className="flex flex-col items-stretch md:items-center gap-4 w-full md:w-64">
+                <Button
+                  className="bg-green-600 hover:bg-green-700 text-white w-full text-base sm:text-lg font-semibold"
+                  onClick={handleSponsor}
+                >
+                  Sponsor Now
+                </Button>
+                {/* <Link to="/why-sponsor"> */}
+                  <Button onClick={() => navigate('/why-sponsor')} variant="outline" className="w-full p-3 border-green-600 text-green-700 hover:bg-green-50">
+                    How sponsorship works
+                  </Button>
+                {/* </Link> */}
+              </div>
+            </div>
+          </div>
+        </section>
+
+
         {/* Testimonials */}
         {/* <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
@@ -736,12 +776,12 @@ const DynamicCausePage = () => {
 
       {/* FAQs */}
       <section className="py-20 bg-white">
-        <div className="container mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-6 text-gray-900">Frequently Asked Questions</h2>
           </div>
           
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <Accordion type="single" collapsible>
               {faqs.map((faq, index) => (
                 <AccordionItem key={index} value={`item-${index}`} className="border-b border-gray-200">

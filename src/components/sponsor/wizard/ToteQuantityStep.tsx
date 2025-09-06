@@ -17,11 +17,19 @@ interface ToteQuantityStepProps {
 const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQuantityStepProps) => {
   // Calculate unit price based on quantity tiers
   const getUnitPrice = (quantity: number): number => {
-    if (quantity >= 7000) return 5; // ₹5 per tote for 7000+ totes
-    if (quantity >= 5000) return 7; // ₹7 per tote for 5000-6999 totes
-    if (quantity >= 1000) return 8; // ₹8 per tote for 1000-4999 totes
-    if (quantity >= 500) return 9;  // ₹9 per tote for 500-999 totes
-    return 10; // ₹10 per tote for 50-499 totes (default)
+    if (quantity >= 50000) return 35.01; // ₹5 per tote for 7000+ totes
+    if (quantity >= 40000) return 39.55; // ₹5 per tote for 7000+ totes
+    if (quantity >= 30000) return 44.09; // ₹5 per tote for 7000+ totes
+    if (quantity >= 20000) return 48.64; // ₹5 per tote for 7000+ totes
+    if (quantity >= 10000) return 53.18; // ₹5 per tote for 7000+ totes
+    if (quantity >= 5000) return 57.73; // ₹5 per tote for 7000+ totes
+    if (quantity >= 2500) return 62.27; // ₹5 per tote for 7000+ totes
+    if (quantity >= 1000) return 66.82; // ₹5 per tote for 7000+ totes
+    if (quantity >= 500) return 71.36; // ₹5 per tote for 7000+ totes
+    if (quantity >= 250) return 75.91; // ₹7 per tote for 5000-6999 totes
+    if (quantity >= 100) return 80.45; // ₹8 per tote for 1000-4999 totes
+    if (quantity >= 50) return 85;  // ₹9 per tote for 500-999 totes
+    return 85; // ₹10 per tote for 50-499 totes (default)
   };
 
   // Use stored unit price if available, otherwise calculate it
@@ -91,10 +99,10 @@ const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQua
                 <div className="text-xl font-semibold text-gray-900">{formData.toteQuantity.toLocaleString()} totes</div>
               </div>
             </div>
-            <div className="mt-4 text-xs text-gray-500">
+            {/* <div className="mt-4 text-xs text-gray-500">
               <div className="font-medium mb-1">Price Tiers:</div>
               <div>50-499: ₹10, 500-999: ₹9, 1000-4999: ₹8, 5000-6999: ₹7, 7000+: ₹5</div>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
       
@@ -119,12 +127,12 @@ const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQua
           </CardContent>
         </Card>
       
-        <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4">
+        {/* <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4">
           <p className="text-sm text-yellow-800">
             <span className="font-semibold">Note:</span> The final price will be calculated based on the quantity and your selected cause.
             You'll review the full details in the confirmation step.
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

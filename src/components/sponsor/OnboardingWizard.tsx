@@ -325,11 +325,19 @@ const OnboardingWizard = ({
   const calculatePricing = () => {
     // Calculate unit price based on quantity tiers (same logic as ToteQuantityStep)
     const getUnitPrice = (quantity: number): number => {
-      if (quantity >= 7000) return 5; // ₹5 per tote for 7000+ totes
-      if (quantity >= 5000) return 7; // ₹7 per tote for 5000-6999 totes
-      if (quantity >= 1000) return 8; // ₹8 per tote for 1000-4999 totes
-      if (quantity >= 500) return 9;  // ₹9 per tote for 500-999 totes
-      return 10; // ₹10 per tote for 50-499 totes (default)
+      if (quantity >= 50000) return 35.01; // ₹5 per tote for 7000+ totes
+      if (quantity >= 40000) return 39.55; // ₹5 per tote for 7000+ totes
+      if (quantity >= 30000) return 44.09; // ₹5 per tote for 7000+ totes
+      if (quantity >= 20000) return 48.64; // ₹5 per tote for 7000+ totes
+      if (quantity >= 10000) return 53.18; // ₹5 per tote for 7000+ totes
+      if (quantity >= 5000) return 57.73; // ₹5 per tote for 7000+ totes
+      if (quantity >= 2500) return 62.27; // ₹5 per tote for 7000+ totes
+      if (quantity >= 1000) return 66.82; // ₹5 per tote for 7000+ totes
+      if (quantity >= 500) return 71.36; // ₹5 per tote for 7000+ totes
+      if (quantity >= 250) return 75.91; // ₹7 per tote for 5000-6999 totes
+      if (quantity >= 100) return 80.45; // ₹8 per tote for 1000-4999 totes
+      if (quantity >= 50) return 85;  // ₹9 per tote for 500-999 totes
+      return 85; // ₹10 per tote for 50-499 totes (default)
     };
     
     const toteQuantity = calculateTotalTotes();

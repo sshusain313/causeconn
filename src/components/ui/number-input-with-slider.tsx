@@ -137,9 +137,9 @@ const NumberInputWithSlider: React.FC<NumberInputWithSliderProps> = ({
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Manual Input</span>
-            <span className="text-sm text-gray-500">
+            {/* <span className="text-sm text-gray-500">
               Up to {inputMax.toLocaleString()}
-            </span>
+            </span> */}
           </div>
           <Input
             type="number"
@@ -164,7 +164,7 @@ const NumberInputWithSlider: React.FC<NumberInputWithSliderProps> = ({
         </div>
 
         {/* Current Value Display */}
-        <div className="bg-gray-50 rounded-md p-3">
+        {/* <div className="bg-gray-50 rounded-md p-3">
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-gray-700">Current Value:</span>
             <span className="text-lg font-semibold text-gray-900">
@@ -176,7 +176,7 @@ const NumberInputWithSlider: React.FC<NumberInputWithSliderProps> = ({
               ⚠️ Value exceeds slider range ({sliderMax.toLocaleString()})
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Limits Explanation */}
         {/* <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
