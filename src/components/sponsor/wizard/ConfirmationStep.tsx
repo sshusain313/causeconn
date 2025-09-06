@@ -52,7 +52,13 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
   const unitPrice = formData.unitPrice || 10; // Default to ₹10 per tote if not provided
   const totalCost = formData.totalAmount || (formData.toteQuantity * unitPrice);
   
-  console.log(`ConfirmationStep: UnitPrice=₹${unitPrice}, TotalCost=₹${totalCost}, ToteQuantity=${formData.toteQuantity}`);
+  // Shipping cost for online distribution
+  const isOnlineDistribution = formData.distributionType === 'online';
+  const shippingCostPerTote = 50;
+  const shippingCost = isOnlineDistribution ? formData.toteQuantity * shippingCostPerTote : 0;
+  const grandTotal = totalCost + shippingCost;
+  
+  console.log(`ConfirmationStep: UnitPrice=₹${unitPrice}, BaseTotal=₹${totalCost}, Shipping=₹${shippingCost}, GrandTotal=₹${grandTotal}, ToteQuantity=${formData.toteQuantity}`);
   
   // Generate QR code with source tracking parameters
   const qrValue = `${window.location.origin}/claim/${formData.selectedCause}?source=qr&ref=sponsor-form&sponsor=${encodeURIComponent(formData.organizationName)}`;
@@ -92,7 +98,7 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
       const orderResponse = await axios.post(
         `${config.apiUrl}/payments/create-order`,
         {
-          amount: Math.round(totalCost * 100), // Convert to paise (smallest currency unit)
+          amount: Math.round(grandTotal * 100), // Convert to paise (smallest currency unit)
           currency: 'INR',
           email: formData.email,
           organizationName: formData.organizationName,
@@ -102,7 +108,9 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
           causeId: formData.selectedCause || causeData?._id, // <-- ADDED BY MYSELF
           toteQuantity: formData.toteQuantity,
           unitPrice: formData.unitPrice,
-          totalAmount: totalCost,
+          totalAmount: grandTotal,
+          shippingCost,
+          shippingCostPerTote,
           qrCodeUrl: qrValue // Add QR code URL to the order data
         },
         {
@@ -187,7 +195,7 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
       console.error('Error response status:', error.response?.status);
       console.error('Error response headers:', error.response?.headers);
       console.error('Request data sent:', {
-        amount: Math.round(totalCost * 100),
+        amount: Math.round(grandTotal * 100),
         currency: 'INR',
         email: formData.email,
         organizationName: formData.organizationName,
@@ -196,7 +204,8 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
         causeTitle: selectedCause,
         toteQuantity: formData.toteQuantity,
         unitPrice: formData.unitPrice,
-        totalAmount: totalCost
+        totalAmount: grandTotal,
+        shippingCost
       });
       setPaymentStatus('failed');
       setIsLoading(false);
@@ -295,10 +304,16 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
                   <span className="text-gray-600">Price per tote:</span>
                   <span className="font-medium">₹{unitPrice.toFixed(2)}</span>
                 </li>
+                {isOnlineDistribution && (
+                  <li className="flex justify-between">
+                    <span className="text-gray-600">Shipping (₹{shippingCostPerTote} x {formData.toteQuantity}):</span>
+                    <span className="font-medium">₹{shippingCost.toLocaleString()}</span>
+                  </li>
+                )}
                 <Separator className="my-2" />
                 <li className="flex justify-between text-lg">
-                  <span className="font-semibold">Total:</span>
-                  <span className="font-bold">₹{totalCost.toLocaleString()}</span>
+                  <span className="font-semibold">Total{isOnlineDistribution ? ' (incl. shipping)' : ''}:</span>
+                  <span className="font-bold">₹{grandTotal.toLocaleString()}</span>
                 </li>
               </ul>
             </CardContent>
@@ -383,7 +398,7 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-600">Total Amount:</span>
-                    <span className="text-xl font-bold text-green-600">₹{totalCost.toLocaleString()}</span>
+                    <span className="text-xl font-bold text-green-600">₹{grandTotal.toLocaleString()}</span>
                   </div>
                   <p className="text-sm text-gray-500">
                     Secure payment powered by Razorpay

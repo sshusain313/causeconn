@@ -272,6 +272,28 @@ const OnboardingWizard = ({
           if (!formData.distributionStartDate || !formData.distributionEndDate) {
             return { isValid: false, message: 'Please specify distribution start and end dates' };
           }
+
+          // Ensure all totes are distributed across selected points
+          let distributedTotal = 0;
+          if (formData.distributionPoints && typeof formData.distributionPoints === 'object') {
+            Object.values(formData.distributionPoints).forEach((city: any) => {
+              Object.values(city).forEach((category: any) => {
+                category.forEach((point: any) => {
+                  if (point.selected) {
+                    distributedTotal += Number(point.totes) || 0;
+                  }
+                });
+              });
+            });
+          }
+
+          const expectedTotal = Number(formData.toteQuantity) || 0;
+          if (distributedTotal !== expectedTotal) {
+            return { 
+              isValid: false, 
+              message: `Please allocate all totes. Assigned ${distributedTotal.toLocaleString()} of ${expectedTotal.toLocaleString()}.` 
+            };
+          }
         } else if (formData.distributionType === 'online') {
           // For online distribution, only validate campaign dates
           if (!formData.distributionStartDate || !formData.distributionEndDate) {
@@ -464,7 +486,7 @@ const OnboardingWizard = ({
         <DistributionInfoStep
           formData={formData}
           updateFormData={updateFormData}
-          // validationError={validationError}
+          validationError={validationError}
           goToStep={(step) => setCurrentStep(step)}
         />
       )}

@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Unauthorized from "./pages/Unauthorized";
@@ -72,6 +72,16 @@ const CauseContentEditorWrapper = () => {
   return <CauseContentEditor causeId={id!} />;
 };
 
+// Scroll to top on route change
+const ScrollToTop: React.FC = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    // Always reset scroll position to top-left on route changes
+    window.scrollTo(0, 0);
+  }, [location.pathname, location.search, location.hash]);
+  return null;
+};
+
 // Test Components
 // import PaymentTest from "./components/PaymentTest";
 import NumberInputDemo from "./components/NumberInputDemo";
@@ -91,6 +101,7 @@ const App: React.FC = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ScrollToTop />
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />

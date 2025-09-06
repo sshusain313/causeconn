@@ -596,6 +596,8 @@ export const generateAndSendInvoice = async (
     causeTitle: string;
     toteQuantity: number;
     unitPrice: number;
+    shippingCost?: number;
+    shippingCostPerTote?: number;
     sponsorshipId?: string;
     causeId?: string;
   }
@@ -733,9 +735,13 @@ export const generateAndSendInvoice = async (
     console.log('Raw payment data for items:', {
       toteQuantity: paymentData.toteQuantity,
       unitPrice: paymentData.unitPrice,
+      shippingCost: paymentData.shippingCost,
+      shippingCostPerTote: paymentData.shippingCostPerTote,
       types: {
         toteQuantity: typeof paymentData.toteQuantity,
-        unitPrice: typeof paymentData.unitPrice
+        unitPrice: typeof paymentData.unitPrice,
+        shippingCost: typeof paymentData.shippingCost,
+        shippingCostPerTote: typeof paymentData.shippingCostPerTote
       }
     });
 
@@ -774,6 +780,21 @@ export const generateAndSendInvoice = async (
           total: itemTotal,
         },
       ];
+
+      // Add shipping as an item if present
+      const shippingCost = typeof paymentData.shippingCost === 'string' ? parseFloat(paymentData.shippingCost) : paymentData.shippingCost;
+      const shippingCostPerTote = typeof paymentData.shippingCostPerTote === 'string' ? parseFloat(paymentData.shippingCostPerTote) : paymentData.shippingCostPerTote;
+      const normalizedShippingCost = validateAmount(shippingCost as number);
+      const normalizedShippingPerTote = validateUnitPrice(shippingCostPerTote as number) || (validatedQuantity > 0 ? normalizedShippingCost / validatedQuantity : 0);
+
+      if (normalizedShippingCost > 0) {
+        validatedData.items.push({
+          description: 'Shipping',
+          quantity: validatedQuantity,
+          unitPrice: normalizedShippingPerTote,
+          total: normalizedShippingCost,
+        });
+      }
     } else {
       console.warn('Invalid quantity or unit price, using fallback values');
       // Use payment amount as fallback

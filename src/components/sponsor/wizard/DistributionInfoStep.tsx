@@ -44,12 +44,14 @@ interface DistributionInfoStepProps {
   };
   updateFormData: (data: Partial<any>) => void;
   goToStep?: (step: number) => void;
+  validationError?: string | null;
 }
 
 const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
   formData,
   updateFormData,
-  goToStep
+  goToStep,
+  validationError
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [openCity, setOpenCity] = useState<string | null>(null);
@@ -316,6 +318,12 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
           Choose how you want to distribute your totes to reach your target audience
         </p>
       </div>
+      {validationError && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTitle>Validation error</AlertTitle>
+          <AlertDescription>{validationError}</AlertDescription>
+        </Alert>
+      )}
       
       {toteError && (
         <Alert variant="destructive" className="mb-6">
@@ -623,6 +631,23 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                         + {city}
                       </Button>
                     ))}
+                  </div>
+                  <div className="mt-3">
+                    <Label className="text-xs font-medium text-muted-foreground">Coming Soon</Label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {['Delhi', 'Mumbai', 'Bangalore'].map((city) => (
+                        <Button
+                          key={`coming-${city}`}
+                          variant="outline"
+                          size="sm"
+                          disabled
+                          title="Coming soon"
+                          className="text-xs opacity-60 cursor-not-allowed"
+                        >
+                          {city}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 

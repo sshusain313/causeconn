@@ -34,6 +34,9 @@ interface CreateOrderRequest {
   sponsorshipId?: string;
   toteQuantity?: number;
   unitPrice?: number;
+  shippingCost?: number;
+  shippingCostPerTote?: number;
+  totalAmount?: number;
   qrCodeUrl?: string; // Add QR code URL field
 }
 
@@ -228,7 +231,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     console.log('Creating Razorpay order with data:', req.body);
     console.log('Request headers:', req.headers);
     
-    const { amount, currency, email, organizationName, contactName, phone, causeTitle, causeId, sponsorshipId, toteQuantity, unitPrice, qrCodeUrl }: CreateOrderRequest = req.body;
+    const { amount, currency, email, organizationName, contactName, phone, causeTitle, causeId, sponsorshipId, toteQuantity, unitPrice, shippingCost, shippingCostPerTote, totalAmount, qrCodeUrl }: CreateOrderRequest = req.body;
 
     console.log('Extracted values:', {
       amount,
@@ -242,10 +245,15 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       sponsorshipId,
       toteQuantity,
       unitPrice,
+      shippingCost,
+      shippingCostPerTote,
+      totalAmount,
       qrCodeUrl,
       types: {
         toteQuantity: typeof toteQuantity,
-        unitPrice: typeof unitPrice
+        unitPrice: typeof unitPrice,
+        shippingCost: typeof shippingCost,
+        shippingCostPerTote: typeof shippingCostPerTote
       }
     });
 
@@ -275,22 +283,39 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
+    // Optional: Guard against very large amounts in non-production (Razorpay test-mode often limits high amounts)
+    const isNonProd = (process.env.NODE_ENV || '').toLowerCase() !== 'production';
+    if (isNonProd && currency.toUpperCase() === 'INR' && amount > 5000000) { // > ₹50,000
+      console.warn('Amount exceeds suggested test-mode limit. Rejecting to avoid Razorpay failure.', {
+        amountPaise: amount,
+        amountRupees: (amount / 100).toFixed(2)
+      });
+      res.status(400).json({
+        message: 'Amount exceeds test-mode limit (~₹50,000). Reduce quantity or split into smaller payments.',
+        amount: amount,
+        amountRupees: (amount / 100).toFixed(2)
+      });
+      return;
+    }
+
     // Create order options
     const orderOptions = {
       amount: amount, // Amount is already in paise from frontend
       currency: currency.toUpperCase(),
       receipt: `receipt_${Date.now()}`,
       notes: {
-        email,
-        organizationName,
-        contactName,
-        phone,
-        causeTitle,
-        causeId: causeId || '',
-        sponsorshipId: sponsorshipId || 'N/A',
-        toteQuantity: toteQuantity || 0,
-        unitPrice: unitPrice || 0,
-        qrCodeUrl: qrCodeUrl || ''
+        email: String(email || ''),
+        organizationName: String(organizationName || ''),
+        contactName: String(contactName || ''),
+        phone: String(phone || ''),
+        causeTitle: String(causeTitle || ''),
+        causeId: String(causeId || ''),
+        sponsorshipId: String(sponsorshipId || 'N/A'),
+        toteQuantity: String(toteQuantity || 0),
+        unitPrice: String(unitPrice || 0),
+        shippingCost: String(shippingCost || 0),
+        shippingCostPerTote: String(shippingCostPerTote || 0),
+        qrCodeUrl: String(qrCodeUrl || '')
       },
       partial_payment: false
     };
@@ -305,14 +330,21 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       sponsorshipId: sponsorshipId || 'N/A',
       toteQuantity: toteQuantity || 0,
       unitPrice: unitPrice || 0,
+      shippingCost: shippingCost || 0,
+      shippingCostPerTote: shippingCostPerTote || 0,
       qrCodeUrl: qrCodeUrl || '',
       types: {
         toteQuantity: typeof (toteQuantity || 0),
-        unitPrice: typeof (unitPrice || 0)
+        unitPrice: typeof (unitPrice || 0),
+        shippingCost: typeof (shippingCost || 0),
+        shippingCostPerTote: typeof (shippingCostPerTote || 0)
       }
     });
 
-    console.log('Creating Razorpay order with options:', orderOptions);
+    console.log('Creating Razorpay order with options:', {
+      ...orderOptions,
+      amountInRupees: (orderOptions.amount / 100).toFixed(2)
+    });
 
     // Create order with Razorpay
     const order = await getRazorpayInstance().orders.create(orderOptions);
@@ -341,24 +373,30 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         causeTitle,
         causeId,
         sponsorshipId,
+        shippingCost: shippingCost || 0,
+        shippingCostPerTote: shippingCostPerTote || 0,
         qrCodeUrl: qrCodeUrl || ''
       }
     });
 
-  } catch (error) {
-    console.error('Error creating Razorpay order:', error);
-    
-    if (error instanceof Error) {
-      res.status(500).json({
-        message: 'Failed to create payment order',
-        error: error.message
-      });
-    } else {
-      res.status(500).json({
-        message: 'Failed to create payment order',
-        error: 'Unknown error occurred'
-      });
-    }
+  } catch (error: any) {
+    // Razorpay SDK often returns non-Error objects; extract meaningful details
+    const rpError = error?.error || error;
+    const errorDescription = rpError?.description || rpError?.message || (typeof rpError === 'string' ? rpError : undefined);
+    const errorCode = rpError?.code || rpError?.statusCode || rpError?.status;
+    const meta = {
+      errorCode,
+      errorDescription,
+      raw: rpError
+    };
+
+    console.error('Error creating Razorpay order:', meta);
+
+    res.status(500).json({
+      message: 'Failed to create payment order',
+      error: errorDescription || 'Unknown error occurred',
+      code: errorCode || 'UNKNOWN'
+    });
   }
 };
 
@@ -422,9 +460,13 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
     console.log('Notes data types:', {
       toteQuantity: typeof notes.toteQuantity,
       unitPrice: typeof notes.unitPrice,
+      shippingCost: typeof notes.shippingCost,
+      shippingCostPerTote: typeof notes.shippingCostPerTote,
       values: {
         toteQuantity: notes.toteQuantity,
-        unitPrice: notes.unitPrice
+        unitPrice: notes.unitPrice,
+        shippingCost: notes.shippingCost,
+        shippingCostPerTote: notes.shippingCostPerTote
       }
     });
 
@@ -445,6 +487,8 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
           causeId: notes.causeId || '',
           toteQuantity: Number(notes.toteQuantity) || 0,
           unitPrice: Number(notes.unitPrice) || 0,
+          shippingCost: Number(notes.shippingCost) || 0,
+          shippingCostPerTote: Number(notes.shippingCostPerTote) || 0,
           qrCodeUrl: notes.qrCodeUrl || ''
         };
 
