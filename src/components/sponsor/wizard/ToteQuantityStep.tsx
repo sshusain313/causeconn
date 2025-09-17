@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import NumberInputWithSlider from '@/components/ui/number-input-with-slider';
+import { useToast } from '@/hooks/use-toast';
 
 interface ToteQuantityStepProps {
   formData: {
@@ -15,6 +16,7 @@ interface ToteQuantityStepProps {
 }
 
 const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQuantityStepProps) => {
+  const { toast } = useToast();
   // Calculate unit price based on quantity tiers
   const getUnitPrice = (quantity: number): number => {
     if (quantity >= 50000) return 35.01; // ₹5 per tote for 7000+ totes
@@ -51,15 +53,22 @@ const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQua
     });
   };
 
+  // Show validation error via toast instead of large inline banner
+  useEffect(() => {
+    if (validationError) {
+      toast({
+        title: 'Validation error',
+        description: validationError,
+        variant: 'destructive',
+      });
+    }
+  }, [validationError, toast]);
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold mb-4">Tote Quantity</h2>
       
-      {validationError && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
-          {validationError}
-        </div>
-      )}
+      {/* Validation errors are shown via toast; no large inline banner here */}
       
       <p className="text-gray-600 mb-6">
         Select the quantity of totes you'd like to sponsor. Use the slider for quick selection up to 10,000 totes, 

@@ -19,6 +19,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useQuery } from '@tanstack/react-query';
 import { fetchDistributionSettings, fetchPointsByCityAndCategory } from '@/services/distributionService';
 import { DistributionCategory, DistributionPoint } from '@/types/distribution';
+import { useToast } from '@/hooks/use-toast';
 
 // Icon mapping for dynamic icons
 const iconMap = {
@@ -53,11 +54,17 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
   goToStep,
   validationError
 }) => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [openCity, setOpenCity] = useState<string | null>(null);
   const [openCategory, setOpenCategory] = useState<{ city: string; category: string } | null>(null);
   const [toteError, setToteError] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  // Keep a live ref to the latest formData for use inside intervals
+  const formDataRef = useRef(formData);
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['distribution-settings'],
@@ -67,6 +74,49 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
   // Get active cities and categories
   const activeCities = settings?.cities.filter(city => city.isActive) || [];
   const activeCategories = settings?.categories.filter(cat => cat.isActive) || [];
+
+  // Long-press state for incrementing totes
+  const incrementHoldTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const incrementHoldIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const wasHoldingRef = useRef(false);
+
+  const startIncrementHold = (
+    city: string,
+    categoryId: string,
+    locationIndex: number
+  ) => {
+    // Start after a short delay to differentiate from a normal click
+    if (incrementHoldTimeoutRef.current) clearTimeout(incrementHoldTimeoutRef.current);
+    if (incrementHoldIntervalRef.current) clearInterval(incrementHoldIntervalRef.current as unknown as number);
+
+    incrementHoldTimeoutRef.current = setTimeout(() => {
+      wasHoldingRef.current = true;
+      // Rapid repeat while held
+      incrementHoldIntervalRef.current = setInterval(() => {
+        const currentTotes = formDataRef.current.distributionPoints?.[city]?.[categoryId]?.[locationIndex]?.totes || 0;
+        handleToteChange(city, categoryId, locationIndex, currentTotes + 50);
+      }, 120) as unknown as NodeJS.Timeout;
+    }, 250) as unknown as NodeJS.Timeout;
+  };
+
+  const stopIncrementHold = () => {
+    if (incrementHoldTimeoutRef.current) {
+      clearTimeout(incrementHoldTimeoutRef.current);
+      incrementHoldTimeoutRef.current = null;
+    }
+    if (incrementHoldIntervalRef.current) {
+      clearInterval(incrementHoldIntervalRef.current as unknown as number);
+      incrementHoldIntervalRef.current = null;
+    }
+  };
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (incrementHoldTimeoutRef.current) clearTimeout(incrementHoldTimeoutRef.current);
+      if (incrementHoldIntervalRef.current) clearInterval(incrementHoldIntervalRef.current as unknown as number);
+    };
+  }, []);
 
   // Get quick pick cities (first 8 active cities)
   const quickPickCities = activeCities.slice(0, 8).map(city => city.name);
@@ -267,6 +317,27 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
 
   const { totalTotes, totalLocations, totalCities } = getOverallTotals();
 
+  // Toast on validation errors instead of showing large banners
+  useEffect(() => {
+    if (validationError) {
+      toast({
+        title: 'Validation error',
+        description: validationError,
+        variant: 'destructive',
+      });
+    }
+  }, [validationError, toast]);
+
+  useEffect(() => {
+    if (toteError) {
+      toast({
+        title: 'Tote limit exceeded',
+        description: toteError,
+        variant: 'destructive',
+      });
+    }
+  }, [toteError, toast]);
+
   const handleCityAccordionToggle = (city: string) => {
     setOpenCity(openCity === city ? null : city);
     setOpenCategory(null);
@@ -318,31 +389,21 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
           Choose how you want to distribute your totes to reach your target audience
         </p>
       </div>
-      {validationError && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertTitle>Validation error</AlertTitle>
-          <AlertDescription>{validationError}</AlertDescription>
-        </Alert>
-      )}
       
-      {toteError && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertTitle className="flex items-center gap-2">
-            Tote Quantity Exceeded
-            {goToStep && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="ml-2"
-                onClick={() => goToStep(1)}
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back to Tote Quantity
-              </Button>
-            )}
-          </AlertTitle>
-          <AlertDescription>{toteError}</AlertDescription>
-        </Alert>
+      {/* Inline helper for quick navigation when totes exceed, shown subtly when error exists */}
+      {toteError && goToStep && (
+        <div className="mb-2 text-sm text-red-600 flex items-center gap-2">
+          Tote Quantity Exceeded. 
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-1"
+            onClick={() => goToStep(1)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Tote Quantity
+          </Button>
+        </div>
       )}
 
       <div className="space-y-6">
@@ -772,8 +833,7 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleToteChange(cityName, category._id!, index, point.totes - 50)}
-                disabled={point.totes <= category.defaultToteCount}
+                onMouseDown
                 className="h-6 w-6 p-0"
               >
                 <Minus className="h-2 w-2" />
@@ -788,7 +848,19 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleToteChange(cityName, category._id!, index, point.totes + 50)}
+                onMouseDown={() => startIncrementHold(cityName, category._id!, index)}
+                onMouseUp={() => stopIncrementHold()}
+                onMouseLeave={() => stopIncrementHold()}
+                onTouchStart={() => startIncrementHold(cityName, category._id!, index)}
+                onTouchEnd={() => stopIncrementHold()}
+                onClick={(e) => {
+                  // If a long press occurred, avoid triggering an extra single increment on click
+                  if (wasHoldingRef.current) {
+                    wasHoldingRef.current = false;
+                    return;
+                  }
+                  handleToteChange(cityName, category._id!, index, point.totes + 50);
+                }}
                 className="h-6 w-6 p-0"
               >
                 <Plus className="h-2 w-2" />

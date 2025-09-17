@@ -15,6 +15,7 @@ import {
 import config from '@/config';
 import axios from 'axios';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 
 interface LogoUploadStepProps {
   formData: {
@@ -55,6 +56,7 @@ interface LogoUploadStepProps {
 }
 
 const LogoUploadStep = ({ formData, updateFormData, validationError }: LogoUploadStepProps) => {
+  const { toast } = useToast();
   // Fetch selected cause if available
   const { data: selectedCauseData } = useQuery({
     queryKey: ['cause', formData.selectedCause],
@@ -109,6 +111,17 @@ const LogoUploadStep = ({ formData, updateFormData, validationError }: LogoUploa
     console.log('Admin Image URL:', selectedCauseData?.adminImageUrl);
     console.log('========================');
   }, [formData.selectedCause, selectedCauseData]);
+
+  // Show validation errors as toast instead of a large banner
+  useEffect(() => {
+    if (validationError) {
+      toast({
+        title: 'Validation error',
+        description: validationError,
+        variant: 'destructive',
+      });
+    }
+  }, [validationError, toast]);
 
   // Get the effective admin image URL
   const effectiveAdminImageUrl = selectedCauseData?.adminImageUrl;
@@ -716,11 +729,7 @@ const LogoUploadStep = ({ formData, updateFormData, validationError }: LogoUploa
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {validationError && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
-            {validationError}
-          </div>
-        )}
+        {/* Validation errors are handled via toast; no large inline banner */}
         
         {/* File Upload Section */}
         <Card>
@@ -935,6 +944,6 @@ const LogoUploadStep = ({ formData, updateFormData, validationError }: LogoUploa
       </div>
     </TooltipProvider>
   );
-};
+}
 
 export default LogoUploadStep;
