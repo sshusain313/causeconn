@@ -60,11 +60,6 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
   const [openCategory, setOpenCategory] = useState<{ city: string; category: string } | null>(null);
   const [toteError, setToteError] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  // Keep a live ref to the latest formData for use inside intervals
-  const formDataRef = useRef(formData);
-  useEffect(() => {
-    formDataRef.current = formData;
-  }, [formData]);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['distribution-settings'],
@@ -93,8 +88,7 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
       wasHoldingRef.current = true;
       // Rapid repeat while held
       incrementHoldIntervalRef.current = setInterval(() => {
-        const currentTotes = formDataRef.current.distributionPoints?.[city]?.[categoryId]?.[locationIndex]?.totes || 0;
-        handleToteChange(city, categoryId, locationIndex, currentTotes + 50);
+        handleToteChange(city, categoryId, locationIndex, (formData.distributionPoints?.[city]?.[categoryId]?.[locationIndex]?.totes || 0) + 50);
       }, 120) as unknown as NodeJS.Timeout;
     }, 250) as unknown as NodeJS.Timeout;
   };
@@ -809,7 +803,7 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
                               
                               return (
   <div key={category._id} className="border rounded-lg">
-    <div id={`category-${cityName}-${category._id}-content`} className="px-3 pb-3 space-y-2">
+    <div id={`category-${cityName}-${category._id}-content`} className="px-3 p-3 space-y-2">
       {categoryPoints.map((point, index) => (
         <div key={index} className={cn(
           "flex items-center justify-between p-2 border rounded",
@@ -833,7 +827,8 @@ const DistributionInfoStep: React.FC<DistributionInfoStepProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onMouseDown
+                onClick={() => handleToteChange(cityName, category._id!, index, point.totes - 50)}
+                disabled={point.totes <= category.defaultToteCount}
                 className="h-6 w-6 p-0"
               >
                 <Minus className="h-2 w-2" />

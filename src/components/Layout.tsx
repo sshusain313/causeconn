@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Menu, X, Home, Heart, Plus, Users, Target, Building } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 import { 
   DropdownMenu, 
@@ -12,6 +13,15 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose
+} from '@/components/ui/sheet';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -21,10 +31,25 @@ const Layout = ({ children }: LayoutProps) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   const isActive = (path: string) => {
     return location.pathname === path ? 'text-green-600 bg-green-50 border-b-2 border-green-600' : 'text-gray-700 hover:text-green-600';
   };
+
+  const isActiveMobile = (path: string) => {
+    return location.pathname === path ? 'text-green-600 bg-green-50' : 'text-gray-700';
+  };
+
+  // Navigation items for mobile menu
+  const navigationItems = [
+    { path: '/', label: 'Home', icon: Home },
+    { path: '/causes', label: 'Causes', icon: Heart },
+    { path: '/create-cause', label: 'Create a Cause', icon: Plus },
+    { path: '/why-sponsor', label: 'Why Sponsor?', icon: Users },
+    { path: '/why-claim', label: 'Why Claim?', icon: Target },
+    { path: '/csr', label: 'CSR', icon: Building },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -48,7 +73,7 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </Link>
             
-            {/* Enhanced Navigation */}
+            {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-1">
               <Link 
                 to="/" 
@@ -89,8 +114,108 @@ const Layout = ({ children }: LayoutProps) => {
               </Link>
             </nav>
 
-            {/* Enhanced User Section */}
-            <div className="flex items-center space-x-3">
+            {/* Mobile Navigation */}
+            <div className="lg:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="hover:bg-gray-100 p-2"
+                    aria-label="Open navigation menu"
+                  >
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80 p-0">
+                  <SheetHeader className="p-6 pb-0">
+                    <div className="flex items-center">
+                      <div className="flex text-green-600 items-center justify-center">
+                        <ShoppingBag className="w-8 h-8 text-brand-primary" strokeWidth={2} />
+                      </div>
+                      <div className="ml-3">
+                        <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                          ChangeBag
+                        </span>
+                        <div className="text-xs text-gray-500 font-medium">Brand For Good</div>
+                      </div>
+                    </div>
+                  </SheetHeader>
+                  
+                  <div className="px-6 py-4">
+                    <nav className="space-y-2">
+                      {navigationItems.map((item) => {
+                        const IconComponent = item.icon;
+                        return (
+                          <SheetClose asChild key={item.path}>
+                            <Link
+                              to={item.path}
+                              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-50 ${isActiveMobile(item.path)}`}
+                            >
+                              <IconComponent className="h-5 w-5" />
+                              <span className="font-medium">{item.label}</span>
+                            </Link>
+                          </SheetClose>
+                        );
+                      })}
+                    </nav>
+
+                    {/* Mobile User Section */}
+                    <div className="mt-8 pt-6 border-t border-gray-200">
+                      {user ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-3 px-4 py-3">
+                            <Avatar className="h-10 w-10 ring-2 ring-green-100">
+                              <AvatarFallback className="bg-gradient-to-br from-green-500 to-green-600 text-white font-semibold">
+                                {user.name.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium text-gray-900">{user.name}</p>
+                              <p className="text-sm text-gray-500 capitalize">{user.role}</p>
+                            </div>
+                          </div>
+                          
+                          <SheetClose asChild>
+                            <Link
+                              to={`/dashboard/${user.role}`}
+                              className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-50 text-gray-700"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                              <span className="font-medium">Dashboard</span>
+                            </Link>
+                          </SheetClose>
+                          
+                          <button
+                            onClick={logout}
+                            className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-red-50 text-red-600 w-full"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span className="font-medium">Logout</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <SheetClose asChild>
+                          <Button 
+                            onClick={() => navigate('/login')} 
+                            className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 rounded-lg font-medium"
+                          >
+                            Log In / Sign Up
+                          </Button>
+                        </SheetClose>
+                      )}
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+
+            {/* Enhanced User Section - Desktop Only */}
+            <div className="hidden lg:flex items-center space-x-3">
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -174,6 +299,7 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </div>
 
+            <div className='sm:col-span-2 flex justify-between lg:justify-around'>
             {/* Quick Links */}
             <div>
               <h3 className="text-lg font-semibold mb-4 text-white">Quick Links</h3>
@@ -197,6 +323,7 @@ const Layout = ({ children }: LayoutProps) => {
                 <li><Link to="/cookie-policy" className="text-gray-300 hover:text-green-400 transition-colors">Cookie Policy</Link></li>
                 <li><Link to="/accessibility" className="text-gray-300 hover:text-green-400 transition-colors">Accessibility</Link></li>
               </ul>
+            </div>
             </div>
 
             {/* Contact & Support */}
@@ -232,7 +359,7 @@ const Layout = ({ children }: LayoutProps) => {
                 © {new Date().getFullYear()} CauseConnect. All rights reserved.
               </p>
               <div className="flex items-center space-x-4">
-                <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Made with ❤️ for positive change</span>
+                <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm lg:text-md lg:px-3 lg:py-1.5 sm:text-xs sm:px-1">Made with ❤️ for change</span>
                 <span className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">100% Carbon Neutral</span>
               </div>
             </div>
