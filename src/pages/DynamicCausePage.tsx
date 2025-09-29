@@ -891,27 +891,7 @@ const DynamicCausePage = () => {
           </div>
         </div>
       </section>
-      
-      {/* Floating Action Button for Mobile */}
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:hidden z-50">
-        <div className="flex flex-col gap-2">
-          <Button 
-            size="lg"
-            className={`${categoryInfo.buttonColor} ${categoryInfo.hoverColor} rounded-full shadow-lg w-12 h-12 sm:w-14 sm:h-14`}
-            onClick={handleClaim}
-          >
-            <Gift className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
-          <Button 
-            size="lg"
-            variant="outline"
-            className={`${categoryInfo.borderColor} ${categoryInfo.textColor} bg-white rounded-full shadow-lg w-12 h-12 sm:w-14 sm:h-14`}
-            onClick={handleSponsor}
-          >
-            <Megaphone className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
-        </div>
-      </div>
+    
       </div>
 
       {/* Development Debug Panel */}
