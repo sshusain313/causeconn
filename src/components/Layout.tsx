@@ -120,7 +120,7 @@ const Layout = ({ children }: LayoutProps) => {
                 <SheetTrigger asChild>
                   <Button 
                     variant="ghost" 
-                    size="sm"
+                    size="lg"
                     className="hover:bg-gray-100 p-2"
                     aria-label="Open navigation menu"
                   >
@@ -142,7 +142,7 @@ const Layout = ({ children }: LayoutProps) => {
                     </div>
                   </SheetHeader>
                   
-                  <div className="px-6 py-4">
+                  <div className="px-6 py-6">
                     <nav className="space-y-2">
                       {navigationItems.map((item) => {
                         const IconComponent = item.icon;
@@ -152,7 +152,7 @@ const Layout = ({ children }: LayoutProps) => {
                               to={item.path}
                               className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-50 ${isActiveMobile(item.path)}`}
                             >
-                              <IconComponent className="h-5 w-5" />
+                              <IconComponent className="h-6 w-6" />
                               <span className="font-medium">{item.label}</span>
                             </Link>
                           </SheetClose>
@@ -335,7 +335,7 @@ const Layout = ({ children }: LayoutProps) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   <div>
-                    <a href='mailto:support@shelfmerch.com' className="text-green-400 font-medium">support@causeconnect.org</a>
+                    <a href='mailto:support@shelfmerch.com' className="text-green-400 font-medium">support@changebag.org</a>
                     <p className="text-sm text-gray-300">We typically respond within 24 hours</p>
                   </div>
                 </div>
