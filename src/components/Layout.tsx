@@ -334,10 +334,22 @@ const Layout = ({ children }: LayoutProps) => {
                   <svg className="w-5 h-5 text-green-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
-                  <div>
+                  {/* <div>
                     <a href='mailto:support@shelfmerch.com' className="text-green-400 font-medium">support@changebag.org</a>
                     <p className="text-sm text-gray-300">We typically respond within 24 hours</p>
-                  </div>
+                  </div> */}
+                  <div>
+  <a
+    href="https://mail.google.com/mail/?view=cm&fs=1&to=koneti%40shelfmerch.com&su=support%20request&body=Hi%20team%2C%0A"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-green-400 font-medium"
+  >
+    koneti@shelfmerch.com
+  </a>
+  <p className="text-sm text-gray-300">We typically respond within 24 hours</p>
+</div>
+
                 </div>
                 <div className="flex items-start space-x-3">
                   <svg className="w-5 h-5 text-green-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
