@@ -1145,8 +1145,8 @@ const Index = () => {
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Everything you need to know about our initiatives. If you have any other questions please reach out to us at:{" "}
-              <a href="mailto:support@shelfmerch.com" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-300">
-                support@shelfmerch.com
+              <a href="mailto:support@changebag.org" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-300">
+                support@changebag.org
               </a>
             </p>
           </div>
