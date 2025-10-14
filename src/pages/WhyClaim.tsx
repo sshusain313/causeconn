@@ -221,7 +221,17 @@ const WhyClaim = () => {
       <div 
         className="absolute inset-0 parallax-hero" 
       >
-        <img src='/images/claim-header.png' alt='claim-header' className='w-full h-full object-cover object-center sm:object-cover' />
+        <img src='/images/claim-header.jpg' alt='claim-header' className='w-full h-full object-cover object-top sm:object-cover' />
+        {/* Masked blur overlay on left third */}
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="h-full w-1/3 backdrop-blur-[10px]"
+            style={{
+              maskImage: 'linear-gradient(to right, black, transparent)',
+              WebkitMaskImage: 'linear-gradient(to right, black, transparent)'
+            }}
+          ></div>
+        </div>
         <div className="absolute inset-0 image-overlay"></div>
       </div>
       
@@ -241,16 +251,16 @@ const WhyClaim = () => {
       {/* Content */}
        <div className="relative z-10 flex flex-col justify-center items-start h-full px-4 sm:px-6 lg:px-8 pt-16 pb-20 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-32">
         <div className="max-w-4xl w-full">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight">
+          <h1 className="ml-10 text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold text-white mb-4 sm:mb-6 leading-tight">
             The Power of Your
             <span className="block text-white">Claim</span>
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 sm:mb-8 max-w-2xl leading-relaxed">
+          <p className="ml-10 text-xl sm:text-xl md:text-2xl text-white/90 mb-6 sm:mb-8 max-w-2xl leading-relaxed">
             Every purchase you make creates positive change. Join our community of changemakers supporting education, mental health, and equality worldwide.
           </p>
           <button 
             onClick={scrollToStats}
-            className="bg-green-700 hover:bg-green-800 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg animate-fade-in-up inline-flex items-center space-x-2 transition-all duration-300 hover:scale-105 hover:shadow-lg" 
+            className="ml-10 bg-green-700 hover:bg-green-800 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg animate-fade-in-up inline-flex items-center space-x-2 transition-all duration-300 hover:scale-105 hover:shadow-lg" 
             style={{ animationDelay: '0.6s' }}
           >
             <span>Explore Our Impact</span>
@@ -746,18 +756,18 @@ const WhyClaim = () => {
     )}
     </main>
     
-    <section className="relative py-20 bg-gradient-to-br from-green-900 via-emerald-800 to-teal-700 text-white overflow-hidden w-full my-8">
+    {/* <section className="relative py-20 bg-gradient-to-br from-green-900 via-emerald-800 to-teal-700 text-white overflow-hidden w-full my-8"> */}
       {/* Background pattern */}
-      <div className="absolute inset-0 opacity-10">
+      {/* <div className="absolute inset-0 opacity-10">
         <div className="absolute top-1/4 left-1/4 w-32 h-32 border border-white rounded-full animate-pulse-slow"></div>
         <div 
           className="absolute bottom-1/4 right-1/4 w-24 h-24 border border-white rounded-full animate-pulse-slow" 
           style={{ animationDelay: '1s' }}
         ></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 border border-white rounded-full animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
-      </div>
+      </div> */}
       
-      <div className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+      {/* <div className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
         <h2 className="text-4xl md:text-6xl font-bold mb-6 text-green-100 drop-shadow-lg">
           Better Tomorrows Begin with You
         </h2>
@@ -785,8 +795,8 @@ const WhyClaim = () => {
             2022 Impact Report
           </button>
         </div>
-      </div>
-    </section>
+      </div> */}
+    {/* </section> */}
     
     </Layout>
   );

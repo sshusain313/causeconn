@@ -155,54 +155,54 @@ const journeySteps = [
 const testimonials = [
   {
     id: 1,
-    name: "Sarah Johnson",
+    name: "Ayesha Sharma",
     role: "Environmental Activist",
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+    avatar: "https://i.pravatar.cc/150?u=ayesha-sharma",
     content: "This initiative has transformed how our community thinks about plastic waste. The tote bags are not just practical but also beautiful conversation starters about sustainability.",
     rating: 5,
-    company: "Eco Warriors Collective"
+    company: "EcoSaarthi Foundation"
   },
   {
     id: 2,
-    name: "Michael Chen",
+    name: "Arjun Mehta",
     role: "Corporate Sustainability Manager",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+    avatar: "https://i.pravatar.cc/150?u=arjun-mehta",
     content: "As a corporate partner, we've seen incredible engagement from our employees. The transparency in how funds are used and the regular impact updates make this partnership truly meaningful.",
     rating: 5,
-    company: "GreenTech Solutions"
+    company: "GreenTech India"
   },
   {
     id: 3,
     name: "Priya Patel",
     role: "Local Business Owner",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+    avatar: "https://i.pravatar.cc/150?u=priya-patel",
     content: "I've been using these tote bags in my store for months now. Customers love them and often ask about the cause behind them. It's a win-win for business and the environment.",
     rating: 5,
-    company: "Organic Market"
+    company: "Organic Bazaar"
   },
   {
     id: 4,
-    name: "David Rodriguez",
+    name: "Rohan Verma",
     role: "Community Leader",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+    avatar: "https://i.pravatar.cc/150?u=rohan-verma",
     content: "The impact on our local community has been remarkable. We've reduced plastic waste by 40% and created awareness about environmental issues. This is exactly what we needed.",
     rating: 5,
-    company: "Neighborhood Association"
+    company: "Neighborhood Association India"
   },
   {
     id: 5,
-    name: "Emma Thompson",
+    name: "Neha Gupta",
     role: "School Principal",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+    avatar: "https://i.pravatar.cc/150?u=neha-gupta",
     content: "Our students are excited about the environmental lessons we've integrated using these tote bags. It's a practical way to teach sustainability and community responsibility.",
     rating: 5,
-    company: "Green Valley School"
+    company: "Green Valley School, Mumbai"
   },
   {
     id: 6,
     name: "Rajesh Kumar",
     role: "Restaurant Owner",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+    avatar: "https://i.pravatar.cc/150?u=rajesh-kumar",
     content: "We switched to these tote bags for our takeaway orders and our customers appreciate the eco-friendly approach. It's helped us build a stronger connection with our community.",
     rating: 5,
     company: "Spice Garden Restaurant"
@@ -975,7 +975,7 @@ const Index = () => {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900">{testimonial.name}</h3>
                     <p className="text-sm text-gray-600">{testimonial.role}</p>
-                    <p className="text-xs text-gray-500">{testimonial.company}</p>
+                    {/* <p className="text-xs text-gray-500">{testimonial.company}</p> */}
                   </div>
                   <div className="flex items-center gap-1">
                     {[...Array(testimonial.rating)].map((_, i) => (

@@ -340,7 +340,7 @@ const Layout = ({ children }: LayoutProps) => {
                   </div> */}
                   <div>
   <a
-    href="https://mail.google.com/mail/?view=cm&fs=1&to=koneti%40shelfmerch.com&su=support%20request&body=Hi%20team%2C%0A"
+    href="https://mail.google.com/mail/?view=cm&fs=1&to=koneti%40gmail.com&su=support%20request&body=Hi%20team%2C%0A"
     target="_blank"
     rel="noopener noreferrer"
     className="text-green-400 font-medium"
