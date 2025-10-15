@@ -1145,9 +1145,17 @@ const Index = () => {
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Everything you need to know about our initiatives. If you have any other questions please reach out to us at:{" "}
-              <a href="mailto:support@changebag.org" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-300">
+              {/* <a href="mailto:support@changebag.org" className="text-green-600 hover:text-green-800 font-medium transition-colors duration-300">
                 support@changebag.org
-              </a>
+              </a> */}
+               <a
+    href="https://mail.google.com/mail/?view=cm&fs=1&to=support%40changebag.org&su=support%20request&body=Hi%20team%2C%0A"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-green-400 font-medium"
+  >
+    support@changebag.org
+  </a>
             </p>
           </div>
 

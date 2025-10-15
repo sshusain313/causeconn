@@ -335,17 +335,17 @@ const Layout = ({ children }: LayoutProps) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   {/* <div>
-                    <a href='mailto:support@shelfmerch.com' className="text-green-400 font-medium">support@changebag.org</a>
+                    <a href='mailto:support@changebag.org' className="text-green-400 font-medium">support@changebag.org</a>
                     <p className="text-sm text-gray-300">We typically respond within 24 hours</p>
                   </div> */}
                   <div>
   <a
-    href="https://mail.google.com/mail/?view=cm&fs=1&to=support%40gmail.com&su=support%20request&body=Hi%20team%2C%0A"
+    href="https://mail.google.com/mail/?view=cm&fs=1&to=support%40changebag.org&su=support%20request&body=Hi%20team%2C%0A"
     target="_blank"
     rel="noopener noreferrer"
     className="text-green-400 font-medium"
   >
-    support@shelfmerch.com
+    support@changebag.org
   </a>
   <p className="text-sm text-gray-300">We typically respond within 24 hours</p>
 </div>
