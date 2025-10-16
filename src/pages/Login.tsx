@@ -112,7 +112,7 @@ const LoginPage = () => {
         <div className="text-center mb-8">
           <Link to="/" className="text-2xl font-bold text-primary-800 flex items-center justify-center">
             <span className="mr-2">🤲</span>
-            <span>CauseConnect</span>
+            <span>Changebag</span>
           </Link>
         </div>
         

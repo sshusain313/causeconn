@@ -368,7 +368,7 @@ const Layout = ({ children }: LayoutProps) => {
           <div className="pt-8 border-t border-gray-700">
             <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
               <p className="text-gray-400 text-sm">
-                © {new Date().getFullYear()} CauseConnect. All rights reserved.
+                © {new Date().getFullYear()} Changebag. All rights reserved.
               </p>
               <div className="flex items-center space-x-4">
                 <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm lg:text-md lg:px-3 lg:py-1.5 sm:text-xs sm:px-1">Made with ❤️ for change</span>

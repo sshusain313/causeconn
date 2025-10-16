@@ -474,7 +474,7 @@ const Index = () => {
             Why Choose CauseConnect
           </div> */}
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Why brands sponsor <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">CauseConnect</span>
+            Why brands sponsor <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Changebag</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             We provide everything you need to launch, manage, and scale your cause effectively with sustainable, long-term impact.
@@ -1034,7 +1034,7 @@ const Index = () => {
           </h2>
           
           <p className="text-xl lg:text-2xl text-green-100 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Whether you're a brand looking for authentic reach or someone who loves free, useful things that matter – CauseConnect is for you.
+            Whether you're a brand looking for authentic reach or someone who loves free, useful things that matter – Changebag is for you.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">

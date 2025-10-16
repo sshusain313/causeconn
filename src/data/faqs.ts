@@ -5,8 +5,8 @@ export interface FAQ {
 
 export const faqs: FAQ[] = [
   {
-    question: "What is CauseConnect?",
-    answer: "CauseConnect is a platform that connects brands with meaningful causes through sustainable tote bag sponsorship. Brands sponsor high-quality, reusable tote bags that are distributed to people who support specific causes, creating a win-win for marketing and social impact."
+    question: "What is Changebag?",
+    answer: "Changebag is a platform that connects brands with meaningful causes through sustainable tote bag sponsorship. Brands sponsor high-quality, reusable tote bags that are distributed to people who support specific causes, creating a win-win for marketing and social impact."
   },
   {
     question: "How does the sponsorship process work?",

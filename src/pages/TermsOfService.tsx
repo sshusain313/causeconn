@@ -10,7 +10,7 @@ const TermsOfService = () => {
       content: [
         {
           subtitle: "Agreement to Terms",
-          text: "By accessing or using CauseConnect, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this platform."
+          text: "By accessing or using Changebag, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this platform."
         },
         {
           subtitle: "Modifications",
@@ -78,7 +78,7 @@ const TermsOfService = () => {
       content: [
         {
           subtitle: "Platform Ownership",
-          text: "CauseConnect and its content, features, and functionality are owned by us and are protected by copyright, trademark, and other intellectual property laws. You may not copy, modify, distribute, or create derivative works without our permission."
+          text: "Changebag and its content, features, and functionality are owned by us and are protected by copyright, trademark, and other intellectual property laws. You may not copy, modify, distribute, or create derivative works without our permission."
         },
         {
           subtitle: "User Content",
@@ -123,7 +123,7 @@ const TermsOfService = () => {
               Terms of <span className="bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">Service</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              These terms govern your use of CauseConnect and outline the rights and responsibilities 
+              These terms govern your use of Changebag and outline the rights and responsibilities 
               of both users and our platform.
             </p>
             <p className="text-sm text-gray-500 mt-4">
@@ -161,7 +161,7 @@ const TermsOfService = () => {
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Governing Law</h3>
                   <p className="text-gray-600 leading-relaxed">
                     These terms are governed by and construed in accordance with the laws of the jurisdiction 
-                    where CauseConnect is incorporated, without regard to conflict of law principles.
+                    where Changebag is incorporated, without regard to conflict of law principles.
                   </p>
                 </div>
                 <div>
@@ -181,7 +181,7 @@ const TermsOfService = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Entire Agreement</h3>
                   <p className="text-gray-600 leading-relaxed">
-                    These terms constitute the entire agreement between you and CauseConnect regarding 
+                    These terms constitute the entire agreement between you and Changebag regarding 
                     your use of our platform.
                   </p>
                 </div>
@@ -197,7 +197,7 @@ const TermsOfService = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-gray-600">
-                    <strong>Email:</strong> legal@causeconnect.org
+                    <strong>Email:</strong> legal@Changebag.org
                   </p>
                   <p className="text-gray-600">
                     <strong>Response Time:</strong> Within 5 business days

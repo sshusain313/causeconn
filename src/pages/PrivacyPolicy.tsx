@@ -164,7 +164,7 @@ const PrivacyPolicy = () => {
                   </p>
                   <div className="space-y-2">
                     <p className="text-gray-600">
-                      <strong>Email:</strong> privacy@causeconnect.org
+                      <strong>Email:</strong> privacy@changebag.org
                     </p>
                     <p className="text-gray-600">
                       <strong>Address:</strong> 123 Cause Street, Impact City, IC 12345
@@ -178,7 +178,7 @@ const PrivacyPolicy = () => {
                   </p>
                   <div className="space-y-2">
                     <p className="text-gray-600">
-                      <strong>Email:</strong> dpo@causeconnect.org
+                      <strong>Email:</strong> dpo@changebag.org
                     </p>
                     <p className="text-gray-600">
                       <strong>Response Time:</strong> Within 30 days

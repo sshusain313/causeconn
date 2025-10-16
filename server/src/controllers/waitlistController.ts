@@ -261,8 +261,8 @@ export const notifyWaitlistMembers = async (causeId: string): Promise<void> => {
               <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
               
               <p style="font-size: 12px; color: #666;">
-                This email was sent to you because you joined the waitlist for a cause on CauseConnect. 
-                If you have any questions, please contact us at waitlist@causeconnect.org
+                This email was sent to you because you joined the waitlist for a cause on changebag. 
+                If you have any questions, please contact us at waitlist@changebag.org
               </p>
             </div>
           `;
@@ -422,8 +422,8 @@ export const resendNotification = async (req: Request, res: Response): Promise<v
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
           
           <p style="font-size: 12px; color: #666;">
-            This email was sent to you because you joined the waitlist for a cause on CauseConnect. 
-            If you have any questions, please contact us at waitlist@causeconnect.org
+            This email was sent to you because you joined the waitlist for a cause on changebag. 
+            If you have any questions, please contact us at waitlist@changebag.org
           </p>
         </div>
       `;

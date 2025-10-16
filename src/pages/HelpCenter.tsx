@@ -59,7 +59,7 @@ const HelpCenter = () => {
         },
         {
           question: "How can I report a security issue?",
-          answer: "If you notice any security concerns, please contact us immediately at security@causeconnect.org. We take all security reports seriously and will investigate promptly."
+          answer: "If you notice any security concerns, please contact us immediately at security@changebag.org. We take all security reports seriously and will investigate promptly."
         }
       ]
     },
@@ -123,7 +123,7 @@ const HelpCenter = () => {
               How can we <span className="bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">help you?</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Find answers to common questions, get support, and learn how to make the most of CauseConnect.
+              Find answers to common questions, get support, and learn how to make the most of Changebag.
             </p>
           </div>
 

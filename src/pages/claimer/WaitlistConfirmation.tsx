@@ -96,7 +96,7 @@ const WaitlistConfirmationPage = () => {
       <div className="flex items-start space-x-3 mb-4 p-3 bg-blue-50 rounded-md">
         <Bell className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
         <p className="text-sm text-blue-800">
-          <span className="font-medium">Important:</span> Be sure to check your inbox (and spam folder) for an email from <span className="font-medium">notifications@causeconnect.org</span> when the cause becomes sponsored.
+          <span className="font-medium">Important:</span> Be sure to check your inbox (and spam folder) for an email from <span className="font-medium">notifications@changebag.org</span> when the cause becomes sponsored.
         </p>
       </div>
       <Button 
@@ -130,7 +130,7 @@ const WaitlistConfirmationPage = () => {
             Questions about the waitlist?
           </p>
           <p className="text-gray-800">
-            Contact us at <span className="font-medium">waitlist@causeconnect.org</span>
+            Contact us at <span className="font-medium">waitlist@changebag.org</span>
           </p>
         </div>
       </div>

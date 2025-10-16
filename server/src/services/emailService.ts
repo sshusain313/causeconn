@@ -315,14 +315,14 @@ export const sendInvoiceEmail = async (
     }).format(data.total);
     
     const mailOptions = {
-      from: '"CauseConnect" <noreply@causeconnect.org>',
+      from: '"Changebag" <noreply@Changebag.org>',
       to: email,
       subject: `Invoice #${data.invoiceNumber} - ${data.causeTitle} Campaign`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
           <!-- Header -->
           <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; color: white;">
-            <h1 style="margin: 0; font-size: 28px; font-weight: bold;">CauseConnect</h1>
+            <h1 style="margin: 0; font-size: 28px; font-weight: bold;">Changebag</h1>
             <p style="margin: 10px 0 0 0; opacity: 0.9;">Making a difference, one tote at a time</p>
           </div>
           
@@ -391,7 +391,7 @@ export const sendInvoiceEmail = async (
             <div style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
               <p style="color: #6b7280; margin: 0;">
                 Best regards,<br>
-                <strong>The CauseConnect Team</strong>
+                <strong>The Changebag Team</strong>
               </p>
             </div>
           </div>
@@ -399,7 +399,7 @@ export const sendInvoiceEmail = async (
           <!-- Footer -->
           <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
             <p style="color: #9ca3af; margin: 0; font-size: 12px;">
-              For questions about this invoice, please contact support@causeconnect.org
+              For questions about this invoice, please contact support@changebag.org
             </p>
           </div>
         </div>

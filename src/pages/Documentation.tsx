@@ -23,7 +23,7 @@ const Documentation = () => {
       description: "New to CauseConnect? Start here to learn the basics",
       icon: <BookOpen className="h-6 w-6" />,
       articles: [
-        { title: "What is CauseConnect?", time: "5 min read", popular: true },
+        { title: "What is Changebag?", time: "5 min read", popular: true },
         { title: "How to Create Your First Cause", time: "8 min read", popular: true },
         { title: "Setting Up Your Profile", time: "3 min read" },
         { title: "Understanding Tote Bag Campaigns", time: "6 min read" }
@@ -104,7 +104,7 @@ const Documentation = () => {
               Documentation
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
-              Learn how to use <span className="bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">CauseConnect</span>
+              Learn how to use <span className="bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">Changebag</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Comprehensive guides, tutorials, and resources to help you make the most of our platform

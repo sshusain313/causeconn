@@ -577,7 +577,7 @@ export const testSMSDelivery = async (req: Request, res: Response) => {
     const testPayload = {
       authkey: MSG91_AUTH_KEY,
       mobile: testPhone,
-      message: 'Test SMS from CauseConnect - If you receive this, SMS is working!',
+      message: 'Test SMS from Changebag - If you receive this, SMS is working!',
       sender: 'TXTLCL'
     };
     

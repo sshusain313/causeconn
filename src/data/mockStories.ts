@@ -62,11 +62,11 @@ export const sponsorStories: Story[] = [
 export const claimStories: Story[] = [
   {
     id: 'claim-1',
-    title: 'My eco-friendly journey with CauseConnect',
+    title: 'My eco-friendly journey with Changebag',
     authorName: 'Miguel Rodriguez',
     imageUrl: '/stories/story2.png',
-    content: 'I claimed my first CauseConnect tote bag six months ago, and it changed how I shop. No more plastic bags at the grocery store! I carry my tote everywhere, and so many people have asked about it. I love explaining how it supports the ocean cleanup initiative. The QR code on the bag has even led three of my friends to claim their own bags.',
-    excerpt: 'I claimed my first CauseConnect tote bag six months ago, and it changed how I shop. No more plastic bags at the grocery store!...',
+    content: 'I claimed my first Changebag tote bag six months ago, and it changed how I shop. No more plastic bags at the grocery store! I carry my tote everywhere, and so many people have asked about it. I love explaining how it supports the ocean cleanup initiative. The QR code on the bag has even led three of my friends to claim their own bags.',
+    excerpt: 'I claimed my first Changebag tote bag six months ago, and it changed how I shop. No more plastic bags at the grocery store!...',
     createdAt: new Date('2025-05-02'),
   },
   {
@@ -83,8 +83,8 @@ export const claimStories: Story[] = [
     title: 'Teaching my kids about sustainability',
     authorName: 'Lisa Chang',
     imageUrl: '/images/teaching.png',
-    content: 'My children love our CauseConnect tote bags! They ask questions about the causes we support, and it\'s been a great way to teach them about environmental responsibility. We\'ve claimed bags for animal welfare and education initiatives, and the kids are proud to carry them to school. It\'s amazing how a simple bag can spark such important conversations.',
-    excerpt: 'My children love our CauseConnect tote bags! They ask questions about the causes we support, and it\'s been a great way to teach them...',
+    content: 'My children love our Changebag tote bags! They ask questions about the causes we support, and it\'s been a great way to teach them about environmental responsibility. We\'ve claimed bags for animal welfare and education initiatives, and the kids are proud to carry them to school. It\'s amazing how a simple bag can spark such important conversations.',
+    excerpt: 'My children love our Changebag tote bags! They ask questions about the causes we support, and it\'s been a great way to teach them...',
     createdAt: new Date('2025-05-05'),
   },
 //   {
@@ -101,8 +101,8 @@ export const claimStories: Story[] = [
 //     title: 'Supporting causes I care about',
 //     authorName: 'Rachel Green',
 //     imageUrl: '/stories/story1.png',
-//     content: 'I love that I can support multiple causes through CauseConnect. I\'ve claimed bags for environmental protection, animal welfare, and education initiatives. Each bag tells a story and helps me feel connected to the causes I care about. The fact that they\'re free and high-quality makes it even better!',
-//     excerpt: 'I love that I can support multiple causes through CauseConnect. I\'ve claimed bags for environmental protection...',
+//     content: 'I love that I can support multiple causes through Changebag. I\'ve claimed bags for environmental protection, animal welfare, and education initiatives. Each bag tells a story and helps me feel connected to the causes I care about. The fact that they\'re free and high-quality makes it even better!',
+//     excerpt: 'I love that I can support multiple causes through Changebag. I\'ve claimed bags for environmental protection...',
 //     createdAt: new Date('2025-05-18'),
 //   },
 //   {
@@ -110,8 +110,8 @@ export const claimStories: Story[] = [
 //     title: 'Building a sustainable future, one bag at a time',
 //     authorName: 'Carlos Martinez',
 //     imageUrl: '/stories/story3.png',
-//     content: 'As a college student, I appreciate that CauseConnect makes supporting good causes accessible. I\'ve claimed bags for various initiatives and use them for everything from groceries to carrying books. My friends have been inspired to claim their own bags, and we\'ve started a campus sustainability group. It\'s amazing how one small action can create such positive change.',
-//     excerpt: 'As a college student, I appreciate that CauseConnect makes supporting good causes accessible. I\'ve claimed bags for various initiatives...',
+//     content: 'As a college student, I appreciate that Changebag makes supporting good causes accessible. I\'ve claimed bags for various initiatives and use them for everything from groceries to carrying books. My friends have been inspired to claim their own bags, and we\'ve started a campus sustainability group. It\'s amazing how one small action can create such positive change.',
+//     excerpt: 'As a college student, I appreciate that Changebag makes supporting good causes accessible. I\'ve claimed bags for various initiatives...',
 //     createdAt: new Date('2025-05-22'),
 //   }
 ];

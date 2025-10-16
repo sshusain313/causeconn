@@ -78,7 +78,7 @@ const CookiePolicy = () => {
               Cookie <span className="bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">Policy</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              We use cookies and similar technologies to enhance your experience on CauseConnect. 
+              We use cookies and similar technologies to enhance your experience on Changebag. 
               This policy explains how we use these technologies and your options for managing them.
             </p>
             <p className="text-sm text-gray-500 mt-4">
@@ -211,7 +211,7 @@ const CookiePolicy = () => {
                     If you have any questions about our use of cookies, please contact us:
                   </p>
                   <p className="text-gray-600 text-sm mt-2">
-                    <strong>Email:</strong> privacy@causeconnect.org
+                    <strong>Email:</strong> privacy@changebag.org
                   </p>
                 </div>
                 <div>

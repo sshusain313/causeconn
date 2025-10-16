@@ -96,7 +96,7 @@ const SubmitStory = () => {
                   name="content"
                   value={form.content}
                   onChange={handleChange}
-                  placeholder="Share your experience with CauseConnect..."
+                  placeholder="Share your experience with Changebag..."
                   rows={8}
                   required
                 />

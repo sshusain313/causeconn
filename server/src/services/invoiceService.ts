@@ -181,7 +181,7 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<string> => 
       doc.fontSize(28)
          .font('Helvetica-Bold')
          .fillColor('#1f2937')
-         .text('CauseConnect', 50, 50, { width: imgX - 60, ellipsis: true });
+         .text('Changebag', 50, 50, { width: imgX - 60, ellipsis: true });
 
       doc.fontSize(12)
          .font('Helvetica')
@@ -431,7 +431,7 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<string> => 
       doc.fontSize(8)
          .font('Helvetica')
          .fillColor('#9ca3af')
-         .text('For questions about this invoice, please contact support@causeconnect.org', 0, footerY + 15, { align: 'center', width: doc.page.width, ellipsis: true });
+         .text('For questions about this invoice, please contact support@changebag.org', 0, footerY + 15, { align: 'center', width: doc.page.width, ellipsis: true });
 
       // Finalize PDF
       doc.end();

@@ -101,7 +101,7 @@ const AccessibilityPage = () => {
               Accessibility <span className="bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">Statement</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              We are committed to making CauseConnect accessible to everyone. 
+              We are committed to making Changebag accessible to everyone. 
               Our platform is designed to work for users of all abilities and assistive technologies.
             </p>
           </div>
@@ -220,7 +220,7 @@ const AccessibilityPage = () => {
                     If you experience accessibility barriers, please contact us:
                   </p>
                   <p className="text-gray-600 text-sm">
-                    <strong>Email:</strong> accessibility@causeconnect.org
+                    <strong>Email:</strong> accessibility@changebag.org
                   </p>
                   <p className="text-gray-600 text-sm">
                     <strong>Response Time:</strong> Within 48 hours
@@ -244,7 +244,7 @@ const AccessibilityPage = () => {
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
               <h2 className="text-2xl font-bold text-black mb-4">Our Commitment</h2>
               <p className="text-gray-600 leading-relaxed">
-                At CauseConnect, we believe that digital accessibility is a fundamental right, not a privilege. 
+                At Changebag, we believe that digital accessibility is a fundamental right, not a privilege. 
                 We are committed to ensuring that our platform is accessible to users of all abilities, including 
                 those using assistive technologies. Our accessibility efforts are ongoing, and we welcome feedback 
                 from our community to help us improve.
