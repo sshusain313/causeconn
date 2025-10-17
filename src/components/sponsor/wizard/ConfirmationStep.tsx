@@ -49,7 +49,7 @@ const ConfirmationStep = ({ formData, causeData, onComplete }: ConfirmationStepP
   const selectedCause = formData.causeTitle || causeData?.title || causeData?.name || 'Selected Cause';
   
   // Use the pricing information from the form data
-  const unitPrice = formData.unitPrice || 10; // Default to ₹10 per tote if not provided
+  const unitPrice = formData.unitPrice || 85; // Default to ₹10 per tote if not provided
   const totalCost = formData.totalAmount || (formData.toteQuantity * unitPrice);
   
   // Shipping cost for online distribution

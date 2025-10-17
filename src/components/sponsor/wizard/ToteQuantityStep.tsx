@@ -31,11 +31,11 @@ const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQua
     if (quantity >= 250) return 75.91; // ₹7 per tote for 5000-6999 totes
     if (quantity >= 100) return 80.45; // ₹8 per tote for 1000-4999 totes
     if (quantity >= 50) return 85;  // ₹9 per tote for 500-999 totes
-    return 85; // ₹10 per tote for 50-499 totes (default)
+    return 85;
   };
 
   // Use stored unit price if available, otherwise calculate it
-  const unitPrice = formData.unitPrice || getUnitPrice(formData.toteQuantity);
+  const unitPrice = getUnitPrice(formData.toteQuantity);
   const totalPrice = formData.toteQuantity * unitPrice;
 
   const impactStatistics = {
@@ -108,10 +108,6 @@ const ToteQuantityStep = ({ formData, updateFormData, validationError }: ToteQua
                 <div className="text-xl font-semibold text-gray-900">{formData.toteQuantity.toLocaleString()} totes</div>
               </div>
             </div>
-            {/* <div className="mt-4 text-xs text-gray-500">
-              <div className="font-medium mb-1">Price Tiers:</div>
-              <div>50-499: ₹10, 500-999: ₹9, 1000-4999: ₹8, 5000-6999: ₹7, 7000+: ₹5</div>
-            </div> */}
           </CardContent>
         </Card>
       

@@ -337,7 +337,7 @@ const OnboardingWizard = ({
       if (quantity >= 250) return 75.91; // ₹7 per tote for 5000-6999 totes
       if (quantity >= 100) return 80.45; // ₹8 per tote for 1000-4999 totes
       if (quantity >= 50) return 85;  // ₹9 per tote for 500-999 totes
-      return 85; // ₹10 per tote for 50-499 totes (default)
+      return 85;
     };
     
     const toteQuantity = calculateTotalTotes();
