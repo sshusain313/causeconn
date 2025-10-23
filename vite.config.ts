@@ -43,11 +43,7 @@ export default defineConfig(({ mode }) => {
     sourcemap: mode !== 'production',
     minify: mode === 'production',
     outDir: 'dist',
-    emptyOutDir: true,
-    cssCodeSplit: false,
-    assetsInlineLimit: 0,
-    cssMinify: mode === 'production',
-    target: 'es2015'
+    emptyOutDir: true
   }
   };
 });
