@@ -152,24 +152,23 @@ app.get('/api/test', (req: Request, res: Response) => {
   res.status(200).json({ status: 'ok', message: 'Testing end point' });
 });
 
-// Root route handler
+// Serve static files from the React app build directory
+const frontendPath = path.join(__dirname, '../../dist');
+app.use(express.static(frontendPath));
+
+// Root route handler - serve the React app
 app.get('/', (req: Request, res: Response) => {
-  res.status(200).json({
-    message: 'CauseConnect API Server',
-    version: '1.0.0',
-    documentation: '/api/health',
-    endpoints: [
-      '/api/auth',
-      '/api/causes',
-      '/api/sponsorships',
-      '/api/claims',
-      '/api/upload',
-      '/api/otp',
-      '/api/profile',
-      '/api/admin',
-      '/api/health'
-    ]
-  });
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
+// Catch-all handler: send back React's index.html file for any non-API routes
+app.get('*', (req: Request, res: Response) => {
+  // Only serve index.html for non-API routes
+  if (!req.path.startsWith('/api/')) {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+  } else {
+    res.status(404).json({ message: 'API endpoint not found' });
+  }
 });
 
 export default app;

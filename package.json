@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/copyUploads.js && vite",
-    "build": "node scripts/copyUploads.js && npx vite build",
+    "build": "node scripts/copyUploads.js && npx vite build && npx tailwindcss -i ./src/index.css -o ./dist/assets/styles.css --minify",
     "build:dev": "node scripts/copyUploads.js && npx vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
