@@ -34,10 +34,10 @@ interface Cause {
 const HERO_IMAGE = "/images/zero.jpg"; // Placeholder, replace with actual illustration if available
 
 const stats = [
-  { number: "2.7M+", label: "Donations" },
-  { number: "15M+", label: "Lives Impacted" },
-  { number: "3000+", label: "Verified Non Profits" },
-  { number: "300+", label: "Corporate Partners" },
+  { number: "1.2M+", label: "Bags in Circulation" },
+  { number: "2M+", label: "People Reached" },
+  { number: "3000+", label: "Campaign Locations" },
+  { number: "100+", label: "Brand Collaborations" },
 ];
 
 const marketingMethods = [
@@ -94,22 +94,22 @@ const benefits = [
   {
     icon: <Heart className="h-8 w-8 text-red-400" />,
     title: "Own Your Space",
-    description: "Create authentic connections with causes that align with your brand values."
+    description: "Put your brand in people’s hands and everyday life."
   },
   {
     icon: <Target className="h-8 w-8 text-red-400" />,
-    title: "Targeted Impact",
-    description: "Reach engaged audiences who care about the same issues you do."
+    title: "Targeted Reach",
+    description: "Engage audiences that share your values."
   },
   {
     icon: <Sparkles className="h-8 w-8 text-red-400" />,
-    title: "Sustainable Success",
-    description: "Build long-term relationships that create lasting positive change."
+    title: "Sustainable Visibility",
+    description: "Stay seen through eco-friendly campaigns that last."
   },
   {
     icon: <Users className="h-8 w-8 text-red-400" />,
     title: "Trackable Results",
-    description: "Measure your impact with detailed analytics and success stories."
+    description: "Get real-time insights and campaign performance metrics."
   }
 ];
 
@@ -234,26 +234,26 @@ const steps = [
   {
     number: "01",
     icon: <Search className="h-8 w-8" />,
-    title: "Pick a Cause",
-    description: "Choose from 3,000+ verified NGOs and causes that align with your brand values."
+    title: "Join the Movement",
+    description: "Sign up or scan at partner locations to receive your free ChangeBag."
   },
   {
     number: "02",
     icon: <Heart className="h-8 w-8" />,
-    title: "Sponsor Bags",
-    description: "Fund eco-friendly tote bags with your brand logo supporting your chosen cause."
+    title: "Pick a Purpose",
+    description: "Choose a cause that matters — from clean cities to greener living"
   },
   {
     number: "03",
     icon: <TrendingUp className="h-8 w-8" />,
-    title: "Track Impact",
-    description: "Monitor real-time distribution and impact through custom dashboards and reports."
+    title: "Carry your Bag",
+    description: "Use it daily. Each tote replaces plastic and carries a story of purpose."
   },
   {
     number: "04",
     icon: <Share2 className="h-8 w-8" />,
-    title: "Share Your Story",
-    description: "Showcase your CSR impact with compelling content and transparent reporting."
+    title: "Share Your Impact",
+    description: "Tag or scan your bag to see your impact and inspire others."
   }
 ];
 
@@ -352,18 +352,16 @@ const Index = () => {
                 <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                 Sponsor Change – Make an Impact
               </div>
-              <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 leading-tight">
-                A New-Age Promotional Platform for{" "}
+              <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                A New-Age Medium for Real-World Branding{" "}
                 <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                  Purpose-Driven Brands
+                No more TV ads, billboards, or print ads.
                 </span>
               </h1>
             </div>
             
             <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">
-              At ChangeBag, we offer brands a sustainable, high-visibility marketing 
-              medium that creates real impact. No more TV ads, billboards, or print ads – 
-              this is real-world branding with genuine engagement and lasting value.
+            ChangeBag turns everyday bags into sustainable, high-visibility campaigns - where your brand is carried, seen, and remembered.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
@@ -474,10 +472,10 @@ const Index = () => {
             Why Choose CauseConnect
           </div> */}
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Why brands sponsor <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Changebag</span>
+            Why brands choose <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Changebag</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            We provide everything you need to launch, manage, and scale your cause effectively with sustainable, long-term impact.
+          We help brands launch, manage, and scale real-world visibility campaigns with sustainable reach and measurable results.
           </p>
         </div>
         
@@ -1197,13 +1195,13 @@ const Index = () => {
             give.do
           </div> */}
           <h2 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
-            India's most trusted online<br />
+            India's most trusted on-ground<br />
             <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-              donation platform
+              brand activation platform
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Empowering millions to make a difference through secure, transparent, and impactful giving
+          Empowering brands to make real-world impact through sustainable, visible, and community-driven campaigns.
           </p>
         </div>
         
@@ -1249,10 +1247,10 @@ const Index = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            How It <span className="text-[#008037]">Works</span>
+            Carry the <span className="text-[#008037]">Change</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Simple, transparent process from cause selection to impact measurement
+          Join the movement. Get a free tote, support a cause, and go greener.
           </p>
         </div>
         

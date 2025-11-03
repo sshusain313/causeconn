@@ -663,7 +663,7 @@ const WhySponsor = () => {
             How It <span className="text-[#008037]">Works</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Simple, transparent process from cause selection to impact measurement
+          A simple, transparent process to launch your brand’s next visibility campaign.
           </p>
         </div>
         

@@ -4,25 +4,25 @@ export const steps = [
     {
       number: "01",
       icon: <Search className="h-8 w-8" />,
-      title: "Pick a Cause",
-      description: "Choose from 3,000+ verified NGOs and causes that align with your brand values."
+      title: "Choose a Cause",
+      description: "Select a verified local or national meaningful cause that aligns with your brand’s purpose."
     },
     {
       number: "02",
       icon: <Heart className="h-8 w-8" />,
       title: "Sponsor Bags",
-      description: "Fund eco-friendly tote bags with your brand logo supporting your chosen cause."
+      description: "Create eco-friendly tote bags with your logo and message supporting that cause."
     },
     {
       number: "03",
       icon: <TrendingUp className="h-8 w-8" />,
       title: "Track Impact",
-      description: "Monitor real-time distribution and impact through custom dashboards and reports."
+      description: "See where your campaign travels through live dashboards and impact analytics."
     },
     {
       number: "04",
       icon: <Share2 className="h-8 w-8" />,
       title: "Share Your Story",
-      description: "Showcase your CSR impact with compelling content and transparent reporting."
+      description: "Showcase your brand’s sustainability journey through compelling stories and reports"
     }
   ];
