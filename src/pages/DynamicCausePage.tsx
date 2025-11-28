@@ -462,6 +462,7 @@ const DynamicCausePage = () => {
         <Button 
           size="lg" 
           className="bg-green-600 hover:bg-green-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-lg hover:scale-105 transition-all duration-300 shadow-lg"
+          onClick={handleSponsor}
         >
           Start Sponsor
         </Button>
