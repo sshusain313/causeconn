@@ -16,6 +16,7 @@ import { authGuard, adminGuard } from './middleware/authGuard';
 import configureStaticFiles from './middleware/staticFiles';
 import copyUploadsToPublic from './utils/copyUploadsToPublic';
 import distributionRoutes from './routes/distributionRoutes';
+import partnerClaimsRoutes from './routes/partnerClaims';
 
 // Create Express app
 const app: Application = express();
@@ -123,6 +124,7 @@ app.use('/api/payments', paymentRoutes as any);
 app.use('/api/stats', statsRoutes as any);
 app.use('/api/waitlist', waitlistRoutes as any);
 app.use('/api/admin/distribution', distributionRoutes);
+app.use('/api/partner', partnerClaimsRoutes);
 
 // Protected route example
 app.get('/api/profile', authGuard as any, (req: Request, res: Response) => {

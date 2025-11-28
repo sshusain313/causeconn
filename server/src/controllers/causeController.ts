@@ -696,6 +696,46 @@ export const uploadCauseImage = async (req: Request, res: Response) => {
   }
 };
 
+// Get causes available for partner API (only causes with available totes)
+export const getPartnerCauses = async (req: Request, res: Response) => {
+  try {
+    const Cause = mongoose.model('Cause');
+    
+    // Get only approved causes with available totes
+    const causes = await Cause.find({
+      status: CauseStatus.APPROVED,
+      availableTotes: { $gt: 0 }
+    })
+    .select('_id title description imageUrl availableTotes claimedTotes category createdAt')
+    .sort({ createdAt: -1 });
+
+    // Format response for partners
+    const partnerCauses = causes.map(cause => ({
+      causeId: cause._id,
+      causeTitle: cause.title,
+      description: cause.description,
+      imageUrl: cause.imageUrl,
+      availableTotes: cause.availableTotes,
+      claimedTotes: cause.claimedTotes,
+      category: cause.category,
+      createdAt: cause.createdAt
+    }));
+
+    res.json({
+      success: true,
+      count: partnerCauses.length,
+      causes: partnerCauses
+    });
+  } catch (error) {
+    console.error('Error fetching partner causes:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching causes',
+      error: error.message 
+    });
+  }
+};
+
 export default {
   getAllCauses,
   getCauseById,
@@ -706,5 +746,6 @@ export default {
   getSponsorCausesWithClaimStats,
   updateCauseStatus,
   updateCauseTotePreviewImage,
-  uploadCauseImage
+  uploadCauseImage,
+  getPartnerCauses
 };

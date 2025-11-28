@@ -49,6 +49,22 @@ export const createClaim = async (req: Request, res: Response): Promise<void> =>
       res.status(400).json({ message: 'No totes available for this cause' });
       return;
     }
+
+        // Determine source and partner info if coming from API partner
+        let claimSource = source;
+        let partnerId = undefined;
+        let partnerApiKey = undefined;
+        let partnerBusinessName = undefined;
+
+        // Check if request is from an API partner
+    if (req.apiPartner) {
+      claimSource = ClaimSource.PARTNER_LINK;
+      partnerId = req.apiPartner._id;
+      partnerApiKey = req.apiPartner.apiKey;
+      partnerBusinessName = req.apiPartner.businessName;
+    }
+
+
     
     // For QR code claims, start with PENDING status and verify after OTP
     // For regular claims, use PENDING status
@@ -68,9 +84,12 @@ export const createClaim = async (req: Request, res: Response): Promise<void> =>
       zipCode,
       status: initialStatus,
       emailVerified: false, // Will be verified after OTP for QR claims
-      source,
-      referrerUrl,
-      qrCodeScanned
+      source: claimSource,
+      referrerUrl: referrerUrl || (req.apiPartner ? req.apiPartner.businessName : undefined),
+      qrCodeScanned,
+      partnerId,
+      partnerApiKey,
+      partnerBusinessName
     });
 
     await claim.save();

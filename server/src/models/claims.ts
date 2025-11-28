@@ -13,7 +13,8 @@ export enum ClaimSource {
   QR_CODE = 'qr',
   WAITLIST = 'waitlist',
   MAGIC_LINK = 'magic-link',
-  SPONSOR_LINK = 'sponsor-link'
+  SPONSOR_LINK = 'sponsor-link', 
+  PARTNER_LINK = 'PARTNER_API'
 }
 
 export interface IClaim extends Document {
@@ -39,6 +40,10 @@ export interface IClaim extends Document {
   trackingNumber?: string;
   carrier?: string;
   estimatedDelivery?: Date;
+
+  partnerId?: mongoose.Types.ObjectId; // Add this
+  partnerApiKey?: string; // Add this
+  partnerBusinessName?: string; // Add this for quick reference
 }
 
 const claimSchema = new Schema<IClaim>(
@@ -47,6 +52,19 @@ const claimSchema = new Schema<IClaim>(
       type: Schema.Types.ObjectId,
       ref: 'Cause',
       required: true
+    },
+    partnerId: {
+      type: Schema.Types.ObjectId,
+      ref: 'ApiPartner',
+      required: false
+    },
+    partnerApiKey: {
+      type: String,
+      required: false
+    },
+    partnerBusinessName: {
+      type: String,
+      required: false
     },
     causeTitle: {
       type: String,

@@ -12,6 +12,7 @@ declare module 'express' {
     file?: any;
     files?: any;
     user?: any;
+    apiPartner?: any;
     clearCookie?: (name: string, options?: any) => void;
     cookie?: (name: string, value: any, options?: any) => void;
   }

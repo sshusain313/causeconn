@@ -84,6 +84,7 @@ const AdminLayout = ({ children, title, subtitle, loading = false }: AdminLayout
     { icon: CheckCircle, label: 'Campaign Approvals', path: '/admin/approvals' },
     { icon: Image, label: 'Logo Review', path: '/admin/logos' },
     { icon: Package, label: 'Claims Management', path: '/admin/claims' },
+    { icon: Package, label: 'Partner Claims', path: '/admin/partner-claims' },
     { icon: QrCode, label: 'QR Code Claims', path: '/admin/qr-claims' },
     { icon: Users, label: 'Waitlist Management', path: '/admin/waitlist' },
     { icon: MapPin, label: 'Distribution Settings', path: '/admin/distribution-settings' },

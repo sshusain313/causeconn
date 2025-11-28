@@ -55,6 +55,7 @@ import CauseImageUpload from '@/pages/admin/CauseImageUpload';
 import CampaignApprovals from "./pages/admin/CampaignApprovals";
 import LogoReview from "./pages/admin/LogoReview";
 import ClaimsManagement from "./pages/admin/ClaimsManagement";
+import PartnerClaims from "./pages/admin/PartnerClaims";
 import Shipping from "./pages/admin/Shipping";
 import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
@@ -190,6 +191,11 @@ const App: React.FC = () => {
                 <Route path="/admin/claims" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <ClaimsManagement />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/partner-claims" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <PartnerClaims />
                   </ProtectedRoute>
                 } />
                 <Route path="/admin/shipping" element={
